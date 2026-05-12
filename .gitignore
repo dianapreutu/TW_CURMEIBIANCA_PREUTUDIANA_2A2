@@ -1,0 +1,17 @@
+# Fisiere generate de Visual Studio / VS Code
+.vs/
+
+# Baza de date (generate automat)
+db/database.sqlite
+
+# Fisiere de sistem Windows
+Thumbs.db
+desktop.ini
+
+# Fisiere de sistem Mac
+.DS_Store
+
+# Directoare generate de aplicatie
+generated/html/
+generated/pdf/
+uploads/
