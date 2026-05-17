@@ -6,6 +6,8 @@
 class FieldTypes {
  
     public static function generate(string $type, array $options = []): string {
+        // Apelam metoda corespunzatoare tipului
+        // Daca tipul nu exista, returnam un string gol
         switch ($type) {
             case 'full_name':       return self::fullName();
             case 'first_name':      return self::firstName();
@@ -33,8 +35,11 @@ class FieldTypes {
         }
     }
  
+    // Returneaza lista tuturor tipurilor disponibile
+    
     public static function getAll(): array {
         return [
+            // Date personale
             'full_name'      => 'Nume complet',
             'first_name'     => 'Prenume',
             'last_name'      => 'Nume de familie',
@@ -43,16 +48,20 @@ class FieldTypes {
             'address'        => 'Adresa completa',
             'city'           => 'Oras',
             'county'         => 'Judet',
+            // Identificatori romani
             'cnp'            => 'CNP',
             'cui'            => 'CUI firma',
             'iban'           => 'IBAN',
+            // Date financiare
             'price'          => 'Pret (RON)',
             'tva'            => 'TVA (%)',
             'invoice_number' => 'Numar factura',
+            // Date profesionale
             'company'        => 'Firma',
             'job_title'      => 'Functie/Ocupatie',
             'education'      => 'Nivel studii',
             'product'        => 'Produs/Serviciu',
+            // Date generice
             'date'           => 'Data',
             'number'         => 'Numar intreg',
             'text'           => 'Text scurt',
@@ -60,6 +69,8 @@ class FieldTypes {
         ];
     }
  
+    // Returneaza descrierea unui tip (pt tooltip in UI)
+
     public static function describe(string $type): string {
         $descriptions = [
             'full_name'      => 'Nume si prenume romanesc (ex: Ion Popescu)',
@@ -88,6 +99,10 @@ class FieldTypes {
         return $descriptions[$type] ?? 'Tip necunoscut';
     }
 
+    // Generatoare private 
+ 
+    // Nume romanesti
+
     private static function firstName(): string {
         $masculine = [
             'Alexandru', 'Andrei', 'Bogdan', 'Catalin', 'Cristian',
@@ -105,6 +120,7 @@ class FieldTypes {
             'Raluca', 'Ramona', 'Roxana', 'Simona', 'Sorina',
             'Teodora', 'Valentina', 'Veronica', 'Victoria', 'Zorica'
         ];
+        // Alegem aleatoriu intre masculin si feminin
         $pool = (rand(0, 1) === 0) ? $masculine : $feminine;
         return $pool[array_rand($pool)];
     }
@@ -127,8 +143,11 @@ class FieldTypes {
     }
  
     private static function fullName(): string {
+        // Format romanesc: Prenume Nume
         return self::firstName() . ' ' . self::lastName();
     }
+ 
+    // Contact
  
     private static function email(): string {
         $firstName = strtolower(self::removeAccents(self::firstName()));
@@ -137,16 +156,21 @@ class FieldTypes {
         $separators = ['.', '_', ''];
         $sep = $separators[array_rand($separators)];
         $domain = $domains[array_rand($domains)];
+        // Variante: ion.popescu@gmail.com sau ionpopescu42@yahoo.ro
         $suffix = (rand(0, 1) === 0) ? '' : rand(10, 99);
         return $firstName . $sep . $lastName . $suffix . '@' . $domain;
     }
  
     private static function phone(): string {
+        // Prefixe reale de retele din Romania
         $prefixes = ['072', '073', '074', '075', '076', '077', '078', '021', '031'];
         $prefix = $prefixes[array_rand($prefixes)];
+        // Restul de 7 cifre
         $rest = str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
         return $prefix . ' ' . substr($rest, 0, 3) . ' ' . substr($rest, 3);
     }
+ 
+    // Adresa
  
     private static function address(): string {
         $streets = [
@@ -159,6 +183,7 @@ class FieldTypes {
         $street = $streets[array_rand($streets)];
         $number = rand(1, 200);
         $city   = self::city();
+        // Uneori adaugam si nr apartament
         $apt = (rand(0, 1) === 0) ? ', Ap. ' . rand(1, 50) : '';
         return $street . ' nr. ' . $number . $apt . ', ' . $city;
     }
@@ -189,18 +214,29 @@ class FieldTypes {
         return $counties[array_rand($counties)];
     }
  
+    // Identificatori romani
+ 
     private static function cnp(): string {
+        // Genereaza un CNP cu format valid (nu neaparat cifra de control corecta)
+        // S (sex+era): 1-8
         $s = rand(1, 8);
+        // AA (an nastere): 00-99
         $aa = str_pad(rand(0, 99), 2, '0', STR_PAD_LEFT);
+        // LL (luna): 01-12
         $ll = str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT);
+        // ZZ (zi): 01-28 (simplificat)
         $zz = str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT);
+        // JJ (judet): 01-46 (coduri judete Romania)
         $jj = str_pad(rand(1, 46), 2, '0', STR_PAD_LEFT);
+        // NNN (numar ordine): 001-999
         $nnn = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
+        // C (cifra control) - calculez corect
         $partial = $s . $aa . $ll . $zz . $jj . $nnn;
         $c = self::cnpControlDigit($partial);
         return $partial . $c;
     }
  
+    // Calculeaza cifra de control a CNP-ului (algoritm oficial)
     private static function cnpControlDigit(string $partial): string {
         $weights = [2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9];
         $sum = 0;
@@ -212,11 +248,13 @@ class FieldTypes {
     }
  
     private static function cui(): string {
+        // CUI = RO urmat de 2-10 cifre
         $digits = rand(10000000, 99999999);
         return 'RO' . $digits;
     }
  
     private static function iban(): string {
+        // IBAN romanesc: RO + 2 cifre control + 4 litere banca + 16 cifre cont
         $banks = ['RNCB', 'BTRL', 'INGB', 'BRDE', 'BPOS', 'CECE', 'PIRB', 'BACX'];
         $bank = $banks[array_rand($banks)];
         $control = str_pad(rand(10, 99), 2, '0', STR_PAD_LEFT);
@@ -224,14 +262,18 @@ class FieldTypes {
         return 'RO' . $control . $bank . $account;
     }
 
+    // Date financiare
+
     private static function price(array $options = []): string {
         $min = $options['min'] ?? 1;
         $max = $options['max'] ?? 9999;
+        // Pret cu 2 zecimale
         $price = rand($min * 100, $max * 100) / 100;
         return number_format($price, 2, '.', '');
     }
  
     private static function tva(): string {
+        // Cotele de TVA din Romania
         $rates = ['0', '5', '9', '19'];
         return $rates[array_rand($rates)];
     }
@@ -244,6 +286,8 @@ class FieldTypes {
         return $serie . '-' . $year . '-' . $number;
     }
  
+    // Date profesionale
+
     private static function company(): string {
         $prefixes = ['SC', 'SRL', 'SA'];
         $names = [
@@ -294,12 +338,16 @@ class FieldTypes {
         return $products[array_rand($products)];
     }
  
+    // Date generice
+ 
     private static function date(array $options = []): string {
+        // Interval implicit: ultimii 30 de ani pana azi
         $startYear = $options['start_year'] ?? (date('Y') - 30);
         $endYear   = $options['end_year']   ?? (int)date('Y');
         $start = mktime(0, 0, 0, 1, 1, $startYear);
         $end   = mktime(0, 0, 0, 12, 31, $endYear);
         $timestamp = rand($start, $end);
+        // Format romanesc: ZZ.LL.AAAA
         return date('d.m.Y', $timestamp);
     }
  
@@ -332,6 +380,7 @@ class FieldTypes {
         return $paragraphs[array_rand($paragraphs)];
     }
  
+    // Elimina diacriticele din string , pentru generarea email-urilor
     private static function removeAccents(string $str): string {
         $accents = ['ă','â','î','ș','ț','Ă','Â','Î','Ș','Ț','ş','ţ','Ş','Ţ'];
         $replace = ['a','a','i','s','t','A','A','I','S','T','s','t','S','T'];
