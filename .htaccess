@@ -1,0 +1,68 @@
+
+# Toate cererile sunt redirectionate catre index.php
+
+# Activez modulul de rescriere URL
+RewriteEngine On
+
+# Setez directorul de baza al aplicatiei
+RewriteBase /TW_CURMEIBIANCA_PREUTUDIANA_2A2/
+
+# Las sa treaca fisierele si folderele care exista fizic pe disk (CSS, JS, imagini etc.)
+# Daca fisierul exista fizic - nu rescriu
+
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Daca folderul exista fizic -> nu rescriu
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Orice alta cerere merge la index.php ( QSA - pastreaza parametrii GET din URL)
+
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Blochez accesul direct la fisiere sensibile care nu trebuie accesate din browser
+
+# Blochez accesul la baza de date SQLite
+<Files "database.sqlite">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Blochez accesul la fisierele de configurare
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Blochez accesul la fisierele SQL
+<Files "*.sql">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Blochez accesul la fisierele JSON din templates/
+
+<FilesMatch "\.json$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Securitate suplimentara - headere HTTP
+
+# Previn clickjacking
+Header always set X-Frame-Options "SAMEORIGIN"
+
+# Previn MIME sniffing
+Header always set X-Content-Type-Options "nosniff"
+
+# Activez XSS protection in browser
+Header always set X-XSS-Protection "1; mode=block"
+
+
+# Setez charset-ul implicit pentru fisierele PHP
+AddDefaultCharset UTF-8
+
+# Ascund versiunea de PHP din headere
+
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+</IfModule>
