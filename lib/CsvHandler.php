@@ -19,11 +19,11 @@ class CsvHandler {
     // $delimiter - separatorul coloanelor (implicit virgula)
     // $encoding - encodingul fisierului (implicit UTF-8)
 
-    public function construct($db, $delimiter = ',',$encoding = 'UTF-8') {
-        $this->db = $db;
-        this->delimiter = $delimiter;
-        $this->encoding  = $encoding;
-    }
+    public function __construct($db, $delimiter = ',', $encoding = 'UTF-8') {
+    $this->db = $db;
+    $this->delimiter = $delimiter;
+    $this->encoding = $encoding;
+}
 
     // IMPORT CSV
 
@@ -237,7 +237,7 @@ class CsvHandler {
     // $headers  - array cu numele coloanelor
     // $rows     - array de array-uri cu datele
     // $filename - numele fisierului descarcat
--
+
     public function downloadCsv(array $headers, array $rows, string $filename = 'export'): void
     {
         // Generam continutul CSV
@@ -269,7 +269,7 @@ class CsvHandler {
             [$userId]
         );
     }
--
+    
     // getImportById() - returneaza un import dupa id
 
     public function getImportById(int $importId, int $userId): ?array
