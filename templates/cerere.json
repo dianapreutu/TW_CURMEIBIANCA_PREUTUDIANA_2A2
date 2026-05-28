@@ -1,0 +1,72 @@
+{
+    "name": "cerere",
+    "label": "Cerere",
+    "description": "Sablon pentru o cerere administrativa generica",
+    "version": "1.0",
+    "fields": [
+        {
+            "field": "nume_solicitant",
+            "type": "full_name",
+            "label": "Nume solicitant",
+            "required": true
+        },
+        {
+            "field": "cnp",
+            "type": "cnp",
+            "label": "CNP",
+            "required": true
+        },
+        {
+            "field": "adresa",
+            "type": "address",
+            "label": "Adresa domiciliu",
+            "required": true
+        },
+        {
+            "field": "oras",
+            "type": "city",
+            "label": "Oras",
+            "required": true
+        },
+        {
+            "field": "judet",
+            "type": "county",
+            "label": "Judet",
+            "required": true
+        },
+        {
+            "field": "email",
+            "type": "email",
+            "label": "Email contact",
+            "required": false
+        },
+        {
+            "field": "telefon",
+            "type": "phone",
+            "label": "Telefon contact",
+            "required": false
+        },
+        {
+            "field": "data_cererii",
+            "type": "date",
+            "label": "Data cererii",
+            "required": true,
+            "options": {
+                "start_year": 2023,
+                "end_year": 2025
+            }
+        },
+        {
+            "field": "subiect",
+            "type": "text",
+            "label": "Subiect cerere",
+            "required": true
+        },
+        {
+            "field": "detalii",
+            "type": "paragraph",
+            "label": "Continutul cererii",
+            "required": true
+        }
+    ]
+}

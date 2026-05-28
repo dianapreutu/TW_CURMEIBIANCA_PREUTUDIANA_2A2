@@ -1,0 +1,92 @@
+{
+    "name": "factura",
+    "label": "Factura",
+    "description": "Sablon pentru o factura fiscala simpla",
+    "version": "1.0",
+    "fields": [
+        {
+            "field": "nr_factura",
+            "type": "invoice_number",
+            "label": "Numar factura",
+            "required": true
+        },
+        {
+            "field": "data_emitere",
+            "type": "date",
+            "label": "Data emiterii",
+            "required": true,
+            "options": {
+                "start_year": 2023,
+                "end_year": 2025
+            }
+        },
+        {
+            "field": "furnizor",
+            "type": "company",
+            "label": "Furnizor",
+            "required": true
+        },
+        {
+            "field": "cui_furnizor",
+            "type": "cui",
+            "label": "CUI furnizor",
+            "required": true
+        },
+        {
+            "field": "iban_furnizor",
+            "type": "iban",
+            "label": "IBAN furnizor",
+            "required": true
+        },
+        {
+            "field": "client",
+            "type": "company",
+            "label": "Client",
+            "required": true
+        },
+        {
+            "field": "cui_client",
+            "type": "cui",
+            "label": "CUI client",
+            "required": true
+        },
+        {
+            "field": "adresa_client",
+            "type": "address",
+            "label": "Adresa client",
+            "required": false
+        },
+        {
+            "field": "produs",
+            "type": "product",
+            "label": "Produs / Serviciu",
+            "required": true
+        },
+        {
+            "field": "cantitate",
+            "type": "number",
+            "label": "Cantitate",
+            "required": true,
+            "options": {
+                "min": 1,
+                "max": 100
+            }
+        },
+        {
+            "field": "pret_unitar",
+            "type": "price",
+            "label": "Pret unitar (RON)",
+            "required": true,
+            "options": {
+                "min": 10,
+                "max": 5000
+            }
+        },
+        {
+            "field": "tva",
+            "type": "tva",
+            "label": "TVA (%)",
+            "required": true
+        }
+    ]
+}
