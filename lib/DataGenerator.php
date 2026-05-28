@@ -44,7 +44,7 @@ class DataGenerator
             $rows[] = $this->generateRow($fields);
         }
 
-        // Returnam toate nodurile generate
+        // Returnam toate randurile generate
         return $rows;
     }
 
@@ -95,7 +95,7 @@ class DataGenerator
             throw new Exception('Schema nu a fost gasita!');
         }
 
-        // Decodificam campuril schemei din JSON
+        // Decodificam campurile schemei din JSON
         $fields = json_decode($schema['fields'], true);
 
         // Verificam daca JSON-ul a fost decodat corect
@@ -160,7 +160,7 @@ class DataGenerator
 
     // --------------------------------------------------
     // toCSV() - converteste datele generate in format CSV
-    // $rows - array cu randuril date
+    // $rows - array cu randurile de date
     // $delimiter - separatorul (implicit virgula)
     // Returneaza string-ul CSV complet
     // --------------------------------------------------

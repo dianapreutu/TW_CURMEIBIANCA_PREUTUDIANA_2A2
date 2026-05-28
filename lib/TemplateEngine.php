@@ -48,7 +48,7 @@ class TemplateEngine
     // --------------------------------------------------
     // processFunctions() - inlocuieste functiile dinamice din sablon
     // Functii disponibile:
-    // {{DATE}} -> data curecta
+    // {{DATE}} -> data curenta
     // {{TIME}} -> ora curenta
     // {{DATETIME}} -> data si ora curenta
     // {{YEAR}} -> anul curent
@@ -78,7 +78,7 @@ class TemplateEngine
     // --------------------------------------------------
     // processConditions() - proceseaza blocurile conditionale
     // Sintaxa: {{IF variabila}}continut{{ENDIF}}
-    // Sintaxa: {{IF variabila}}continut{{ELSEIF}}alt continut{{ENDIF}}
+    // Sintaxa: {{IF variabila}}continut{{ELSE}}alt continut{{ENDIF}}
     // Daca variabila exista si nu e goala, afiseaza continutul
     // --------------------------------------------------
     private function processConditions($template, $data)
@@ -126,14 +126,14 @@ class TemplateEngine
     // processVariables() - inlocuieste variabilele simple
     // Sintaxa: {{nume_variabila}}
     // Inlocuieste cu valoarea corespunzatoare din array-ul $data
-    // Protejeaza impotriva Xss folosind htmlspecialchars()
+    // Protejeaza impotriva XSS folosind htmlspecialchars()
     // --------------------------------------------------
     private function processVariables($template, $data)
     {
         // Parcurgem toate perechile cheie-valoare din date
         foreach ($data as $key => $value) {
             // Curatam valoarea pentru a preveni atacurile XSS
-            // htmlspecialChars() transforma caracterele speciale in entitati HTML
+            // htmlspecialchars() transforma caracterele speciale in entitati HTML
             // ex: <script> devine &lt;script&gt;
             $safeValue = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 
@@ -243,7 +243,7 @@ class TemplateEngine
     // --------------------------------------------------
     public function generateDocument($templateId, $data, $name, $userId = null)
     {
-        // Incercam sablonul din baza de date
+        // Incarcam sablonul din baza de date
         $template = $this->loadTemplate($templateId);
 
         // Daca sablonul nu exista, aruncam o exceptie 

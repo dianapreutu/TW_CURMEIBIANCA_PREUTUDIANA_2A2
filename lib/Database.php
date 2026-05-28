@@ -24,7 +24,7 @@ class Database
     private function __construct()
     {
         try {
-            // Cream conexiunea PDO le fisierul SQLite 
+            // Cream conexiunea PDO la fisierul SQLite 
             $this->pdo = new PDO('sqlite:' . DB_PATH);
 
             // Setam modul de raportare a erorilor PDO

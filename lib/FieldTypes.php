@@ -86,7 +86,7 @@ class FieldTypes {
             'iban'           => 'IBAN romanesc valid ca format (RO + 22 caractere)',
             'price'          => 'Pret in RON cu 2 zecimale (ex: 149.99)',
             'tva'            => 'Cota TVA romaneasca (0, 5, 9 sau 19%)',
-            'invoice_number' => 'Numar factura fiscal (ex: FCT-2024-00123)',
+            'invoice_number' => 'Numar factura fiscala (ex: FCT-2024-00123)',
             'company'        => 'Denumire firma romaneasca',
             'job_title'      => 'Titlu/functie profesionala',
             'education'      => 'Nivel de educatie (ex: Licenta, Master)',
@@ -380,7 +380,7 @@ class FieldTypes {
         return $paragraphs[array_rand($paragraphs)];
     }
  
-    // Elimina diacriticele din string , pentru generarea email-urilor
+    // Elimina diacriticele din string, pentru generarea email-urilor
     private static function removeAccents(string $str): string {
         $accents = ['ă','â','î','ș','ț','Ă','Â','Î','Ș','Ț','ş','ţ','Ş','Ţ'];
         $replace = ['a','a','i','s','t','A','A','I','S','T','s','t','S','T'];
