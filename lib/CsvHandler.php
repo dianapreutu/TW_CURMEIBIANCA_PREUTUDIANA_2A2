@@ -1,6 +1,6 @@
 <?php
 //lib/CsvHandler.php - clasa pt import/export CSV (gestioneaza importul fisiereleor CSV incarcate de utilizatori)
-//exportul datelor generate in format CSV, salvarea fisierlor CSV importate in BD
+//exportul datelor generate in format CSV, salvarea fisierelor CSV importate in BD
 
 class CsvHandler {
     //instanta bazei de date primita prin constructor
