@@ -174,13 +174,10 @@ class TemplateEngine
     {
         // Inseram sablonul in baza de date
         $id = $this->db->insert('templates', [
-            'name' => $name, 
-            'type' => $type,
-            'content' => $content, 
-            'format' => $format,
-            'created_by' => $userId,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'name' => $name,
+            'label' => $type,
+            'fields_json' => $content,
+            'filename' => $name . '.json'
         ]);
 
         // Inregistram actiunea in logs
@@ -201,8 +198,7 @@ class TemplateEngine
         // Actualizam sablonul in baza de date
         $this->db->update('templates', [
             'name' => $name,
-            'content' => $content,
-            'updated_at' => date('Y-m-d H:i:s')
+            'fields_json' => $content
         ], 'id = ?', [$id]);
 
         // Inregistram actiunea in logs
@@ -252,7 +248,7 @@ class TemplateEngine
         }
 
         // Procesam sablonul cu datele furnizate
-        $html = $this->render($template['content'], $data);
+        $html = $this->render($template['fields_json'], $data);
 
         // Generam un nume unic pentru fisierul HTML
         $filename = uniqid('doc_') . '_' . time() . '.html';
@@ -265,13 +261,13 @@ class TemplateEngine
 
         // Salvam inregistrarea documentului in baza de date
         $docId = $this->db->insert('documents', [
-            'name' => $name, 
+            'title' => $name, 
             'template_id' => $templateId,
-            'output_type' => 'html',
-            'file_path'   => $filename,
-            'data_source' => 'random',
-            'created_by'  => $userId,
-            'created_at'  => date('Y-m-d H:i:s')
+            'html_path'   => $filename,
+            'status'      => 'generated',
+            'user_id'     => $userId ?? 1,
+            'created_at'  => date('Y-m-d H:i:s'),
+            'updated_at'  => date('Y-m-d H:i:s')
         ]);
 
         // Inregistram actiunea in logs

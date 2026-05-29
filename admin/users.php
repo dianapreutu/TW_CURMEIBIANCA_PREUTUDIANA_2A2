@@ -59,11 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
                 // Inseram utilizatorul in baza de date 
+                $email = trim(htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'));
+
                 $db->insert('users', [
                     'username' => $username,
+                    'email'    => $email,
                     'password' => $hashedPassword,
-                    'role' => $role,
-                    'created_at' => date('Y-m-d H:i:s')
+                    'role'     => $role
                 ]);
 
                 // Inregistram actiunea in logs

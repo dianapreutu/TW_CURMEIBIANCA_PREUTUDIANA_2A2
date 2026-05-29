@@ -201,7 +201,7 @@ class Database
         $this->insert('logs', [
             'user_id' => $userId,
             'action' => $action,
-            'details' => $details,
+            'description' => $details,
             'ip_address' => $ip 
         ]);
     }

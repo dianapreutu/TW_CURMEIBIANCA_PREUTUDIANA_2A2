@@ -96,7 +96,7 @@ class DataGenerator
         }
 
         // Decodificam campurile schemei din JSON
-        $fields = json_decode($schema['fields'], true);
+        $fields = json_decode($schema['fields_json'], true);
 
         // Verificam daca JSON-ul a fost decodat corect
         if (!$fields) {
@@ -122,9 +122,9 @@ class DataGenerator
         // Inseram schema in baza de date
         $id = $this->db->insert('schemas', [
             'name' => $name,
-            'fields' => $fieldsJson,
-            'created_by' => $userId,
-            'created_at' => date('Y-m-d H:i:s')
+            'fields_json' => $fieldsJson,
+            'user_id' => $userId ?? 1,
+            'rows_count' => 10
         ]);
 
         // Inregistram actiunea in logs

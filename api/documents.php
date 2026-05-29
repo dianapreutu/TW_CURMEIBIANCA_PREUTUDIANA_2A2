@@ -77,7 +77,7 @@ function handleGet(Database $db)
     }
 
     // Citim si continutul fisierului HTML generat
-    $filePath = GENERATED_HTML_PATH . '/' . $document['file_path'];
+    $filePath = GENERATED_HTML_PATH . '/' . $document['html_path'];
     if (file_exists($filePath)) {
         // Adaugam continutul HTML la raspuns 
         $document['html_content'] = file_get_contents($filePath);
@@ -252,7 +252,7 @@ function handleDelete(Database $db)
     }
 
     // Stergem fisierul HTML de pe server (daca exista)
-    $filePath = GENERATED_HTML_PATH . '/' . $document['file_path'];
+    $filePath = GENERATED_HTML_PATH . '/' . $document['html_path'];
     if (file_exists($filePath)) {
         unlink($filePath);
     }

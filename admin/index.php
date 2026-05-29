@@ -191,9 +191,9 @@ $recentDocuments = $db->fetchAll(
                             <?php foreach ($recentDocuments as $doc): ?>
                                 <tr>
                                     <td><?php echo $doc['id']; ?></td>
-                                    <td><?php echo htmlspecialchars($doc['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($doc['title']); ?></td>
                                     <td><?php echo htmlspecialchars($doc['template_name'] ?? 'N/A'); ?></td>
-                                    <td><?php echo htmlspecialchars($doc['output_type']); ?></td>
+                                    <td><?php echo htmlspecialchars($doc['status']); ?></td>
                                     <td><?php echo $doc['created_at']; ?></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -225,7 +225,7 @@ $recentDocuments = $db->fetchAll(
                             <?php foreach ($recentLogs as $log): ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($log['action']); ?></td>
-                                    <td><?php echo htmlspecialchars($log['details'] ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($log['description'] ?? ''); ?></td>
                                     <td><?php echo htmlspecialchars($log['ip_address'] ?? ''); ?></td>
                                     <td><?php echo $log['created_at']; ?></td>
                                 </tr>
