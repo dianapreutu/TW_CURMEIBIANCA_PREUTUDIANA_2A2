@@ -1,0 +1,84 @@
+{
+    "name": "cv",
+    "label": "Curriculum Vitae",
+    "description": "Sablon pentru generarea unui CV cu date realiste",
+    "version": "1.0",
+    "fields": [
+        {
+            "field": "nume",
+            "type": "full_name",
+            "label": "Nume complet",
+            "required": true
+        },
+        {
+            "field": "email",
+            "type": "email",
+            "label": "Adresa email",
+            "required": true
+        },
+        {
+            "field": "telefon",
+            "type": "phone",
+            "label": "Numar de telefon",
+            "required": true
+        },
+        {
+            "field": "adresa",
+            "type": "address",
+            "label": "Adresa",
+            "required": false
+        },
+        {
+            "field": "oras",
+            "type": "city",
+            "label": "Oras",
+            "required": true
+        },
+        {
+            "field": "judet",
+            "type": "county",
+            "label": "Judet",
+            "required": false
+        },
+        {
+            "field": "data_nasterii",
+            "type": "date",
+            "label": "Data nasterii",
+            "required": true,
+            "options": {
+                "start_year": 1960,
+                "end_year": 2000
+            }
+        },
+        {
+            "field": "cnp",
+            "type": "cnp",
+            "label": "CNP",
+            "required": true
+        },
+        {
+            "field": "ocupatie",
+            "type": "job_title",
+            "label": "Ocupatie curenta",
+            "required": true
+        },
+        {
+            "field": "firma",
+            "type": "company",
+            "label": "Angajator curent",
+            "required": false
+        },
+        {
+            "field": "studii",
+            "type": "education",
+            "label": "Nivel studii",
+            "required": true
+        },
+        {
+            "field": "descriere",
+            "type": "paragraph",
+            "label": "Profil profesional",
+            "required": false
+        }
+    ]
+}
