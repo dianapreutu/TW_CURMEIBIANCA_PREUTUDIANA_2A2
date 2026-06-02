@@ -24,6 +24,9 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
             // Parola corecta - marcam sesiunea ca autentificata
             $_SESSION['admin'] = true;
+            $_SESSION['user_id'] = 1;
+            $_SESSION['role'] = 'admin';
+            $_SESSION['username'] = 'admin';
 
             // Redirectionam catre panoul admin
             header('Location: index.php');

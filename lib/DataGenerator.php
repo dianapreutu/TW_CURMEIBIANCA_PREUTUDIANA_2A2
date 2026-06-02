@@ -61,7 +61,7 @@ class DataGenerator
         // Parcurgem fiecare camp din schema 
         foreach ($fields as $field) {
             // Numele campului (ex: 'nume', 'email')
-            $name = $field['name'] ?? 'camp';
+            $name = $field['field'] ?? 'camp';
 
             // Tipul campului (ex: 'full_name', 'email')
             $type = $field['type'] ?? 'text';

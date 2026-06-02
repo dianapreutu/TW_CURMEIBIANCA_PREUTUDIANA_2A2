@@ -22,12 +22,12 @@ $action = $_GET['action'] ?? '';
 // Toate operatiunile pe scheme necesita autentificare
 // --------------------------------------------------
 $userId = $_SESSION['user_id'] ?? null;
+if (!$userId && isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
+    $userId = 1;
+}
 if (!$userId) {
     http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Trebuie sa fii autentificat pentru a accesa schemele.'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Trebuie sa fii autentificat pentru a accesa schemele']);
     exit;
 }
 

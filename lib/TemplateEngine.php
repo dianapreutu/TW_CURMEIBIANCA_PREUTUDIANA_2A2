@@ -261,11 +261,12 @@ class TemplateEngine
 
         // Salvam inregistrarea documentului in baza de date
         $docId = $this->db->insert('documents', [
-            'title' => $name, 
+            'title'       => $name,
             'template_id' => $templateId,
             'html_path'   => $filename,
             'status'      => 'generated',
             'user_id'     => $userId ?? 1,
+            'rows_count'  => 1,
             'created_at'  => date('Y-m-d H:i:s'),
             'updated_at'  => date('Y-m-d H:i:s')
         ]);

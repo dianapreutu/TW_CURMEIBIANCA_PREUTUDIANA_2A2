@@ -45,17 +45,18 @@ function handleGenerate(DataGenerator $generator)
     }
 
     // Citim campurile schemei din POST (trimisa ca JSON)
-    $fieldsJson = $_POST['fields'] ?? '[]';
-    $fields = json_decode($fieldsJson, true);
+    $input = getRequestData();
+    $fields = $input['fields'] ?? [];
+    if (is_string($fields)) {
+        $fields = json_decode($fields, true);
+    }
+    $count = (int)($input['rows'] ?? $input['count'] ?? DEFAULT_ROWS);
 
     // Verificam ca avem campurile valide
     if (empty($fields) || !is_array($fields)) {
         jsonError('Schema de campuri este invalida sau goala!');
         return;
     }
-
-    // Citim numarul de randuri generat
-    $count = intval($_POST['count'] ?? DEFAULT_ROWS);
 
     // Validam numarul de randuri
     if ($count <= 0 || $count > MAX_ROWS) {
@@ -193,7 +194,7 @@ function handleListSchemas(DataGenerator $generator)
 
     // Decodificam campurile JSON pentru fiecare schema 
     foreach ($schemas as &$schema) {
-        $schema['fields'] = json_decode($schema['fields'], true);
+        $schema['fields'] = json_decode($schema['fields_json'], true);
     }
 
     // Returnam lista de scheme
@@ -250,4 +251,14 @@ function jsonError($message)
         'error' => $message
     ], JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+function getRequestData(): array 
+{
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($contentType, 'application/json') !== false) {
+        $body = file_get_contents('php://input');
+        return json_decode($body, true) ?? [];
+    }
+    return $_POST;
 }

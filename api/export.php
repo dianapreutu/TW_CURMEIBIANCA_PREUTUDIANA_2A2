@@ -15,12 +15,12 @@ $db = Database::getInstance();
 
 // Verificam autentificarea utilizatorului
 $userId = $_SESSION['user_id'] ?? null;
+if (!$userId && isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
+    $userId = 1;
+}
 if (!$userId) {
     http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Trebuie sa fii autentificat pentru a exporta documente.'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Trebuie sa fii autentificat pentru a exporta documente']);
     exit;
 }
 
@@ -301,7 +301,7 @@ function exportData(array $data, int $userId, $csvHandler): void
 
     // Generam datele cu DataGenerator
     $generator   = new DataGenerator();
-    $generatedRows = $generator->generateRows($fields, $rows);
+    $generatedRows = $generator->generate($fields, $rows);
 
     $headers   = array_column($fields, 'label');
     $fieldKeys = array_column($fields, 'field');

@@ -87,7 +87,7 @@ class PdfExporter
         }
 
         // Citim fisierul HTML salvat al documentului
-        $htmlPath = GENERATED_HTML_PATH . '/' . $document['file_path'];
+        $htmlPath = GENERATED_HTML_PATH . '/' . $document['html_path'];
 
         if (!file_exists($htmlPath)) {
             throw new Exception('Fisierul HTML al documentului nu a fost gasit.');
@@ -98,7 +98,7 @@ class PdfExporter
         // Exportam HTML-ul ca PDF
         $pdfPath = $this->exportFromHtml(
             $html,
-            pathinfo($document['file_path'], PATHINFO_FILENAME),
+            pathinfo($document['html_path'], PATHINFO_FILENAME),
             $userId
         );
 

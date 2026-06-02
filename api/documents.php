@@ -141,9 +141,9 @@ function handleGenerate(TemplateEngine $engine, DataGenerator $generator)
         // Daca nu avem campuri definite, folosim un set implicit
         if (empty($fields)) {
             $fields = [
-                ['name' => 'nume', 'type' => 'full_name'],
-                ['name' => 'email', 'type' => 'email'],
-                ['name' => 'data', 'type' => 'date']
+                ['field' => 'nume', 'type' => 'full_name', 'label' => 'Nume'],
+                ['field' => 'email', 'type' => 'email', 'label' => 'Email'],
+                ['field' => 'data', 'type' => 'date', 'label' => 'Data']
             ];
         }
 

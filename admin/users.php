@@ -179,6 +179,15 @@ $users = $db->fetchAll(
                     </div>
 
                     <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Introduceti adresa email"
+                            required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="role">Rol:</label>
                         <select id="role" name="role">
                             <option value="user">Utilizator</option>

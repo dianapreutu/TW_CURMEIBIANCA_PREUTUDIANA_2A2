@@ -72,6 +72,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start(); // pornim sesiunea
 }
 
+// Bridge compatibilitate sesiuni
+if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
+    if (!isset($_SESSION['user_id'])) {
+        $_SESSION['user_id'] = 1;
+        $_SESSION['role'] = 'admin';
+        $_SESSION['username'] = 'admin';
+    }
+}
+
 // -- Autoload simplificat pentru clasele din /lib --
 // Incarca automat fisierul clasei cand aceasta este folosita prima data
 spl_autoload_register(function ($className) {
