@@ -104,14 +104,18 @@ foreach ($requiredPaths as $path) {
     }
 }
 
-// -- Autoload simplificat pentru clasele din /lib --
+// -- Autoload simplificat pentru clasele din /lib si /lib/services --
 // Incarca automat fisierul clasei cand aceasta este folosita prima data
 spl_autoload_register(function ($className) {
-    // Construim calea catre fisierul clasei
-    $file = ROOT_PATH . '/lib/' . $className . '.php';
+    $paths = [
+        ROOT_PATH . '/lib/services/' . $className . '.php',
+        ROOT_PATH . '/lib/' . $className . '.php'
+    ];
 
-    // Daca fisierul exista, il includem 
-    if (file_exists($file)) {
-        require_once $file;
+    foreach ($paths as $file) {
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
     }
 });
