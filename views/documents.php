@@ -10,7 +10,7 @@
 require_once __DIR__ . '/../config.php';
 
 // Verificam autentificarea
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin'])) {
     header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }

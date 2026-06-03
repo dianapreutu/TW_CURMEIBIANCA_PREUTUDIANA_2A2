@@ -61,11 +61,10 @@ function loadDocument(documentId) {
         }
 
         // Populam metadatele documentului in UI
-        renderDocumentMeta(data.document);
+        renderDocumentMeta(data);
 
-        // Afisam continutul HTML al documentului in iframe
-        if (data.document.html_content) {
-            renderDocumentPreview(data.document.html_content);
+        if (data.html_content) {
+            renderDocumentPreview(data.html_content);
         } else {
             showPreviewMessage('Documentul nu are continut HTML generat inca.', 'warning');
         }

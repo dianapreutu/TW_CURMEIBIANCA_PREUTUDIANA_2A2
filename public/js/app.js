@@ -74,12 +74,8 @@ function ajax(url, method, data, onSuccess, onError) {
             xhr.send(data);
         } else {
             // Altfel, setam header-ul si codificam datele
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            // Convertim obiectul in string URL-encoded
-            const params = Object.keys(data)
-                .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-                .join('&');
-            xhr.send(params);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(data));
         }
     } else {
         // Pentru GET, nu trimitem date in body

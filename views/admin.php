@@ -9,8 +9,8 @@
 require_once __DIR__ . '/../config.php';
 
 // Verificam autentificarea si rolul de admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header('Location: ' . BASE_URL . '/index.php?page=home');
+if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+    header('Location: ' . BASE_URL . '/admin/index.php');
     exit;
 }
 

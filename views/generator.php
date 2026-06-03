@@ -63,55 +63,67 @@ require_once '../config.php';
                         </div>
 
                         <!-- Tab: Generator aleatoriu --> 
-                        <div id="tab-generator" class="tab-content active">
+                        <!-- Mesaj status --> 
+                        <div id="generator-message" class="admin-alert" style="display:none;"></div>
 
-                            <!-- Numarul de randuri de generat --> 
-                            <div class="form-group">
-                                <label for="rows-count">Numar de randuri:</label>
-                                <input type="number"
-                                    id="rows-count"
-                                    value="<?php echo DEFAULT_ROWS; ?>"
-                                    min="1"
-                                    max="<?php echo MAX_ROWS; ?>">
-                                <small>Maxim <?php echo MAX_ROWS; ?> randuri</small>
+                        <!-- Numarul de randuri de generat --> 
+                        <div class="form-group">
+                            <label for="rows-count-input">Numar de randuri:</label>
+                            <input type="number"
+                                id="rows-count-input"
+                                value="<?php echo DEFAULT_ROWS; ?>"
+                                min="1"
+                                max="<?php echo MAX_ROWS; ?>">
+                            <small>Maxim <?php echo MAX_ROWS; ?> randuri</small>
+                        </div>
+
+                        <!-- Numele schemei --> 
+                        <div class="form-group">
+                            <label for="schema-name-input">Nume schema (optional):</label>
+                            <input type="text"
+                                id="schema-name-input"
+                                placeholder="Ex: Schema CV">
+                        </div>
+
+                        <!-- Adaugare camp nou --> 
+                        <div class="fields-section">
+                            <div class="fields-header">
+                                <h3>Campuri schema</h3>
+                                <button id="btn-add-field" class="btn-small">+ Adauga camp</button>
                             </div>
 
-                            <!-- Numele schemei --> 
-                            <div class="form-group">
-                                <label for="schema-name">Nume schema (optional):</label>
-                                <input type="text"
-                                    id="schema-name"
-                                    placeholder="Ex: Schema CV">
+                            <!-- Randuri de adaugare --> 
+                            <div class="fields-add-row" style="display:flex; gap:8px; margin-bottom:12px;">
+                                <select id="field-type-select" class="select-input">
+                                    <option value="">-- Alege tipul --</option>
+                                </select>
+                                <input type="text" id="field-label-input" placeholder="Nume camp (ex: Nume)" class="select-input">
                             </div>
 
-                            <!-- Lista de campuri ale schemei --> 
-                            <div class="fields-section">
-                                <div class="fields-header">
-                                    <h3>Campuri schema</h3>
-                                    <!-- Buton adaugare camp nou --> 
-                                    <button id="btn-add-field" class="btn-small">
-                                        + Adauga camp 
-                                    </button>
-                                </div>
+                            <!-- Tabelul campurilor -->
+                            <table id="fields-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Label</th>
+                                        <th>Cheie</th>
+                                        <th>Tip</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="empty-row">
+                                        <td colspan="4" style="text-align:center; color:#999; padding:20px;">
+                                            Niciun camp adaugat inca 
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                                <!-- Containerul campurilor (populat dinamic) --> 
-                                <div id="fields-container">
-                                    <!-- Campurile se adauga dinamic via JavaScript --> 
-                                </div>
-                            </div>
-
-                            <!-- Butoane de actiune --> 
-                            <div class="generator-actions">
-                                <!-- Buton generare date --> 
-                                <button id="btn-generate-data" class="btn-generator">
-                                    Genereaza Date
-                                </button>
-                                <!-- Buton salvare schema -->
-                                <button id="btn-save-schema" class="btn-generator-secondary">
-                                    Salveaza Schema 
-                                </button>
-                            </div>
-
+                        <!-- Butoane de actiune --> 
+                        <div class="generator-actions">
+                            <button id="btn-generate" class="btn-generator">Genereaza Date</button>
+                            <button id="btn-save-schema" class="btn-generator-secondary">Salveaza Schema</button>
                         </div>
 
                         <!-- Tab: Import CSV --> 
@@ -172,10 +184,9 @@ require_once '../config.php';
 
                         <!-- Tabelul cu datele generate --> 
                         <div class="results-container">
-                            <div id="results-table" class="results-table-wrapper">
+                            <div id="preview-container" class="result-table-wrapper">
                                 <p class="empty-message">
-                                    Configureaza campurile si apasa "Genereaza Date"
-                                    pentru a vedea rezultatele
+                                    Configureaza campurile si apasa "Genereaza Date" pentru a vedea rezultatele
                                 </p>
                             </div>
                         </div>
