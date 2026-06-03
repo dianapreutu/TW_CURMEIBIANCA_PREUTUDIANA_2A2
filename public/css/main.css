@@ -62,8 +62,8 @@ body {
     background-color: var(--color-dark);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
+    justify-content: flex-start;
+    padding: 0 20px;
     z-index: 1000; /* apare deasupra tuturor elementelor */
     box-shadow: var(--shadow);
 }
@@ -89,7 +89,8 @@ body {
     list-style: none; /* eliminam punctele de lista */
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    margin-left: auto;
 }
 
 /* Linkurile individuale din navigare */
@@ -349,6 +350,22 @@ body {
     border-radius: var(--border-radius);
     padding: 12px 16px;
     margin-bottom: 16px;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-dark);
+    line-height: 1.1;
+    margin: 0;
 }
 
 .alert {
@@ -825,6 +842,7 @@ body {
 .page-wrapper,
 .editor-page,
 .generator-page,
+.preview-wrapper,
 main {
     padding-top: calc(var(--nav-height) + 20px);
 }

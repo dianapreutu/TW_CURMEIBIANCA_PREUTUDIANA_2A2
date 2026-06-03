@@ -20,14 +20,14 @@ require_once __DIR__ . '/../config.php';
 
         <!-- Bara de navigare principala --> 
         <nav class="main-nav">
-            <div class="nav-brand">
+            <a href="<?php echo BASE_URL; ?>/index.php?page=home" class="nav-brand" title="Mergi la Acasa">
                 <span class="brand-icon">📄</span>
                 <?php echo APP_NAME; ?>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=home" class="active">Acasa</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
-                <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generare Date</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             </ul>

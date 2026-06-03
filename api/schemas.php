@@ -94,7 +94,9 @@ function getFieldTypes(): void
 {
     echo json_encode([
         'success' => true,
-        'types'   => FieldTypes::getAll()
+        'data'    => [
+            'types' => FieldTypes::getAll()
+        ]
     ]);
 }
 
@@ -119,8 +121,10 @@ function getSchemas(int $userId, $db): void
 
     echo json_encode([
         'success' => true,
-        'schemas' => $schemas,
-        'count'   => count($schemas)
+        'data'    => [
+            'schemas' => $schemas,
+            'count'   => count($schemas)
+        ]
     ]);
 }
 

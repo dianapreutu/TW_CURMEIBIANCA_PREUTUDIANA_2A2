@@ -80,8 +80,10 @@ function ajax(url, method, data, onSuccess, onError) {
                 // Verificam daca API-ul a returnat succes
                 if (response.success) {
                     // Apelam callback-ul de succes cu datele
+                    // Daca API-ul returneaza obiectul sub cheia data, folosim acel payload.
+                    // Altfel, trimitem tot obiectul raspuns ca fallback.
                     if (typeof onSuccess === 'function') {
-                        onSuccess(response.data);
+                        onSuccess(response.hasOwnProperty('data') ? response.data : response);
                     }
                 } else {
                     // API-ul a returnat eroare
@@ -326,7 +328,7 @@ function ajaxPostForm(url, formData, onSuccess, onError) {
                 const response = JSON.parse(xhr.responseText);
                 if (xhr.status === 200 && response.success) {
                     if (typeof onSuccess === 'function') {
-                        onSuccess(response.data);
+                        onSuccess(response.hasOwnProperty('data') ? response.data : response);
                     }
                 } else {
                     if (typeof onError === 'function') {

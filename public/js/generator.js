@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // si populam dropdown-ul de selectie tip
     loadFieldTypes();
 
+    // Incarcam schemele salvate ale utilizatorului
+    loadSavedSchemas();
+
     // Ascultam butoanele principale
     const btnAddField    = document.getElementById('btn-add-field');
     const btnGenerate    = document.getElementById('btn-generate');
@@ -87,7 +90,7 @@ function loadFieldTypes() {
     if (!select) return;
 
     // Apel AJAX catre API
-    ajaxGet('/api/schemas.php?action=field_types', function (data) {
+    ajaxGet('api/schemas.php?action=field_types', function (data) {
         if (!data || !data.types) return;
 
         // Golim optiunile existente
@@ -101,6 +104,58 @@ function loadFieldTypes() {
             select.appendChild(option);
         });
     });
+}
+
+
+// --------------------------------------------------
+// Incarca schemele salvate ale utilizatorului
+// si le afiseaza in panoul din generator
+// --------------------------------------------------
+function loadSavedSchemas() {
+    const container = document.getElementById('schemas-list');
+    if (!container) return;
+
+    ajaxGet('api/schemas.php', function (data) {
+        if (!data) {
+            container.innerHTML = '<p class="empty-message">Eroare la incarcare scheme salvate.</p>';
+            return;
+        }
+
+        const schemas = data.schemas || [];
+        renderSavedSchemas(schemas);
+    }, function (error) {
+        const message = (typeof error === 'string' && error.indexOf('401') !== -1)
+            ? 'Conecteaza-te pentru a vedea schemele salvate.'
+            : 'Nu exista scheme salvate sau nu esti autentificat.';
+        container.innerHTML = '<p class="empty-message">' + message + '</p>';
+    });
+}
+
+
+// --------------------------------------------------
+// Afiseaza lista de scheme salvate in UI
+// --------------------------------------------------
+function renderSavedSchemas(schemas) {
+    const container = document.getElementById('schemas-list');
+    if (!container) return;
+
+    if (!Array.isArray(schemas) || schemas.length === 0) {
+        container.innerHTML = '<p class="empty-message">Nu exista scheme salvate inca.</p>';
+        return;
+    }
+
+    const listItems = schemas.map(schema => {
+        return `
+            <div class="saved-schema-item">
+                <strong>${escapeHtml(schema.name)}</strong>
+                <div class="saved-schema-meta">
+                    ${escapeHtml(schema.rows_count.toString())} randuri • actualizata: ${escapeHtml(schema.updated_at)}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = listItems;
 }
 
 
@@ -228,14 +283,14 @@ function handleGenerate() {
     setGenerateButtonLoading(true);
 
     // Apel AJAX catre api/data.php
-    ajaxPost('/api/data.php', {
+    ajaxPost('api/data.php', {
         action: 'generate',
         fields: GeneratorState.toJSON(),
         rows:   rows
     }, function (data) {
         setGenerateButtonLoading(false);
 
-        if (data && data.success && data.rows) {
+        if (data && Array.isArray(data.rows)) {
             renderPreviewTable(GeneratorState.fields, data.rows);
             showGeneratorMessage(
                 `Au fost generate ${data.rows.length} randuri cu succes!`,
@@ -243,7 +298,7 @@ function handleGenerate() {
             );
         } else {
             showGeneratorMessage(
-                data.message || 'Eroare la generarea datelor.',
+                data && data.message ? data.message : 'Eroare la generarea datelor.',
                 'danger'
             );
         }
@@ -321,17 +376,21 @@ function handleSaveSchema() {
     const rowsInput = document.getElementById('rows-count-input');
     const rows = rowsInput ? parseInt(rowsInput.value) || 10 : 10;
 
-    ajaxPost('/api/schemas.php', {
+    ajaxPost('api/schemas.php', {
         action:      'save',
         name:        name,
         fields_json: JSON.stringify(GeneratorState.toJSON()),
         rows_count:  rows
     }, function (data) {
-        if (data && data.success) {
+        if (data) {
             showGeneratorMessage('Schema salvata cu succes!', 'success');
+            if (nameInput) {
+                nameInput.value = '';
+            }
+            loadSavedSchemas();
         } else {
             showGeneratorMessage(
-                data.message || 'Eroare la salvarea schemei.',
+                data && data.message ? data.message : 'Eroare la salvarea schemei.',
                 'danger'
             );
         }
@@ -365,8 +424,8 @@ function handleImportCsv() {
     showGeneratorMessage('Se importa fisierul CSV...', 'info');
 
     // Apel AJAX cu FormData
-    ajaxPostForm('/api/data.php', formData, function (data) {
-        if (data && data.success) {
+    ajaxPostForm('api/data.php', formData, function (data) {
+        if (data && data.row_count && data.headers) {
             showGeneratorMessage(
                 `CSV importat: ${data.row_count} randuri, ${data.headers.length} coloane.`,
                 'success'
@@ -377,7 +436,7 @@ function handleImportCsv() {
             }
         } else {
             showGeneratorMessage(
-                data.message || 'Eroare la importul CSV.',
+                data && data.message ? data.message : 'Eroare la importul CSV.',
                 'danger'
             );
         }
@@ -429,13 +488,13 @@ function handleExport(format) {
     const rowsInput = document.getElementById('rows-count-input');
     const rows = rowsInput ? parseInt(rowsInput.value) || 10 : 10;
 
-    ajaxPost('/api/export.php', {
+    ajaxPost('api/export.php', {
         action: 'export_data',
         format: format,
         fields: GeneratorState.toJSON(),
         rows:   rows
     }, function (data) {
-        if (data && data.success && data.download_url) {
+        if (data && data.download_url) {
             // Declansam descarcarea fisierului
             const link = document.createElement('a');
             link.href = data.download_url;
@@ -446,7 +505,7 @@ function handleExport(format) {
             showGeneratorMessage(`Export ${format.toUpperCase()} generat!`, 'success');
         } else {
             showGeneratorMessage(
-                data.message || `Eroare la exportul ${format}.`,
+                data && data.message ? data.message : `Eroare la exportul ${format}.`,
                 'danger'
             );
         }

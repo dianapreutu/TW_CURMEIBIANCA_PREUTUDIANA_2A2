@@ -210,7 +210,7 @@ class PdfExporter
         $mpdf = new \Mpdf\Mpdf([
             'mode'        => 'utf-8',
             'format'      => 'A4',
-            'orientation' => 'P', // Portrait
+            'orientation' => 'P', // Portret
             'margin_top'  => 15,
             'margin_bottom'=> 15,
             'margin_left' => 15,

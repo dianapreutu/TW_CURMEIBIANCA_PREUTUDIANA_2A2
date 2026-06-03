@@ -50,6 +50,21 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
             <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
         </head>
         <body>
+            <!-- Bara de navigare principala -->
+            <nav class="main-nav">
+                <a href="<?php echo BASE_URL; ?>/index.php?page=home" class="nav-brand" title="Mergi la Acasa">
+                    <span class="brand-icon">📄</span>
+                    <?php echo APP_NAME; ?>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="<?php echo BASE_URL; ?>/index.php?page=home">Acasa</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
+                </ul>
+            </nav>
+
             <div class="login-container">
                 <div class="login-card">
                     <h1>Panou Administrare</h1>

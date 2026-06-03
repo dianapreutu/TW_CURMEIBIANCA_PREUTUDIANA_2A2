@@ -12,6 +12,11 @@
     min-height: calc(100vh - var(--nav-height)); /* ocupa toata inaltimea ecranului */
     display: flex;
     flex-direction: column;
+    background-color: var(--color-light);
+}
+
+.editor-page .container {
+    padding-top: 0;
 }
 
 /* Header-ul paginii de editor */

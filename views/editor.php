@@ -21,10 +21,10 @@ require_once __DIR__ . '/../config.php';
 
         <!-- Bara de navigare principala --> 
         <nav class="main-nav">
-            <div class="nav-brand">
+            <a href="<?php echo BASE_URL; ?>/index.php?page=home" class="nav-brand" title="Mergi la Acasa">
                 <span class="brand-icon">📄</span>
                 <?php echo APP_NAME; ?>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=home">Acasa</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="active">Editor Sabloane</a></li>
@@ -35,10 +35,11 @@ require_once __DIR__ . '/../config.php';
         </nav>
 
         <!-- Pagina editorului --> 
-        <div class="editor-page">
+        <main class="editor-page">
+            <div class="container">
 
-            <!-- Header-ul editorului --> 
-            <div class="editor-header">
+                <!-- Header-ul editorului --> 
+                <div class="editor-header">
                 <h1>Editor Sabloane</h1>
                 <div class="editor-header-actions">
                     <!-- Buton sablon nou --> 
@@ -167,7 +168,8 @@ Exemplu:
                 </div>
             </div>
 
-        </div>
+            </div>
+        </main>
         <!-- sfarsit editor-page --> 
         
         <!-- Scripturile JavaScript --> 
