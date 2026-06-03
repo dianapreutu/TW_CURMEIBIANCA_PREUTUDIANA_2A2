@@ -5,7 +5,7 @@
 RewriteEngine On
 
 # Setez directorul de baza al aplicatiei
-RewriteBase /TW_CURMEIBIANCA_PREUTUDIANA_2A2/
+RewriteBase /docgen/
 
 # Las sa treaca fisierele si folderele care exista fizic pe disk (CSS, JS, imagini etc.)
 # Daca fisierul exista fizic - nu rescriu
