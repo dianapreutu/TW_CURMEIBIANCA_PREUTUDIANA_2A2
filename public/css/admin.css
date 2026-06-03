@@ -23,12 +23,91 @@
 }
 
 /* --------------------------------------------------
+   Stiluri pentru pagina de login admin
+   -------------------------------------------------- */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #1a3a5c 0%, #2c7be5 100%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    padding: 32px;
+}
+
+.login-card h1,
+.login-card h2 {
+    text-align: center;
+}
+
+.login-card h1 {
+    margin-bottom: 12px;
+    font-size: 1.8rem;
+    color: #2c3e50;
+}
+
+.login-card h2 {
+    margin-bottom: 24px;
+    font-size: 1rem;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
+.login-card .form-group {
+    margin-bottom: 18px;
+}
+
+.login-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.login-card input:focus {
+    border-color: var(--color-primary);
+}
+
+.login-card button {
+    width: 100%;
+}
+
+/* --------------------------------------------------
    Reset de baza pentru panoul admin
    -------------------------------------------------- */
 .admin-wrapper * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+}
+
+/* Restore spacing for standard elements inside admin pages */
+.admin-wrapper h1,
+.admin-wrapper h2,
+.admin-wrapper h3,
+.admin-wrapper h4,
+.admin-wrapper p,
+.admin-wrapper ul,
+.admin-wrapper ol,
+.admin-wrapper form {
+    margin: initial;
+    padding: initial;
 }
 
 /* --------------------------------------------------
@@ -270,6 +349,14 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    margin-top: 16px;
+}
+
+.admin-section .empty-message,
+.admin-card .empty-message {
+    margin: 0;
+    color: #6c757d;
+    padding: 14px 0;
 }
 
 .admin-table thead tr {
@@ -386,6 +473,160 @@
 .admin-btn.small {
     padding: 5px 10px;
     font-size: 12px;
+}
+
+/* --------------------------------------------------
+   Sectiuni si linkuri admin
+   -------------------------------------------------- */
+.admin-content h1 {
+    margin-bottom: 18px;
+    font-size: 2rem;
+    color: #1f2a38;
+}
+
+.admin-section {
+    background-color: #ffffff;
+    border: 1px solid #e8eaee;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 24px rgba(34, 49, 63, 0.04);
+}
+
+.admin-section h2 {
+    margin-bottom: 18px;
+    font-size: 1.25rem;
+    color: #2c3e50;
+}
+
+.admin-section .form-group {
+    margin-bottom: 18px;
+}
+
+.admin-section label {
+    display: block;
+    margin-bottom: 8px;
+    color: #495057;
+    font-weight: 600;
+}
+
+.admin-section input,
+.admin-section select,
+.admin-section textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #dfe3e8;
+    border-radius: 10px;
+    background-color: #ffffff;
+    color: #333;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-section input:focus,
+.admin-section select:focus,
+.admin-section textarea:focus {
+    border-color: var(--admin-info);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+}
+
+.admin-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--admin-info);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+.role-badge,
+.protected-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.role-user,
+.role-admin {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--admin-sidebar-text);
+}
+
+.protected-label {
+    background-color: rgba(236, 240, 241, 0.8);
+    color: #495057;
+}
+
+.btn-admin,
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-admin:hover,
+.admin-btn:hover {
+    opacity: 0.95;
+}
+
+.btn-admin.primary,
+.admin-btn.primary {
+    background-color: var(--admin-info);
+    color: #ffffff;
+}
+
+.btn-admin.danger,
+.admin-btn.danger {
+    background-color: var(--admin-danger);
+    color: #ffffff;
+}
+
+.btn-admin.secondary,
+.admin-btn.secondary {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+}
+
+.btn-admin.small,
+.admin-btn.small {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+}
+
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #e74c3c;
+    background-color: #ffffff;
+    color: var(--admin-danger);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-delete:hover {
+    background-color: rgba(231, 76, 60, 0.1);
 }
 
 /* --------------------------------------------------

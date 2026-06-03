@@ -46,30 +46,33 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Admin Login - <?php echo APP_NAME; ?></title>
-            <link rel="stylesheet" href="../public/css/admin.css">
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
         </head>
         <body>
             <div class="login-container">
-                <h1>Panou Administrare</h1>
-                <h2><?php echo APP_NAME; ?></h2>
+                <div class="login-card">
+                    <h1>Panou Administrare</h1>
+                    <h2><?php echo APP_NAME; ?></h2>
 
-                <?php if (isset($loginError)): ?>
-                    <!-- Afisam eroarea daca parola e gresita -->
-                    <div class="error-message"><?php echo $loginError; ?></div>
-                <?php endif; ?>
+                    <?php if (isset($loginError)): ?>
+                        <!-- Afisam eroarea daca parola e gresita -->
+                        <div class="error-message"><?php echo $loginError; ?></div>
+                    <?php endif; ?>
 
-                <!-- Formularul de autentificare --> 
-                <form method="POST" action="index.php">
-                    <div class="form-group">
-                        <label for="password">Parola administrator:</label>
-                        <input type="password"
-                                id="password"
-                                name="password"
-                                placeholder="Introduceti parola"
-                                required>
-                    </div>
-                    <button type="submit">Autentificare</button>
-                </form>
+                    <!-- Formularul de autentificare --> 
+                    <form method="POST" action="index.php">
+                        <div class="form-group">
+                            <label for="password">Parola administrator:</label>
+                            <input type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Introduceti parola"
+                                    required>
+                        </div>
+                        <button type="submit">Autentificare</button>
+                    </form>
+                </div>
             </div>
         </body>
     </html>
@@ -124,54 +127,85 @@ $recentDocuments = $db->fetchAll(
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Admin Dashboard - <?php echo APP_NAME; ?></title>
-        <link rel="stylesheet" href="../public/css/admin.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
     </head>
     <body>
+    <div class="admin-wrapper">
 
-        <!-- Bara de navigare admin --> 
-        <nav class="admin-nav">
-            <div class="nav-brand"><?php echo APP_NAME; ?> - Admin</div>
-            <ul class="nav-links">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="users.php">Utilizatori</a></li>
-                <li><a href="logs.php">Jurnalul activitatii</a></li>
-                <li><a href="../index.php">Inapoi la aplicatie</a></li>
-                <li><a href="index.php?logout=1">Delogare</a></li>
-            </ul>
-        </nav>
-
-        <!-- Continutul principal al dashboard-ului --> 
-        <main class="admin-main">
-            <h1>Dashboard</h1>
-
-            <!-- Carduri cu statistici -->
-            <div class="stats-grid">
-
-                <!-- Card: total sabloane -->
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo $totalTemplates; ?></div>
-                    <div class="stat-label">Sabloane</div>
-                </div>
-
-                <!-- Card: total documente --> 
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo $totalDocuments; ?></div>
-                    <div class="stat-label">Documente generate</div>
-                </div>
-
-                <!-- Card: total scheme --> 
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo $totalSchemas; ?></div>
-                    <div class="stat-label">Scheme de date</div>
-                </div>
-
-                <!-- Card: total utilizatori --> 
-                <div class="stat-card">
-                    <div class="stat-number"><?php echo $totalUsers; ?></div>
-                    <div class="stat-label">Utilizatori</div>
-                </div>
-
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-logo">
+                Do<span>Gen</span>
             </div>
+            <ul class="admin-nav">
+                <li class="admin-nav-section-title">Administrare</li>
+                <li class="admin-nav-item active">
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php">
+                        <span class="nav-icon">📊</span> Dashboard
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/users.php">
+                        <span class="nav-icon">👥</span> Utilizatori
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/logs.php">
+                        <span class="nav-icon">📋</span> Istoric activitate
+                    </a>
+                </li>
+                <li class="admin-nav-section-title">Aplicatie</li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/">
+                        <span class="nav-icon">🏠</span> Inapoi la aplicatie
+                    </a>
+                </li>
+            </ul>
+            <div class="admin-sidebar-footer">
+                <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
+                <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <div class="admin-topbar">
+                <span class="admin-topbar-title">📊 Dashboard</span>
+                <div class="admin-topbar-actions">
+                    <a href="<?php echo BASE_URL; ?>/" class="admin-btn secondary">Inapoi la aplicatie</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn danger">Delogare</a>
+                </div>
+            </div>
+            <div class="admin-content">
+                <h1>Dashboard</h1>
+
+                <!-- Carduri cu statistici -->
+                <div class="admin-stats-grid">
+
+                    <!-- Card: total sabloane -->
+                    <div class="admin-stat-card info">
+                        <div class="admin-stat-value"><?php echo $totalTemplates; ?></div>
+                        <div class="admin-stat-label">Sabloane</div>
+                    </div>
+
+                    <!-- Card: total documente --> 
+                    <div class="admin-stat-card info">
+                        <div class="admin-stat-value"><?php echo $totalDocuments; ?></div>
+                        <div class="admin-stat-label">Documente generate</div>
+                    </div>
+
+                    <!-- Card: total scheme --> 
+                    <div class="admin-stat-card info">
+                        <div class="admin-stat-value"><?php echo $totalSchemas; ?></div>
+                        <div class="admin-stat-label">Scheme de date</div>
+                    </div>
+
+                    <!-- Card: total utilizatori --> 
+                    <div class="admin-stat-card info">
+                        <div class="admin-stat-value"><?php echo $totalUsers; ?></div>
+                        <div class="admin-stat-label">Utilizatori</div>
+                    </div>
+
+                </div>
 
             <!-- Sectiunea: ultimele documente generate --> 
             <section class="admin-section">
@@ -241,7 +275,10 @@ $recentDocuments = $db->fetchAll(
                 <a href="logs.php" class="admin-link">Vezi toate actiunile</a>
             </section>
 
-        </main>
+        </div>
+    </main>
+
+</div>
 
     </body>
 </html>

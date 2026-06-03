@@ -122,25 +122,56 @@ $users = $db->fetchAll(
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Utilizatori - <?php echo APP_NAME; ?></title>
-        <link rel="stylesheet" href="../public/css/admin.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
     </head>
     <body>
+    <div class="admin-wrapper">
 
-        <!-- Bara de navigare admin --> 
-        <nav class="admin-nav">
-            <div class="nav-brand"><?php echo APP_NAME; ?> - Admin</div>
-            <ul class="nav-links">
-                <li><a href="index.php">Dashboard</a></li>
-                <li><a href="users.php" class="active">Utilizatori</a></li>
-                <li><a href="logs.php">Jurnalul activitatii</a></li>
-                <li><a href="../index.php">Inapoi la aplicatie</a></li>
-                <li><a href="index.php?logout=1">Delogare</a></li>
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-logo">
+                Do<span>Gen</span>
+            </div>
+            <ul class="admin-nav">
+                <li class="admin-nav-section-title">Administrare</li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php">
+                        <span class="nav-icon">📊</span> Dashboard
+                    </a>
+                </li>
+                <li class="admin-nav-item active">
+                    <a href="<?php echo BASE_URL; ?>/admin/users.php">
+                        <span class="nav-icon">👥</span> Utilizatori
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/logs.php">
+                        <span class="nav-icon">📋</span> Istoric activitate
+                    </a>
+                </li>
+                <li class="admin-nav-section-title">Aplicatie</li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/">
+                        <span class="nav-icon">🏠</span> Inapoi la aplicatie
+                    </a>
+                </li>
             </ul>
-        </nav>
+            <div class="admin-sidebar-footer">
+                <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
+                <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
+            </div>
+        </aside>
 
-        <!-- Continutul principal --> 
         <main class="admin-main">
-            <h1>Gestionare Utilizatori</h1>
+            <div class="admin-topbar">
+                <span class="admin-topbar-title">👥 Gestionare Utilizatori</span>
+                <div class="admin-topbar-actions">
+                    <a href="<?php echo BASE_URL; ?>/" class="admin-btn secondary">Inapoi la aplicatie</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn danger">Delogare</a>
+                </div>
+            </div>
+            <div class="admin-content">
+                <h1>Gestionare Utilizatori</h1>
 
             <!-- Afisam mesajul de succes daca exista --> 
             <?php if (!empty($message)): ?>
@@ -195,7 +226,7 @@ $users = $db->fetchAll(
                         </select>
                     </div>
 
-                    <button type="submit" class="btn-admin">Adauga utilizator</button>
+                    <button type="submit" class="admin-btn primary">Adauga utilizator</button>
                 </form>
             </section>
 
@@ -223,7 +254,7 @@ $users = $db->fetchAll(
                                     <td><?php echo htmlspecialchars($user['username']); ?></td>
                                     <td>
                                         <!-- Afisam rolul cu stil diferit --> 
-                                        <span class="role-badge role-<?php echo $user['role']; ?>">
+                                        <span class="admin-badge <?php echo $user['role'] === 'admin' ? 'admin' : 'info'; ?>">
                                             <?php echo $user['role'] === 'admin' ? 'Administrator' : 'Utilizator'; ?>
                                         </span>
                                     </td>
@@ -239,7 +270,7 @@ $users = $db->fetchAll(
                                             </form>
                                         <?php else: ?>
                                             <!-- Admin principal - nu poate fi sters --> 
-                                            <span class="protected-label">Protejat</span>
+                                            <span class="admin-badge" style="background-color:#f1f3f5;color:#495057;">Protejat</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -249,7 +280,10 @@ $users = $db->fetchAll(
                 <?php endif; ?>
             </section>
 
-        </main>
+        </div>
+    </main>
+
+</div>
 
     </body>
 </html>
