@@ -276,6 +276,43 @@ function debounce(func, delay) {
     };
 }
 
+/**
+ * ajaxPostForm() - trimite un formular (FormData) prin POST
+ * Folosit pentru uploaduri (ex: CSV, imagini)
+ * param {string} url - endpoint-ul API-ului
+ * param {FormData} formData - obiectul FormData cu datele formularului
+ * @param {function} onSuccess - callback la succes
+ * @param {function} onError - callback la eroare
+ */
+function ajaxPostForm(url, formData, onSuccess, onError) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (xhr.status === 200 && response.success) {
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(response.data);
+                    }
+                } else {
+                    if (typeof onError === 'function') {
+                        onError(response.error || 'Eroare necunoscuta!');
+                    }
+                }
+            } catch (e) {
+                if (typeof onError === 'function') {
+                    onError('Raspuns invalid de la server!');
+                }
+            }
+        }
+    };
+
+    // Trimitem direct FormData (nu setam Content-Type manual)
+    xhr.send(formData);
+}
+
 // ==================================================
 // INITIALIZARE - cod executat la incarcarea paginii
 // ==================================================
