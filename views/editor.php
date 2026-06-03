@@ -6,7 +6,7 @@
 // ==================================================
 
 // Includem configurarile globale
-require_once '../config.php';
+require_once __DIR__ . '/../config.php';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -14,8 +14,8 @@ require_once '../config.php';
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Editor Sabloane - <?php echo APP_NAME; ?></title>
-        <link rel="stylesheet" href="../public/css/main.css">
-        <link rel="stylesheet" href="../public/css/editor.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/editor.css">
     </head>
     <body>
 
@@ -26,11 +26,11 @@ require_once '../config.php';
                 <?php echo APP_NAME; ?>
             </div>
             <ul class="nav-links">
-                <li><a href="home.php">Acasa</a></li>
-                <li><a href="editor.php" class="active">Editor Sabloane</a></li>
-                <li><a href="generator.php">Generator Date</a></li>
-                <li><a href="documents.php">Documentele Mele</a></li>
-                <li><a href="../admin/index.php">Admin</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=home">Acasa</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="active">Editor Sabloane</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             </ul>
         </nav>
 
@@ -171,8 +171,8 @@ Exemplu:
         <!-- sfarsit editor-page --> 
         
         <!-- Scripturile JavaScript --> 
-        <script src="../public/js/app.js"></script>
-        <script src="../public/js/editor.js"></script>
+        <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
+        <script src="<?php echo BASE_URL; ?>/public/js/editor.js"></script>
 
     </body>
 </html>

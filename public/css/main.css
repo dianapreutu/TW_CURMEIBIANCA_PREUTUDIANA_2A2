@@ -400,3 +400,11 @@ body {
         padding: 0 12px;
     }
 }
+
+/* -- Compensare pentru bara de navigare fixa pe paginile fara .hero -- */
+.page-wrapper,
+.editor-page,
+.generator-page,
+main {
+    padding-top: calc(var(--nav-height) + 20px);
+}

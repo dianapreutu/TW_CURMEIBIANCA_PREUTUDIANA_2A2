@@ -7,7 +7,7 @@
 // ==================================================
 
 // Includem configurarile globale
-require_once '../config.php';
+require_once __DIR__ . '/../config.php';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -15,7 +15,7 @@ require_once '../config.php';
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Generator Date - <?php echo APP_NAME; ?></title>
-        <link rel="stylesheet" href="../public/css/main.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
     </head>
     <body>
 
@@ -26,11 +26,11 @@ require_once '../config.php';
                 <?php echo APP_NAME; ?>
             </div>
             <ul class="nav-links">
-                <li><a href="home.php">Acasa</a></li>
-                <li><a href="editor.php">Editor Sabloane</a></li>
-                <li><a href="generator.php" class="active">Generator Date</a></li>
-                <li><a href="documents.php">Documentele Mele</a></li>
-                <li><a href="../admin/index.php">Admin</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=home">Acasa</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator" class="active">Generator Date</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             </ul>
         </nav>
 
@@ -211,8 +211,8 @@ require_once '../config.php';
         </footer>
 
         <!-- Scripturile JavaScript --> 
-        <script src="../public/js/app.js"></script>
-        <script src="../public/js/generator.js"></script>
+        <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
+        <script src="<?php echo BASE_URL; ?>/public/js/generator.js"></script>
 
     </body>
 </html>

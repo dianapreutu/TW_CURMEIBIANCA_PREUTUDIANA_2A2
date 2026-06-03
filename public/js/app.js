@@ -9,6 +9,28 @@
 // MODUL AJAX - functii pentru comunicarea cu API-ul
 // ==================================================
 
+// Determinam baza aplicatiei (ex: http://localhost/docgen)
+var APP_BASE = (function () {
+    if (window.APP_BASE) return window.APP_BASE;
+    try {
+        var origin = window.location.origin;
+        var path = window.location.pathname || '/';
+        // Daca URL-ul contine index.php, luam partea pana la proiect (ex: /docgen)
+        var m = path.match(/^(.*)\/index\.php$/);
+        if (m && m[1]) {
+            return origin + m[1];
+        }
+        // In alte cazuri cautam primul segment (de obicei /docgen)
+        var segments = path.split('/').filter(Boolean);
+        if (segments.length > 0) {
+            return origin + '/' + segments[0];
+        }
+        return origin;
+    } catch (e) {
+        return '';
+    }
+})();
+
 /**
  * ajax() - trimite o cerere AJAX catre un endpoint al API-ului
  * @param {string} url          - URL-ul endpoint-ului (ex: '../api/templates.php')
@@ -23,6 +45,16 @@ function ajax(url, method, data, onSuccess, onError) {
     const xhr = new XMLHttpRequest();
 
     // Initializam cererea cu metoda si URL-ul
+    // Normalizam URL-urile relative catre API cand pagina e servita prin index.php?page=...
+    if (!/^https?:\/\//i.test(url) && !url.startsWith('/')) {
+        // transformam '../api/templates.php' -> APP_BASE + '/api/templates.php'
+        if (url.indexOf('../api/') === 0) {
+            url = APP_BASE + '/api/' + url.substring('../api/'.length);
+        } else if (url.indexOf('api/') === 0) {
+            url = APP_BASE + '/' + url;
+        }
+    }
+
     xhr.open(method, url, true); // true = asincron
 
     // Definim ce se intampla cand cererea s-a finalizat

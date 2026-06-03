@@ -6,7 +6,7 @@
 // ==================================================
 
 // Includem configurarile globale
-require_once '../config.php';
+require_once __DIR__ . '/../config.php';
 ?>
 <!DOCTYPE html>
 <html lang="ro">
@@ -14,7 +14,7 @@ require_once '../config.php';
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title><?php echo APP_NAME; ?> - Generator de Documente</title>
-        <link rel="stylesheet" href="../public/css/main.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
     </head>
     <body>
 
@@ -25,11 +25,11 @@ require_once '../config.php';
                 <?php echo APP_NAME; ?>
             </div>
             <ul class="nav-links">
-                <li><a href="home.php" class="active">Acasa</a></li>
-                <li><a href="editor.php">Editor Sabloane</a></li>
-                <li><a href="generator.php">Generare Date</a></li>
-                <li><a href="documents.php">Documentele Mele</a></li>
-                <li><a href="../admin/index.php">Admin</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=home" class="active">Acasa</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generare Date</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
+                <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             </ul>
         </nav>
 
@@ -42,8 +42,8 @@ require_once '../config.php';
                     pornind de la sabloane predefinite, cu date realiste generate automat
                 </p>
                 <div class="hero-buttons">
-                    <a href="editor.php" class="btn btn-primary">Creeaza Sablon</a>
-                    <a href="generator.php" class="btn btn-secondary">Genereaza Date</a>
+                    <a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="btn btn-primary">Creeaza Sablon</a>
+                    <a href="<?php echo BASE_URL; ?>/index.php?page=generator" class="btn btn-secondary">Genereaza Date</a>
                 </div>
             </div>
         </header>
@@ -64,7 +64,7 @@ require_once '../config.php';
                             facturi si alte documente. Foloseste variabile dinamice 
                             precum <code>{{nume}}</code> sau <code>{{data}}</code>
                         </p>
-                        <a href="editor.php" class="feature-link">Deschide editorul</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="feature-link">Deschide editorul</a>
                     </div>
 
                     <!-- Functionalitate 2: Generator date --> 
@@ -76,7 +76,7 @@ require_once '../config.php';
                             IBAN, adrese, firme si multe altele. Inspirat din Mockaroo,
                             adaptat pentru Romania
                         </p>
-                        <a href="generator.php" class="feature-link">Genereaza date</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=generator" class="feature-link">Genereaza date</a>
                     </div>
 
                     <!-- Functionalitate 3: Import CSV --> 
@@ -88,7 +88,7 @@ require_once '../config.php';
                             pentru a popula sabloanele tale. Export disponibil
                             in CSV si JSON
                         </p>
-                        <a href="generator.php" class="feature-link">Importa date</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=generator" class="feature-link">Importa date</a>
                     </div>
 
                     <!-- Functionalitate 4: Export documente --> 
@@ -100,7 +100,7 @@ require_once '../config.php';
                             gata de tiparit sau distribuit. Toate documentele
                             sunt salvate pentru acces ulterior
                         </p>
-                        <a href="documents.php" class="feature-link">Vezi documentele</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=documents" class="feature-link">Vezi documentele</a>
                     </div>
 
                     <!-- Functionalitate 5: Templating dinamic --> 
@@ -113,7 +113,7 @@ require_once '../config.php';
                             <code>{{YEAR}}</code> si conditii
                             <code>{{IF camp}}...{{ENDIF}}</code>
                         </p>
-                        <a href="editor.php" class="feature-link">Incearca acum</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="feature-link">Incearca acum</a>
                     </div>
 
                     <!-- Functionalitate 6: Sabloane predefinite --> 
@@ -125,7 +125,7 @@ require_once '../config.php';
                             CV, cerere si factura. Personalizeaza-le
                             dupa nevoile tale
                         </p>
-                        <a href="editor.php" class="feature-link">Vezi sabloanele</a>
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="feature-link">Vezi sabloanele</a>
                     </div>
 
                 </div>
@@ -179,7 +179,7 @@ require_once '../config.php';
             </div>
         </footer>   
 
-        <script src="../public/js/app.js"></script>
+        <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
 
     </body>
 </html>
