@@ -12,6 +12,19 @@ require_once '../config.php';
 // Setam header-ul pentru raspuns JSON
 header('Content-Type: application/json; charset=utf-8');
 
+// Verificam autentificarea utilizatorului
+$authUserId = $_SESSION['user_id'] ?? null;
+$isAdmin = isset($_SESSION['admin']) && $_SESSION['admin'] === true;
+
+if (!$authUserId && !$isAdmin) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Trebuie sa fii autentificat pentru a accesa aceasta resursa.'
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // Initializam clasele necesare
 $engine = new TemplateEngine();
 $generator = new DataGenerator();
@@ -22,10 +35,10 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // Rutam cererea catre functia corespunzatoare
 switch ($action) {
-    case 'list': handleList($db);       break;
-    case 'generate': handleGenerate($engine, $generator);       break;
-    case 'get': handleGet($db);     break;
-    case 'delete': handleDelete($db);       break;
+    case 'list': handleList($db, $authUserId, $isAdmin);       break;
+    case 'generate': handleGenerate($engine, $generator, $authUserId);       break;
+    case 'get': handleGet($db, $authUserId, $isAdmin);     break;
+    case 'delete': handleDelete($db, $authUserId, $isAdmin);       break;
     default: jsonError('Actiune invalida!');        break;
 }
 
@@ -33,15 +46,25 @@ switch ($action) {
 // handleList() - returneaza toate documentele generate
 // Cerere: GET api/documents.php?action=list
 // ==================================================
-function handleList(Database $db) 
+function handleList(Database $db, $userId, $isAdmin)
 {
-    // Selectam toate documentele ordonate dupa data crearii
-    $documents = $db->fetchAll(
-        'SELECT d.*, t.name as template_name
-        FROM documents d
-        LEFT JOIN templates t ON d.template_id = t.id
-        ORDER BY d.created_at DESC'
-    );
+    if ($isAdmin) {
+        $documents = $db->fetchAll(
+            'SELECT d.*, t.name as template_name
+            FROM documents d
+            LEFT JOIN templates t ON d.template_id = t.id
+            ORDER BY d.created_at DESC'
+        );
+    } else {
+        $documents = $db->fetchAll(
+            'SELECT d.*, t.name as template_name
+            FROM documents d
+            LEFT JOIN templates t ON d.template_id = t.id
+            WHERE d.user_id = ?
+            ORDER BY d.created_at DESC',
+            [$userId]
+        );
+    }
 
     // Returnam lista de documente
     jsonSuccess($documents);
@@ -51,7 +74,7 @@ function handleList(Database $db)
 // handleGet() - returneaza un document dupa ID
 // Cerere: GET api/documents.php?action=get&id=1
 // ==================================================
-function handleGet(Database $db)
+function handleGet(Database $db, $userId, $isAdmin)
 {
     // Citim si validam ID-ul 
     $id = intval($_GET['id'] ?? 0);
@@ -61,14 +84,19 @@ function handleGet(Database $db)
         return;
     }
 
-    // Cautam documentul in baza de date
-    $document = $db->fetchOne(
-        'SELECT d.*, t.name as template_name
+    $query = 'SELECT d.*, t.name as template_name
         FROM documents d
         LEFT JOIN templates t ON d.template_id = t.id
-        WHERE d.id = ?',
-        [$id]
-    );
+        WHERE d.id = ?';
+    $params = [$id];
+
+    if (!$isAdmin) {
+        $query .= ' AND d.user_id = ?';
+        $params[] = $userId;
+    }
+
+    // Cautam documentul in baza de date
+    $document = $db->fetchOne($query, $params);
 
     // Daca nu a fost gasit, returnam eroare
     if (!$document) {
@@ -92,7 +120,7 @@ function handleGet(Database $db)
 // Cerere: POST api/documents.php?action=generate
 // Body: template_id, name, data_source, count, data (optional)
 // ==================================================
-function handleGenerate(TemplateEngine $engine, DataGenerator $generator)
+function handleGenerate(TemplateEngine $engine, DataGenerator $generator, $userId)
 {
     // Verificam ca cererea este de tip POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -153,7 +181,8 @@ function handleGenerate(TemplateEngine $engine, DataGenerator $generator)
 
     // Generam documentul folosind TemplateEngine
     try {
-        $result = $engine->generateDocument($templateId, $data, $name);
+        $effectiveUserId = $userId ?: 1;
+        $result = $engine->generateDocument($templateId, $data, $name, $effectiveUserId);
 
         // Returnam succes cu detaliile documentului generat
         jsonSuccess([
@@ -224,7 +253,7 @@ function handleCSVData()
 // Cerere: POST api/documents.php?action=delete
 // Body: id
 // ==================================================
-function handleDelete(Database $db) 
+function handleDelete(Database $db, $userId, $isAdmin) 
 {
     // Verificam ca cererea este de tip POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -248,6 +277,11 @@ function handleDelete(Database $db)
 
     if (!$document) {
         jsonError('Documentul nu a fost gasit!');
+        return;
+    }
+
+    if (!$isAdmin && $document['user_id'] !== $userId) {
+        jsonError('Nu ai acces la acest document.');
         return;
     }
 

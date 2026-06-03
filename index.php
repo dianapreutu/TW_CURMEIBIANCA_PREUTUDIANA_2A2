@@ -25,7 +25,7 @@ $pages = [
     'generator' => 'views/generator.php',
     'documents' => 'views/documents.php',
     'preview'   => 'views/preview.php',
-    'admin'     => 'views/admin.php'
+    'admin'     => 'admin/index.php'
 ];
 
 // Verificam daca pagina ceruta exista

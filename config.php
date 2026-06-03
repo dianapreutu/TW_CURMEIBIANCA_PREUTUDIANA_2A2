@@ -43,8 +43,8 @@ define('UPLOADS_PATH', ROOT_PATH . '/uploads');
 define('SESSION_NAME', 'docgen_session');
 
 // Parola pentru accesul in panoul de administrare
-// IMPORTANT: in productie, aceasta parola trebuie stocata criptat
-define('ADMIN_PASSWORD', 'admin1234');
+// IMPORTANT: folosim variabila de mediu pentru productie
+define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'admin1234');
 
 // -- Setari pentru generarea de date --
 
@@ -54,11 +54,19 @@ define('DEFAULT_ROWS', 10);
 // Numarul maxim de inregistrari care pot fi generate la o cerere
 define('MAX_ROWS', 1000);
 
-// -- Setari pentru afisarea erorilor --
-// In dezvoltare afisam erorile. In productie: se seteaza pe 0
+// -- Mediu aplicatie --
+// In productie, seteaza APP_ENV=production in mediul serverului
+define('APP_ENV', getenv('APP_ENV') ?: 'development');
 
-ini_set('display_errors', 1); // afiseaza erorile in browser
-ini_set('display_startup_errors', 1); // afiseaza erorile de la pornire
+// -- Setari pentru afisarea erorilor --
+// In dezvoltare afisam erorile. In productie, nu le expunem in browser.
+if (APP_ENV === 'production') {
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+} else {
+    ini_set('display_errors', 1); // afiseaza erorile in browser
+    ini_set('display_startup_errors', 1); // afiseaza erorile de la pornire
+}
 error_reporting(E_ALL); // raporteaza toate tipurile de erori
 
 // -- Setarea fusului orar --
@@ -78,6 +86,21 @@ if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
         $_SESSION['user_id'] = 1;
         $_SESSION['role'] = 'admin';
         $_SESSION['username'] = 'admin';
+    }
+}
+
+// -- Creare directoare necesare --
+// Asiguram existenta cailor folosite pentru generare si upload.
+$requiredPaths = [
+    GENERATED_HTML_PATH,
+    GENERATED_PDF_PATH,
+    ROOT_PATH . '/generated/tmp',
+    UPLOADS_PATH,
+];
+
+foreach ($requiredPaths as $path) {
+    if (!is_dir($path)) {
+        mkdir($path, 0755, true);
     }
 }
 
