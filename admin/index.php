@@ -208,12 +208,14 @@ $recentDocuments = $db->fetchAll(
                 </div>
 
             <!-- Sectiunea: ultimele documente generate --> 
-            <section class="admin-section">
-                <h2>Ultimele documente generate</h2>
-
-                <?php if (empty($recentDocuments)): ?>
-                    <p class="empty-message">Nu exista documente generate inca.</p>
-                <?php else: ?>
+            <section class="admin-section admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title">Ultimele documente generate</span>
+                </div>
+                <div class="admin-card-body">
+                    <?php if (empty($recentDocuments)): ?>
+                        <p class="empty-message">Nu exista documente generate inca.</p>
+                    <?php else: ?>
                     <table class="admin-table">
                         <thead>
                             <tr>
@@ -238,13 +240,17 @@ $recentDocuments = $db->fetchAll(
                     </table>
                 <?php endif; ?>
 
-                <!-- Link catre pagina completa de logs --> 
-                <a href="logs.php" class="admin-link">Vezi toate activitatile</a>
+                    <!-- Link catre pagina completa de logs --> 
+                    <a href="logs.php" class="admin-link">Vezi toate activitatile</a>
+                </div>
             </section>
 
             <!-- Sectiunea: activitate recenta --> 
-            <section class="admin-section">
-                <h2>Activitate recenta</h2>
+            <section class="admin-section admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title">Activitate recenta</span>
+                </div>
+                <div class="admin-card-body">
 
                 <?php if (empty($recentLogs)): ?>
                     <p class="empty-message">Nu exista activitate inregistrata</p>
@@ -271,8 +277,9 @@ $recentDocuments = $db->fetchAll(
                     </table>
                 <?php endif; ?>
 
-                <!-- Link catre pagina completa de logs --> 
-                <a href="logs.php" class="admin-link">Vezi toate actiunile</a>
+                    <!-- Link catre pagina completa de logs --> 
+                    <a href="logs.php" class="admin-link">Vezi toate actiunile</a>
+                </div>
             </section>
 
         </div>

@@ -184,10 +184,12 @@ $users = $db->fetchAll(
             <?php endif; ?>
 
             <!-- Formularul de adaugare utilizator nou --> 
-            <section class="admin-section">
-                <h2>Adauga utilizator nou</h2>
-
-                <form method="POST" action="users.php">
+            <section class="admin-section admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title">Adauga utilizator nou</span>
+                </div>
+                <div class="admin-card-body">
+                    <form method="POST" action="users.php">
                     <!-- Camp ascuns pentru actiune --> 
                     <input type="hidden" name="action" value="add">
 
@@ -228,11 +230,15 @@ $users = $db->fetchAll(
 
                     <button type="submit" class="admin-btn primary">Adauga utilizator</button>
                 </form>
+                </div>
             </section>
 
             <!-- Tabelul cu toti utilizatorii --> 
-            <section class="admin-section">
-                <h2>Lista utilizatori (<?php echo count($users); ?>)</h2>
+            <section class="admin-section admin-card">
+                <div class="admin-card-header">
+                    <span class="admin-card-title">Lista utilizatori (<?php echo count($users); ?>)</span>
+                </div>
+                <div class="admin-card-body">
 
                 <?php if (empty($users)): ?>
                     <p class="empty-message">Nu exista utilizatori inregistrati</p>
@@ -278,6 +284,7 @@ $users = $db->fetchAll(
                         </tbody>
                     </table>
                 <?php endif; ?>
+                </div>
             </section>
 
         </div>
