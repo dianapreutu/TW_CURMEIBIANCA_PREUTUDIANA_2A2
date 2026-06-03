@@ -1,42 +1,42 @@
 <?php
-
+ 
 // views/documents.php - Lista documentelor generate
 // Afiseaza toate documentele generate de utilizatorul logat
 // Permite stergerea si accesul la previzualizare
 // Depinde de: lib/Database.php, config.php
 // Stilizat cu: public/css/main.css
 // Logica JS: public/js/app.js
-
+ 
 require_once __DIR__ . '/../config.php';
-
+ 
 // Verificam autentificarea
 if (!isset($_SESSION['user_id']) && !isset($_SESSION['admin'])) {
     header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
-
+ 
 $db     = Database::getInstance();
 $userId = $_SESSION['user_id'];
-
+ 
 // Paginare
 $page    = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
 $offset  = ($page - 1) * $perPage;
-
+ 
 // Filtru status
 $filterStatus = trim($_GET['status'] ?? '');
 $whereStatus  = $filterStatus ? 'AND d.status = ?' : '';
 $params       = $filterStatus ? [$userId, $filterStatus] : [$userId];
-
+ 
 // Total documente pentru paginare
 $total = $db->fetchOne(
     "SELECT COUNT(*) as total FROM documents d
      WHERE d.user_id = ? {$whereStatus}",
     $params
 )['total'] ?? 0;
-
+ 
 $totalPages = (int)ceil($total / $perPage);
-
+ 
 // Obtinem documentele
 $paramsWithLimit = array_merge($params, [$perPage, $offset]);
 $documents = $db->fetchAll(
@@ -61,9 +61,9 @@ $documents = $db->fetchAll(
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
 </head>
 <body>
-
+ 
 <div class="page-wrapper">
-
+ 
     <!-- Header -->
     <div class="page-header">
         <h1>📄 Documentele mele</h1>
@@ -72,10 +72,10 @@ $documents = $db->fetchAll(
             + Document nou
         </a>
     </div>
-
+ 
     <!-- Mesaj status -->
     <div id="documents-message" class="alert" style="display:none;"></div>
-
+ 
     <!-- Filtre -->
     <div class="filters-bar">
         <form method="GET" action="">
@@ -104,7 +104,7 @@ $documents = $db->fetchAll(
             <?php echo $total; ?> document<?php echo $total !== 1 ? 'e' : ''; ?>
         </span>
     </div>
-
+ 
     <!-- Tabel documente -->
     <?php if (empty($documents)): ?>
         <div class="empty-state">
@@ -172,7 +172,7 @@ $documents = $db->fetchAll(
                 </tbody>
             </table>
         </div>
-
+ 
         <!-- Paginare -->
         <?php if ($totalPages > 1): ?>
             <div class="pagination">
@@ -181,7 +181,7 @@ $documents = $db->fetchAll(
                         &laquo;
                     </a>
                 <?php endif; ?>
-
+ 
                 <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
                     <?php if ($i === $page): ?>
                         <span class="active"><?php echo $i; ?></span>
@@ -191,7 +191,7 @@ $documents = $db->fetchAll(
                         </a>
                     <?php endif; ?>
                 <?php endfor; ?>
-
+ 
                 <?php if ($page < $totalPages): ?>
                     <a href="?page=<?php echo $page + 1; ?>&status=<?php echo urlencode($filterStatus); ?>">
                         &raquo;
@@ -199,11 +199,11 @@ $documents = $db->fetchAll(
                 <?php endif; ?>
             </div>
         <?php endif; ?>
-
+ 
     <?php endif; ?>
-
+ 
 </div><!-- /.page-wrapper -->
-
+ 
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
 </script>
@@ -214,22 +214,28 @@ document.querySelectorAll('.btn-delete').forEach(function(btn) {
     btn.addEventListener('click', function() {
         const id = this.dataset.id;
         if (!confirm('Stergi acest document? Actiunea este ireversibila.')) return;
-
-        ajaxPost('/api/documents.php', { action: 'delete', id: id }, function(data) {
-            if (data && data.success) {
+ 
+        // Folosim FormData ca handleDelete() citeste din $_POST
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('id', id);
+ 
+        ajaxPost(BASE_URL + '/api/documents.php', formData, function(data) {
+            // app.js extrage response.data in callback - daca data exista = succes
+            if (data) {
                 // Stergem randul din tabel
                 btn.closest('tr').remove();
             } else {
-                alert(data.message || 'Eroare la stergere.');
+                alert('Eroare la stergere.');
             }
         });
     });
 });
 </script>
-
+ 
 </body>
 </html>
-
+ 
 <?php
 function getStatusClass(string $status): string {
     $classes = [

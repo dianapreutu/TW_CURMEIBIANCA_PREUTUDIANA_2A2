@@ -1,4 +1,3 @@
-
 // preview.js - logica UI pentru pagina de previzualizare
 // gestioneaza:
 //   - incarcarea documentului generat via AJAX
@@ -6,26 +5,26 @@
 //   - exportul documentului (PDF, HTML, CSV, JSON)
 //   - navigarea intre documentele generate
 // In dependenta de: public/js/app.js (functii AJAX globale) si folosit de: views/preview.php
-
-
+ 
+ 
 // --------------------------------------------------
 // Initializare cand pagina e gata
 // --------------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {
-
+ 
     // Citim id-ul documentului din URL
     // Ex: /preview?id=42 -> documentId = 42
     const urlParams   = new URLSearchParams(window.location.search);
     const documentId  = urlParams.get('id');
-
+ 
     if (!documentId) {
         showPreviewMessage('Niciun document specificat.', 'warning');
         return;
     }
-
+ 
     // Incarcam documentul
     loadDocument(documentId);
-
+ 
     // ascultam butoanele de export
     const btnExportPdf  = document.getElementById('btn-export-pdf');
     const btnExportHtml = document.getElementById('btn-export-html');
@@ -33,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnExportJson = document.getElementById('btn-export-json');
     const btnDelete     = document.getElementById('btn-delete-document');
     const btnBack       = document.getElementById('btn-back');
-
+ 
     if (btnExportPdf)  btnExportPdf.addEventListener('click',  () => handleExport(documentId, 'pdf'));
     if (btnExportHtml) btnExportHtml.addEventListener('click', () => handleExport(documentId, 'html'));
     if (btnExportCsv)  btnExportCsv.addEventListener('click',  () => handleExport(documentId, 'csv'));
@@ -41,28 +40,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnDelete)     btnDelete.addEventListener('click',     () => handleDelete(documentId));
     if (btnBack)       btnBack.addEventListener('click',       () => window.history.back());
 });
-
-
+ 
+ 
 // --------------------------------------------------
 // Incarca datele documentului din api/documents.php si randeaza continutul in pagina
 // --------------------------------------------------
 function loadDocument(documentId) {
     showPreviewLoading(true);
-
-    ajaxGet(`/api/documents.php?action=get&id=${documentId}`, function (data) {
+ 
+    // Folosim BASE_URL pentru calea corecta catre API
+    ajaxGet(BASE_URL + `/api/documents.php?action=get&id=${documentId}`, function (data) {
         showPreviewLoading(false);
-
-        if (!data || !data.success) {
-            showPreviewMessage(
-                data.message || 'Documentul nu a putut fi incarcat.',
-                'danger'
-            );
+ 
+        // app.js extrage response.data - daca data exista = succes
+        if (!data) {
+            showPreviewMessage('Documentul nu a putut fi incarcat.', 'danger');
             return;
         }
-
+ 
         // Populam metadatele documentului in UI
         renderDocumentMeta(data);
-
+ 
         if (data.html_content) {
             renderDocumentPreview(data.html_content);
         } else {
@@ -70,8 +68,8 @@ function loadDocument(documentId) {
         }
     });
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // Randeaza metadatele documentului (titlu, data, status, numar randuri etc.)
 // --------------------------------------------------
@@ -79,11 +77,11 @@ function renderDocumentMeta(doc) {
     // Titlul documentului
     const titleEl = document.getElementById('document-title');
     if (titleEl) titleEl.textContent = escapeHtml(doc.title || 'Document fara titlu');
-
+ 
     // Data crearii
     const dateEl = document.getElementById('document-date');
     if (dateEl) dateEl.textContent = doc.created_at || '-';
-
+ 
     // Statusul documentului
     const statusEl = document.getElementById('document-status');
     if (statusEl) {
@@ -96,20 +94,20 @@ function renderDocumentMeta(doc) {
         };
         statusEl.className = `admin-badge ${statusClasses[doc.status] || 'info'}`;
     }
-
+ 
     // Numarul de randuri generate
     const rowsEl = document.getElementById('document-rows');
     if (rowsEl) rowsEl.textContent = doc.rows_count || '-';
-
+ 
     // Numele sablonului folosit
     const templateEl = document.getElementById('document-template');
     if (templateEl) templateEl.textContent = doc.template_label || doc.schema_name || 'Schema personalizata';
-
+ 
     // Actualizam titlul paginii in browser
     document.title = `Previzualizare: ${doc.title || 'Document'} — DoGen`;
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // afiseaza continutul HTML al documentului
 // folosim iframe pentru izolare stiluri
@@ -117,20 +115,20 @@ function renderDocumentMeta(doc) {
 function renderDocumentPreview(htmlContent) {
     const iframe = document.getElementById('document-iframe');
     if (!iframe) return;
-
+ 
     // scriem continutul HTML in iframe
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     iframeDoc.open();
     iframeDoc.write(htmlContent);
     iframeDoc.close();
-
+ 
     // ajustam inaltimea iframe-ului la continut dupa ce se incarca
     iframe.onload = function () {
         adjustIframeHeight(iframe);
     };
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // ajusteaza inaltimea iframe-ului la continutul sau
 // pentru a evita scroll-ul dublu in pagina
@@ -152,21 +150,24 @@ function adjustIframeHeight(iframe) {
         iframe.style.height = '600px';
     }
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // Export document in formatul dorit
 // Apeleaza api/export.php si declaseaza descarcarea
 // --------------------------------------------------
 function handleExport(documentId, format) {
     showPreviewMessage(`Se pregateste exportul ${format.toUpperCase()}...`, 'info');
-
-    ajaxPost('/api/export.php', {
-        action:      'export_document',
-        document_id: documentId,
-        format:      format
-    }, function (data) {
-        if (data && data.success && data.download_url) {
+ 
+    // Folosim FormData ca api/export.php citeste din $_POST
+    const formData = new FormData();
+    formData.append('action', 'export_document');
+    formData.append('document_id', documentId);
+    formData.append('format', format);
+ 
+    ajaxPost(BASE_URL + '/api/export.php', formData, function (data) {
+        // app.js extrage response.data - verificam download_url
+        if (data && data.download_url) {
             // Declansam descarcarea fisierului
             triggerDownload(data.download_url, data.filename || `document.${format}`);
             showPreviewMessage(
@@ -181,14 +182,14 @@ function handleExport(documentId, format) {
             }
         } else {
             showPreviewMessage(
-                data.message || `Eroare la exportul ${format.toUpperCase()}.`,
+                `Eroare la exportul ${format.toUpperCase()}.`,
                 'danger'
             );
         }
     });
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // sterge documentul curent
 // cere confirmare inainte de stergere
@@ -198,31 +199,34 @@ function handleDelete(documentId) {
     if (!confirm('Esti sigur ca vrei sa stergi acest document? Actiunea este ireversibila.')) {
         return;
     }
-
-    ajaxPost('/api/documents.php', {
-        action: 'delete',
-        id:     documentId
-    }, function (data) {
-        if (data && data.success) {
+ 
+    // Folosim FormData ca handleDelete() citeste din $_POST
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('id', documentId);
+ 
+    ajaxPost(BASE_URL + '/api/documents.php', formData, function (data) {
+        // app.js extrage response.data - daca data exista = succes
+        if (data) {
             showPreviewMessage('Documentul a fost sters. Vei fi redirectionat...', 'success');
             // Redirectam catre lista de documente dupa 2 secunde
             setTimeout(() => {
-                window.location.href = '/documents';
+                window.location.href = BASE_URL + '/index.php?page=documents';
             }, 2000);
         } else {
             showPreviewMessage(
-                data.message || 'Eroare la stergerea documentului.',
+                'Eroare la stergerea documentului.',
                 'danger'
             );
         }
     });
 }
-
-
+ 
+ 
 // --------------------------------------------------
 // Utilitare UI
 // --------------------------------------------------
-
+ 
 // Afiseaza / ascunde indicatorul de incarcare
 function showPreviewLoading(show) {
     const loader    = document.getElementById('preview-loader');
@@ -230,7 +234,7 @@ function showPreviewLoading(show) {
     if (loader)    loader.style.display    = show ? 'flex' : 'none';
     if (container) container.style.display = show ? 'none' : 'block';
 }
-
+ 
 // Afiseaza un mesaj de status in pagina
 function showPreviewMessage(text, type) {
     const msgBox = document.getElementById('preview-message');
@@ -238,13 +242,13 @@ function showPreviewMessage(text, type) {
     msgBox.className   = `admin-alert ${type}`;
     msgBox.textContent = text;
     msgBox.style.display = 'flex';
-
+ 
     // Ascundem mesajele de succes dupa 4 secunde
     if (type === 'success') {
         setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
     }
 }
-
+ 
 // Declaseaza descarcarea unui fisier din browser
 function triggerDownload(url, filename) {
     const link = document.createElement('a');
@@ -254,7 +258,7 @@ function triggerDownload(url, filename) {
     link.click();
     document.body.removeChild(link);
 }
-
+ 
 // Escapeaza HTML pentru a preveni XSS
 function escapeHtml(str) {
     const div = document.createElement('div');
