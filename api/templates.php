@@ -61,6 +61,10 @@ function handleGet()
 
 function handleCreate()
 {
+    if (empty($_POST)) {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $_POST = $input ?? [];
+    }
     global $authService, $templateService;
     $authService->requireAuthentication();
 
