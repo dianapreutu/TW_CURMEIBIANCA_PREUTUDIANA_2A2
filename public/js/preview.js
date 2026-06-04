@@ -115,6 +115,8 @@ function renderDocumentMeta(doc) {
 function renderDocumentPreview(htmlContent) {
     const iframe = document.getElementById('document-iframe');
     if (!iframe) return;
+
+    iframe.style.display = 'block';
  
     // scriem continutul HTML in iframe
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;

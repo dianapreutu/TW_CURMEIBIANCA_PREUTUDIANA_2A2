@@ -355,19 +355,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Marcam linkul activ din navigare
     // Comparam URL-ul curent cu href-ul fiecarui link
-    const currentPage = window.location.pathname.split('/').pop();
-    const navLinks = document.querySelectorAll('.nav-links a');
+    
+const currentParams = new URLSearchParams(window.location.search);
+const currentFile = window.location.pathname.split('/').pop().replace('.php', '');
+const currentPage = currentParams.get('page') || (currentFile === 'index' ? 'home' : currentFile) || 'home';
+const navLinks = document.querySelectorAll('.nav-links a');
 
-    navLinks.forEach(function (link) {
-        const linkPage = link.getAttribute('href').split('/').pop();
-        // Daca URL-ul se potriveste, adaugam clasa 'active'
-        if (linkPage === currentPage) {
-            link.classList.add('active');
-        } else {
-            link.classList.remove('active');
-        }
-    });
-
+navLinks.forEach(function (link) {
+    const url = new URL(link.getAttribute('href'), window.location.href);
+    const linkFile = url.pathname.split('/').pop().replace('.php', '');
+    const linkPage = url.searchParams.get('page') || linkFile || 'home';
+    if (linkPage === currentPage) {
+        link.classList.add('active');
+    } else {
+        link.classList.remove('active');
+    }
+});
     // Inchidem mesajele de eroare/succes la click
     const messages = document.querySelectorAll('.success-message, .error-message');
     messages.forEach(function (msg) {

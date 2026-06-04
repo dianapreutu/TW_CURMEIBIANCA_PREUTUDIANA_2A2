@@ -225,8 +225,12 @@ function exportAsCsv(array $document, int $userId, $db, $csvHandler): void
     $fieldKeys = array_column($fields, 'field');
 
     // Citim datele din HTML (extragem valorile)
-    $rowData = extractDataFromHtml(file_get_contents($htmlPath), $fieldKeys);
-
+    
+     $rawRowData = extractDataFromHtml(file_get_contents($htmlPath), $fieldKeys);
+     $rowData = [];
+     foreach ($fields as $field) {
+            $rowData[$field['label']] = $rawRowData[$field['field']] ?? '';
+        }
     // Exportam ca CSV
     $csvString = $csvHandler->exportToString($headers, [$rowData]);
     file_put_contents($csvPath, $csvString);

@@ -15,7 +15,28 @@ define('APP_NAME', 'DoGen');
 define('APP_VERSION', '1.0.0');
 
 // URL-ul de baza al aplicatiei (se modifica daca se schimba serverul)
-define('BASE_URL', 'http://localhost/docgen');
+if (!defined('BASE_URL')) {
+    $envBaseUrl = getenv('APP_BASE_URL');
+    if ($envBaseUrl) {
+        define('BASE_URL', rtrim($envBaseUrl, '/'));
+    } else {
+        $isHttps = (
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+            (($_SERVER['SERVER_PORT'] ?? '') === '443')
+        );
+        $scheme = $isHttps ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+        $scriptDir = rtrim($scriptDir, '/');
+        foreach (['/views', '/api', '/admin'] as $subdir) {
+            if (substr($scriptDir, -strlen($subdir)) === $subdir) {
+                $scriptDir = substr($scriptDir, 0, -strlen($subdir));
+                break;
+            }
+        }
+        define('BASE_URL', rtrim($scheme . '://' . $host . $scriptDir, '/'));
+    }
+}
 
 // -- Cai catre directoare importante --
 
