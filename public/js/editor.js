@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Configuram butoanele din toolbar (inserare variabile)
-    setupToolbar(); 
+    setupToolbar();
 });
 
 // ==================================================
@@ -167,8 +167,8 @@ function updatePreview() {
     // Inlocuim functiile dinamice
     const now = new Date();
     preview = preview.replace(/\{\{DATE\}\}/g, now.toLocaleDateString('ro-RO'));
-    preview = preview.replace(/\{\{TIME\}\}/g, now.toLocaleTimeString('ro-RO', {hour: '2-digit', minute: '2-digit'}));
-    preview = preview.replace(/\{\{DATETIME\}\}/g, now.toLocaleDateString('ro-RO') + ' ' + now.toLocaleTimeString('ro-RO', {hour: '2-digit', minute: '2-digit'}));
+    preview = preview.replace(/\{\{TIME\}\}/g, now.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }));
+    preview = preview.replace(/\{\{DATETIME\}\}/g, now.toLocaleDateString('ro-RO') + ' ' + now.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }));
     preview = preview.replace(/\{\{YEAR\}\}/g, now.getFullYear());
 
     // Procesam blocurile conditionale simple (IF/ENDIF)
@@ -231,7 +231,7 @@ function buildTemplateCard(template) {
     // Determinam badge-ul tipului
     const typeBadge = '<span class="type-badge ' + sanitizeHTML(template.name) + '">' + sanitizeHTML(template.label) + '</span>';
 
-    return '<div class="template-card" data-id="' + template.id + '">' + 
+    return '<div class="template-card" data-id="' + template.id + '">' +
         '<div class="template-card-name">' + sanitizeHTML(template.name) + '</div>' +
         '<div class="template-card-type">' + typeBadge + '</div>' +
         '<div class="template-card-actions">' +
@@ -261,11 +261,11 @@ function attachTemplateEvents() {
         btn.addEventListener('click', function () {
             const id = parseInt(btn.getAttribute('data-id'));
             // Cerem confirmare inainte de stergere
-            confirmAction('Esti sigur ca vrei sa stergi acest sablon?', function () {
+                showConfirmModal('Ești sigur că vrei să ștergi acest șablon? Acțiunea este ireversibilă.', function () {
                 deleteTemplate(id);
             });
-        });
     });
+});
 }
 
 /**
@@ -290,12 +290,23 @@ function editTemplate(id) {
         if (typeSelect)
             typeSelect.value = template.label;
         if (textarea) {
-            // Continutul sablonului este in fields_json
-            textarea.value = template.fields_json;
-            // Salvam continutul original
-            originalContent = template.fields_json;
+            // Daca fields_json e HTML, il folosim direct
+            // Daca e JSON (sabloane predefinite), generam HTML din campuri
+            let templateContent = template.fields_json || '';
+            try {
+                const parsed = JSON.parse(templateContent);
+                if (Array.isArray(parsed)) {
+                    // E un array de campuri — generam HTML simplu
+                    templateContent = parsed.map(function (f) {
+                        return '<p><strong>' + (f.label || f.field) + ':</strong> {{' + f.field + '}}</p>';
+                    }).join('\n');
+                }
+            } catch (e) {
+                // Nu e JSON valid — e deja HTML, il folosim direct
+            }
+            textarea.value = templateContent;
+            originalContent = templateContent;
         }
-
         // Actualizam previzualizarea
         updatePreview();
 
@@ -303,10 +314,10 @@ function editTemplate(id) {
         showInfo('Sablonul "' + template.name + '" a fost incarcat in editor.');
 
         // Scrollam la editor
-        document.getElementById('editor-content').scrollIntoView({behavior: 'smooth'});
+        document.getElementById('editor-content').scrollIntoView({ behavior: 'smooth' });
 
     }, function (error) {
-        showError('Eroare la incarcarea sablonului: '+ error);
+        showError('Eroare la incarcarea sablonului: ' + error);
     });
 }
 
@@ -364,7 +375,7 @@ function saveTemplate() {
 
     // Pregatim datele pentru trimitere
     const data = {
-        name: name, 
+        name: name,
         type: type,
         content: content,
         format: 'html'
@@ -404,7 +415,7 @@ function saveTemplate() {
 function deleteTemplate(id) {
 
     // Apelam API-ul pentru stergere
-    ajaxPost('../api/templates.php?action=delete', {id: id}, function () {
+    ajaxPost('../api/templates.php?action=delete', { id: id }, function () {
 
         showSuccess('Sablonul a fost sters cu succes!');
 
@@ -425,6 +436,23 @@ function deleteTemplate(id) {
 // GENERARE DOCUMENT
 // ==================================================
 
+function showConfirmModal(message, onConfirm) {
+    const modal = document.getElementById('confirm-modal');
+    const msgEl = document.getElementById('confirm-message');
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    
+    msgEl.textContent = message;
+    modal.style.display = 'flex';
+    
+    okBtn.onclick = function() {
+        modal.style.display = 'none';
+        onConfirm();
+    };
+    cancelBtn.onclick = function() {
+        modal.style.display = 'none';
+    };
+}
 /**
  * generateDocument() - genereaza un document din sablonul curent
  */
