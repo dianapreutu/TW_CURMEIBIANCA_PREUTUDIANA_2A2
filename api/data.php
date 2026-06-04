@@ -3,7 +3,7 @@
 // ==================================================
 // api/data.php - API pentru generarea si importul datelor
 // Acest fisier primeste cereri AJAX si returneaza JSON
-// Operatii: generare aleatorie, import CSV, CRUD schema
+// Operatii: generare aleatorie, import CSV
 // ==================================================
 
 require_once '../config.php';
@@ -18,10 +18,6 @@ try {
     switch ($action) {
         case 'generate': handleGenerate(); break;
         case 'import_csv': handleImportCsv(); break;
-        case 'get_types': handleGetTypes(); break;
-        case 'save_schema': handleSaveSchema(); break;
-        case 'list_schemas': handleListSchemas(); break;
-        case 'delete_schema': handleDeleteSchema(); break;
         default: jsonError('Actiune invalida!'); break;
     }
 } catch (Exception $e) {
@@ -93,69 +89,6 @@ function handleImportCsv()
     } catch (Exception $e) {
         jsonError('Eroare la importul CSV: ' . $e->getMessage());
     }
-}
-
-function handleGetTypes()
-{
-    $types = FieldTypes::getAll();
-    $result = [];
-
-    foreach ($types as $key => $label) {
-        $result[] = [
-            'type' => $key,
-            'label' => $label,
-            'description' => FieldTypes::describe($key)
-        ];
-    }
-
-    jsonSuccess($result);
-}
-
-function handleSaveSchema()
-{
-    global $dataService, $authService;
-
-    $authService->requireAuthentication();
-    $data = getRequestData();
-    $name = trim($data['name'] ?? '');
-    $fields = $data['fields'] ?? json_decode($data['fields_json'] ?? '[]', true);
-
-    if (is_string($fields)) {
-        $fields = json_decode($fields, true);
-    }
-
-    $schemaId = $dataService->saveSchema($name, $fields, $authService->getEffectiveUserId());
-    jsonSuccess(['id' => $schemaId, 'message' => 'Schema a fost salvata cu succes!']);
-}
-
-function handleListSchemas()
-{
-    global $dataService, $authService;
-
-    $authService->requireAuthentication();
-    $userId = $authService->getEffectiveUserId();
-    $schemas = $dataService->listSchemas($userId);
-    jsonSuccess($schemas);
-}
-
-function handleDeleteSchema()
-{
-    global $dataService, $authService;
-
-    $authService->requireAuthentication();
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        jsonError('Metoda HTTP invalida!');
-        return;
-    }
-
-    $id = intval($_POST['id'] ?? 0);
-    if ($id <= 0) {
-        jsonError('ID invalid!');
-        return;
-    }
-
-    $dataService->deleteSchema($id, $authService->getEffectiveUserId());
-    jsonSuccess(['message' => 'Schema a fost stearsa cu succes!']);
 }
 
 function jsonSuccess($data)
