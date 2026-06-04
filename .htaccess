@@ -41,10 +41,8 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 
 # Blochez accesul la fisierele JSON din templates/
 
-<FilesMatch "\.json$">
-    Order Allow,Deny
-    Deny from all
-</FilesMatch>
+# Blochez accesul direct la fisierele JSON din templates/
+RewriteRule ^templates/.*\.json$ - [F,L]
 
 # Securitate suplimentara - headere HTTP
 

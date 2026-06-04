@@ -328,8 +328,8 @@ function renderPreviewTable(fields, rows) {
 
     // Injectam tabelul in container
     container.innerHTML = `
-        <div class="admin-table-wrapper">
-            <table class="admin-table" id="preview-table">
+    <div class="table-wrapper">
+        <table class="data-table" id="preview-table">
                 <thead>
                     <tr>${headers}</tr>
                 </thead>
@@ -342,7 +342,16 @@ function renderPreviewTable(fields, rows) {
             ${rows.length} randuri generate
         </p>
     `;
+     const exportBar = document.getElementById('export-bar');
+const resultsCount = document.getElementById('results-count');
 
+if (exportBar) {
+    exportBar.style.display = 'flex';
+}
+
+if (resultsCount) {
+    resultsCount.textContent = rows.length + ' randuri generate';
+}
     // Facem scroll la previzualizare
     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -494,21 +503,23 @@ function handleExport(format) {
         fields: GeneratorState.toJSON(),
         rows:   rows
     }, function (data) {
-        if (data && data.download_url) {
-            // Declansam descarcarea fisierului
-            const link = document.createElement('a');
-            link.href = data.download_url;
-            link.download = data.filename || `export.${format}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showGeneratorMessage(`Export ${format.toUpperCase()} generat!`, 'success');
-        } else {
-            showGeneratorMessage(
-                data && data.message ? data.message : `Eroare la exportul ${format}.`,
-                'danger'
-            );
-        }
+        const result = data && data.data ? data.data : data;
+
+if (result && result.download_url) {
+    const link = document.createElement('a');
+    link.href = result.download_url;
+    link.download = result.filename || `export.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showGeneratorMessage(`Export ${format.toUpperCase()} generat!`, 'success');
+} else {
+    showGeneratorMessage(
+        result && result.message ? result.message : `Eroare la exportul ${format}.`,
+        'danger'
+    );
+}
     });
 }
 

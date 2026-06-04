@@ -12,7 +12,8 @@ header('Content-Type: application/json; charset=utf-8');
 $authService = new AuthService();
 $dataService = new DataService();
 
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$input = getRequestData();
+$action = $_GET['action'] ?? $_POST['action'] ?? ($input['action'] ?? '');
 
 try {
     switch ($action) {
