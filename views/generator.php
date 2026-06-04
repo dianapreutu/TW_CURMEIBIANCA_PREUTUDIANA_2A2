@@ -40,10 +40,6 @@ require_once __DIR__ . '/../config.php';
 
                 <div class="page-header">
                     <h1>Generator de Date</h1>
-                    <p class="page-subtitle">
-                        Defineste campurile dorite si genereaza date romanesti realiste.
-                        Inspirat din Mockaroo, adaptat pentru Romania
-                    </p>
                 </div>
 
                 <!-- Sectiunea cu doua coloeane --> 
