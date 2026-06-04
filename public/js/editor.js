@@ -431,28 +431,6 @@ function deleteTemplate(id) {
         showError('Eroare la stergere: ' + error);
     });
 }
-
-// ==================================================
-// GENERARE DOCUMENT
-// ==================================================
-
-function showConfirmModal(message, onConfirm) {
-    const modal = document.getElementById('confirm-modal');
-    const msgEl = document.getElementById('confirm-message');
-    const okBtn = document.getElementById('confirm-ok');
-    const cancelBtn = document.getElementById('confirm-cancel');
-    
-    msgEl.textContent = message;
-    modal.style.display = 'flex';
-    
-    okBtn.onclick = function() {
-        modal.style.display = 'none';
-        onConfirm();
-    };
-    cancelBtn.onclick = function() {
-        modal.style.display = 'none';
-    };
-}
 /**
  * generateDocument() - genereaza un document din sablonul curent
  */

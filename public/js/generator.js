@@ -57,6 +57,24 @@ const GeneratorState = {
 // --------------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Logica tab-uri
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabImport = document.getElementById('tab-import');
+
+tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (btn.getAttribute('data-tab') === 'import') {
+            if (tabImport) tabImport.style.display = 'block';
+        } else {
+            if (tabImport) tabImport.style.display = 'none';
+        }
+    });
+});
+
+// Ascundem Import CSV la incarcare
+if (tabImport) tabImport.style.display = 'none';
     // Incarcam tipurile de campuri disponibile din API
     // si populam dropdown-ul de selectie tip
     loadFieldTypes();
@@ -78,6 +96,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnImportCsv)  btnImportCsv.addEventListener('click', handleImportCsv);
     if (btnExportCsv)  btnExportCsv.addEventListener('click', () => handleExport('csv'));
     if (btnExportJson) btnExportJson.addEventListener('click', () => handleExport('json'));
+
+    const csvFileInput = document.getElementById('csv-file-input');
+if (csvFileInput) {
+    csvFileInput.addEventListener('change', function () {
+        const fileName = document.getElementById('csv-file-name');
+        if (fileName) {
+            fileName.textContent = csvFileInput.files.length 
+                ? csvFileInput.files[0].name 
+                : '';
+        }
+    });
+}
 });
 
 
@@ -146,18 +176,88 @@ function renderSavedSchemas(schemas) {
 
     const listItems = schemas.map(schema => {
         return `
-            <div class="saved-schema-item">
-                <strong>${escapeHtml(schema.name)}</strong>
-                <div class="saved-schema-meta">
-                    ${escapeHtml(schema.rows_count.toString())} randuri • actualizata: ${escapeHtml(schema.updated_at)}
+            <div class="saved-schema-item" style="display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid #e9ecef;border-radius:6px;margin-bottom:8px;">
+                <div>
+                    <strong>${escapeHtml(schema.name)}</strong>
+                    <div style="font-size:0.85rem;color:#666;margin-top:2px;">
+                        ${escapeHtml(schema.rows_count.toString())} randuri • ${escapeHtml(schema.updated_at)}
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-small btn-generator-secondary btn-load-schema" 
+                            data-id="${schema.id}" 
+                            data-fields='${(schema.fields_json || '[]').replace(/'/g, '&apos;')}'>
+                        Incarca
+                    </button>
+                    <button class="btn-small btn-generator-secondary btn-delete-schema" 
+                            data-id="${schema.id}"
+                            style="color:#dc3545;border-color:#dc3545;">
+                        Sterge
+                    </button>
                 </div>
             </div>
         `;
     }).join('');
 
     container.innerHTML = listItems;
+
+    // Event listeners pentru butoane
+    container.querySelectorAll('.btn-load-schema').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const raw = (btn.getAttribute('data-fields') || '[]').replace(/&apos;/g, "'");
+            const fields = JSON.parse(raw);
+            loadSchemaIntoGenerator(fields);
+        });
+    });
+
+    container.querySelectorAll('.btn-delete-schema').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const id = parseInt(btn.getAttribute('data-id'));
+            showConfirmModal('Ești sigur că vrei să ștergi această schemă?', function() {
+                deleteSchema(id);
+            });
+        });
+    });
 }
 
+function loadSchemaIntoGenerator(fields) {
+    // Resetam starea curenta
+    GeneratorState.reset();
+    const tbody = document.querySelector('#fields-table tbody');
+    if (tbody) tbody.innerHTML = '';
+
+    // Adaugam campurile din schema
+    fields.forEach(function(f) {
+        const field = GeneratorState.addField(f.type, f.label);
+        renderFieldRow(field);
+    });
+
+    showGeneratorMessage('Schema incarcata cu succes! Apasa Genereaza date.', 'success');
+}
+
+function deleteSchema(id) {
+    // DELETE request catre api/schemas.php
+    const xhr = new XMLHttpRequest();
+    xhr.open('DELETE', 'api/schemas.php?id=' + id, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                showGeneratorMessage('Schema stearsa cu succes!', 'success');
+                loadSavedSchemas();
+            } else {
+                showGeneratorMessage(response.message || 'Eroare la stergere.', 'danger');
+            }
+        } catch(e) {
+            showGeneratorMessage('Eroare la stergere.', 'danger');
+        }
+    };
+    xhr.onerror = function() {
+        showGeneratorMessage('Eroare de retea la stergere.', 'danger');
+    };
+    xhr.send();
+}
 
 // --------------------------------------------------
 // Adauga un camp nou in lista
