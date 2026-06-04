@@ -11,17 +11,18 @@ header('Content-Type: application/json; charset=utf-8');
 
 $authService = new AuthService();
 $documentService = new DocumentService();
+$dataService = new DataService();
 
-actionHandler($authService, $documentService);
+actionHandler($authService, $documentService, $dataService);
 
-function actionHandler(AuthService $authService, DocumentService $documentService)
+function actionHandler(AuthService $authService, DocumentService $documentService, DataService $dataService)
 {
     $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
     try {
         switch ($action) {
             case 'list': handleList($authService, $documentService); break;
-            case 'generate': handleGenerate($authService, $documentService); break;
+            case 'generate': handleGenerate($authService, $documentService, $dataService); break;
             case 'get': handleGet($authService, $documentService); break;
             case 'delete': handleDelete($authService, $documentService); break;
             default: jsonError('Actiune invalida!'); break;
@@ -68,7 +69,7 @@ function handleGet(AuthService $authService, DocumentService $documentService)
     jsonSuccess($document);
 }
 
-function handleGenerate(AuthService $authService, DocumentService $documentService)
+function handleGenerate(AuthService $authService, DocumentService $documentService, DataService $dataService)
 {
     $authService->requireAuthentication();
     $userId = $authService->getEffectiveUserId();
@@ -98,26 +99,23 @@ function handleGenerate(AuthService $authService, DocumentService $documentServi
         return;
     }
 
-    if ($dataSource === 'csv') {
-        $data = handleCSVData();
-        if ($data === null) {
-            return;
-        }
-    } else {
-        $fieldsJson = $_POST['fields'] ?? '[]';
-        $fields = json_decode($fieldsJson, true);
-        if (empty($fields)) {
-            $fields = [
-                ['field' => 'nume', 'type' => 'full_name', 'label' => 'Nume'],
-                ['field' => 'email', 'type' => 'email', 'label' => 'Email'],
-                ['field' => 'data', 'type' => 'date', 'label' => 'Data']
-            ];
-        }
-
-        $data = (new DataGenerator())->generate($fields, 1)[0];
-    }
-
     try {
+        if ($dataSource === 'csv') {
+            $data = $dataService->parseCsvRow($_FILES['csv_file'] ?? []);
+        } else {
+            $fieldsJson = $_POST['fields'] ?? '[]';
+            $fields = json_decode($fieldsJson, true);
+            if (empty($fields)) {
+                $fields = [
+                    ['field' => 'nume', 'type' => 'full_name', 'label' => 'Nume'],
+                    ['field' => 'email', 'type' => 'email', 'label' => 'Email'],
+                    ['field' => 'data', 'type' => 'date', 'label' => 'Data']
+                ];
+            }
+
+            $data = $dataService->generateRecord($fields);
+        }
+
         $result = $documentService->generateDocument((int)$templateId, $data, $name, $userId);
         jsonSuccess([
             'id' => $result['id'],
@@ -155,35 +153,6 @@ function handleDelete(AuthService $authService, DocumentService $documentService
         jsonSuccess(['message' => 'Documentul a fost sters cu succes!']);
     } catch (Exception $e) {
         jsonError($e->getMessage());
-    }
-}
-
-function handleCSVData()
-{
-    if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Nu a fost incarcat niciun fisier CSV valid!');
-        return null;
-    }
-
-    $file = $_FILES['csv_file'];
-    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if ($extension !== 'csv') {
-        jsonError('Fisierul trebuie sa fie de tip CSV!');
-        return null;
-    }
-
-    $csvHandler = new CsvHandler(Database::getInstance());
-    try {
-        $result = $csvHandler->handleUpload($file, 1);
-        if (empty($result['rows'])) {
-            jsonError('CSV-ul nu contine randuri valide.');
-            return null;
-        }
-
-        return $result['rows'][0];
-    } catch (Exception $e) {
-        jsonError('Eroare la importul CSV: ' . $e->getMessage());
-        return null;
     }
 }
 
