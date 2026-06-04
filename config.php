@@ -125,11 +125,12 @@ foreach ($requiredPaths as $path) {
     }
 }
 
-// -- Autoload simplificat pentru clasele din /lib si /lib/services --
+// -- Autoload simplificat pentru clasele din /lib, /lib/core si /lib/services --
 // Incarca automat fisierul clasei cand aceasta este folosita prima data
 spl_autoload_register(function ($className) {
     $paths = [
         ROOT_PATH . '/lib/services/' . $className . '.php',
+        ROOT_PATH . '/lib/core/' . $className . '.php',
         ROOT_PATH . '/lib/' . $className . '.php'
     ];
 
