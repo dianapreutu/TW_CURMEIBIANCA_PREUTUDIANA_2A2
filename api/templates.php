@@ -92,15 +92,15 @@ function handleUpdate()
         return;
     }
 
-    $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
-    $id = intval($input['id'] ?? 0); 
+  $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+  $id = intval($input['id'] ?? 0);
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;
     }
 
-    $name = trim(htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $content = trim($_POST['content'] ?? '');
+    $name = trim(htmlspecialchars($input['name'] ?? '', ENT_QUOTES, 'UTF-8'));
+    $content = trim($input['content'] ?? '');
 
     $templateService->updateTemplate($id, $name, $content);
     jsonSuccess(['message' => 'Sablonul a fost actualizat cu succes!']);
