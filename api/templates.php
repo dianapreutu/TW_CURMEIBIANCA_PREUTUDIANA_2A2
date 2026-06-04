@@ -92,7 +92,8 @@ function handleUpdate()
         return;
     }
 
-    $id = intval($_POST['id'] ?? 0);
+    $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+    $id = intval($input['id'] ?? 0); 
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;
@@ -115,7 +116,8 @@ function handleDelete()
         return;
     }
 
-    $id = intval($_POST['id'] ?? 0);
+    $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+    $id = intval($input['id'] ?? 0);   
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;
