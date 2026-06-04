@@ -79,10 +79,11 @@ function handleGenerate(AuthService $authService, DocumentService $documentServi
         return;
     }
 
-    $templateId = intval($_POST['template_id'] ?? 0);
-    $name = trim(htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $dataSource = trim(htmlspecialchars($_POST['data_source'] ?? 'random', ENT_QUOTES, 'UTF-8'));
-    $count = intval($_POST['count'] ?? DEFAULT_ROWS);
+  $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+  $templateId = intval($input['template_id'] ?? 0);
+  $name = trim(htmlspecialchars($input['name'] ?? '', ENT_QUOTES, 'UTF-8'));
+  $dataSource = trim(htmlspecialchars($input['data_source'] ?? 'random', ENT_QUOTES, 'UTF-8'));
+  $count = intval($input['count'] ?? DEFAULT_ROWS);
 
     if ($templateId <= 0) {
         jsonError('ID-ul sablonului este invalid!');
