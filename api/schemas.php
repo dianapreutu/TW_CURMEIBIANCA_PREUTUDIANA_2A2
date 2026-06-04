@@ -118,7 +118,11 @@ function deleteSchema(int $id): void
     global $schemaService, $authService;
 
     $authService->requireAuthentication();
-    $schemaService->deleteSchema($id);
+
+    $schemaService->deleteSchema(
+        $id,
+        $authService->getEffectiveUserId()
+    );
 
     jsonSuccess(['message' => 'Schema stearsa cu succes!']);
 }
