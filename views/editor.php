@@ -129,11 +129,6 @@ Exemplu:
                         <button id="btn-generate" class="btn-editor">
                             Genereaza Document 
                         </button>
-
-                        <!-- Buton previzualizare --> 
-                        <button id="btn-preview" class="btn-editor-secondary">
-                            Previzualizare
-                        </button>
                     </div>
 
                 </div>
@@ -169,6 +164,17 @@ Exemplu:
             </div>
 
             </div>
+            <!-- Modal confirmare stergere -->
+        <div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;">
+           <div style="background:#fff;border-radius:8px;padding:2rem;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.2);">
+              <h3 id="confirm-title" style="font-size:1.1rem;margin-bottom:.8rem;color:#1a1a2e;">Confirmare</h3>
+                 <p id="confirm-message" style="color:#555;margin-bottom:1.5rem;font-size:.95rem;"></p>
+                   <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+                 <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anulează</button>
+            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Șterge</button>
+        </div>
+         </div>
+       </div> 
         </main>
         <!-- sfarsit editor-page --> 
         
