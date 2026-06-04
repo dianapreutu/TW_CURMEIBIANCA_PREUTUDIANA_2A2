@@ -7,12 +7,12 @@
 class DataService
 {
     private $generator;
-    private $csvHandler;
+    private $csvService;
 
-    public function __construct(DataGenerator $generator = null, CsvHandler $csvHandler = null)
+    public function __construct(DataGenerator $generator = null, CsvService $csvService = null)
     {
         $this->generator = $generator ?? new DataGenerator();
-        $this->csvHandler = $csvHandler ?? new CsvHandler(Database::getInstance());
+        $this->csvService = $csvService ?? new CsvService(Database::getInstance());
     }
 
     public function generateRows(array $fields, int $count): array
@@ -31,7 +31,7 @@ class DataService
 
     public function importCsv(array $file, int $userId): array
     {
-        return $this->csvHandler->handleUpload($file, $userId);
+        return $this->csvService->handleUpload($file, $userId);
     }
 
     public function parseCsvRow(array $file): array
@@ -45,7 +45,7 @@ class DataService
             throw new Exception('Fisierul trebuie sa fie de tip CSV!');
         }
 
-        $result = $this->csvHandler->handleUpload($file, 0);
+        $result = $this->csvService->handleUpload($file, 0);
         if (empty($result['rows']) || !is_array($result['rows'])) {
             throw new Exception('CSV-ul nu contine randuri valide.');
         }

@@ -9,20 +9,20 @@ class ExportService
     private $db;
     private $templateEngine;
     private $pdfExporter;
-    private $csvHandler;
+    private $csvService;
     private $dataService;
 
     public function __construct(
         Database $db = null,
         TemplateEngine $templateEngine = null,
         PdfExporter $pdfExporter = null,
-        CsvHandler $csvHandler = null,
+        CsvService $csvService = null,
         DataService $dataService = null
     ) {
         $this->db = $db ?? Database::getInstance();
         $this->templateEngine = $templateEngine ?? new TemplateEngine();
         $this->pdfExporter = $pdfExporter ?? new PdfExporter($this->db, $this->templateEngine);
-        $this->csvHandler = $csvHandler ?? new CsvHandler($this->db);
+        $this->csvService = $csvService ?? new CsvService($this->db);
         $this->dataService = $dataService ?? new DataService();
     }
 
@@ -156,7 +156,7 @@ class ExportService
 
         $csvFilename = 'export_' . $document['id'] . '_' . date('Ymd_His') . '.csv';
         $csvPath = UPLOADS_PATH . '/' . $csvFilename;
-        $csvString = $this->csvHandler->exportToString($headers, [$rowData]);
+        $csvString = $this->csvService->exportToString($headers, [$rowData]);
 
         file_put_contents($csvPath, $csvString);
 
@@ -197,7 +197,7 @@ class ExportService
     {
         $filename = 'data_export_' . date('Ymd_His') . '.csv';
         $path = UPLOADS_PATH . '/' . $filename;
-        $csvString = $this->csvHandler->exportToString($headers, $rows);
+        $csvString = $this->csvService->exportToString($headers, $rows);
         file_put_contents($path, $csvString);
         $this->db->log('export', 'Export date CSV: ' . count($rows) . ' randuri', $userId);
 

@@ -14,4 +14,5 @@ desktop.ini
 # Directoare generate de aplicatie
 generated/html/
 generated/pdf/
+generated/tmp/
 uploads/
