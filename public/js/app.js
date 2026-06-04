@@ -94,7 +94,10 @@ function ajax(url, method, data, onSuccess, onError) {
             } else {
                 // Eroare HTTP (404, 500 etc.)
                 if (typeof onError === 'function') {
-                    onError('Eroare HTTP: ' + xhr.status);
+                    const msg = (response && response.message)
+                        ? response.message
+                        : ('Eroare HTTP: ' + xhr.status);
+                    onError(msg, xhr.status);
                 }
             }
         }

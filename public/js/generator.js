@@ -51,6 +51,9 @@ const GeneratorState = {
     }
 };
 
+// Retine datele generate pentru export
+let lastGeneratedData = { fields: [], rows: [] };
+
 
 // --------------------------------------------------
 // Initializare cand pagina e gata
@@ -186,7 +189,7 @@ function renderSavedSchemas(schemas) {
                 <div style="display:flex;gap:8px;">
                     <button class="btn-small btn-generator-secondary btn-load-schema" 
                             data-id="${schema.id}" 
-                            data-fields='${(schema.fields_json || '[]').replace(/'/g, '&apos;')}'>
+                            data-fields='${(JSON.stringify(schema.fields || [])).replace(/'/g, '&apos;')}'>
                         Incarca
                     </button>
                     <button class="btn-small btn-generator-secondary btn-delete-schema" 
@@ -205,8 +208,13 @@ function renderSavedSchemas(schemas) {
     container.querySelectorAll('.btn-load-schema').forEach(function(btn) {
         btn.addEventListener('click', function() {
             const raw = (btn.getAttribute('data-fields') || '[]').replace(/&apos;/g, "'");
-            const fields = JSON.parse(raw);
-            loadSchemaIntoGenerator(fields);
+            try {
+                const fields = JSON.parse(raw);
+                loadSchemaIntoGenerator(fields);
+            } catch(e) {
+                console.error('JSON.parse failed:', e, raw);
+                showGeneratorMessage('Eroare la incarcarea schemei.', 'danger');
+            }
         });
     });
 
@@ -221,16 +229,21 @@ function renderSavedSchemas(schemas) {
 }
 
 function loadSchemaIntoGenerator(fields) {
-    // Resetam starea curenta
     GeneratorState.reset();
+    lastGeneratedData = { fields: [], rows: [] };  
+    clearPreviewTable();                           
+
     const tbody = document.querySelector('#fields-table tbody');
     if (tbody) tbody.innerHTML = '';
 
-    // Adaugam campurile din schema
     fields.forEach(function(f) {
         const field = GeneratorState.addField(f.type, f.label);
         renderFieldRow(field);
     });
+
+    // Ascundem si bara de export
+    const exportBar = document.getElementById('export-bar');
+    if (exportBar) exportBar.style.display = 'none'; 
 
     showGeneratorMessage('Schema incarcata cu succes! Apasa Genereaza date.', 'success');
 }
@@ -490,18 +503,23 @@ function handleSaveSchema() {
         name:        name,
         fields_json: JSON.stringify(GeneratorState.toJSON()),
         rows_count:  rows
+    // DUPĂ
     }, function (data) {
-        if (data) {
+        if (data && data.success !== false) {
             showGeneratorMessage('Schema salvata cu succes!', 'success');
-            if (nameInput) {
-                nameInput.value = '';
-            }
+            if (nameInput) nameInput.value = '';
             loadSavedSchemas();
         } else {
             showGeneratorMessage(
                 data && data.message ? data.message : 'Eroare la salvarea schemei.',
                 'danger'
             );
+        }
+    }, function (msg, status) {
+        if (status === 401) {
+            showGeneratorMessage('Trebuie sa fii autentificat pentru a salva scheme. Te rugam sa te loghezi.', 'warning');
+        } else {
+            showGeneratorMessage(msg || 'Eroare la salvarea schemei.', 'danger');
         }
     });
 }
@@ -540,8 +558,8 @@ function handleImportCsv() {
                 'success'
             );
             // Afisam previzualizarea daca avem date
-            if (data.preview && data.headers) {
-                renderCsvPreview(data.headers, data.preview);
+            if (data.rows && data.headers) {
+                renderCsvPreview(data.headers, data.rows);
             }
         } else {
             showGeneratorMessage(
@@ -556,6 +574,7 @@ function handleImportCsv() {
 // --------------------------------------------------
 // Randeaza previzualizarea datelor importate din CSV
 // --------------------------------------------------
+// DUPĂ
 function renderCsvPreview(headers, rows) {
     const container = document.getElementById('preview-container');
     if (!container) return;
@@ -579,8 +598,13 @@ function renderCsvPreview(headers, rows) {
             Previzualizare CSV (primele ${rows.length} randuri)
         </p>
     `;
-}
 
+    // Bara de export ramane ascunsa - nu are sens sa exporti ce ai importat
+    const exportBar = document.getElementById('export-bar');
+    if (exportBar) exportBar.style.display = 'none';
+
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // --------------------------------------------------
 // Export date generate (CSV sau JSON)
@@ -592,8 +616,6 @@ function handleExport(format) {
         return;
     }
 
-    // Redirectam catre api/export.php cu parametrii necesari
-    // Datele generate sunt retrimise ca JSON in body
     const rowsInput = document.getElementById('rows-count-input');
     const rows = rowsInput ? parseInt(rowsInput.value) || 10 : 10;
 
@@ -604,25 +626,28 @@ function handleExport(format) {
         rows:   rows
     }, function (data) {
         const result = data && data.data ? data.data : data;
-
-if (result && result.download_url) {
-    const link = document.createElement('a');
-    link.href = result.download_url;
-    link.download = result.filename || `export.${format}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showGeneratorMessage(`Export ${format.toUpperCase()} generat!`, 'success');
-} else {
-    showGeneratorMessage(
-        result && result.message ? result.message : `Eroare la exportul ${format}.`,
-        'danger'
-    );
-}
+        if (result && result.download_url) {
+            const link = document.createElement('a');
+            link.href = result.download_url;
+            link.download = result.filename || `export.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showGeneratorMessage(`Export ${format.toUpperCase()} generat!`, 'success');
+        } else {
+            showGeneratorMessage(
+                result && result.message ? result.message : `Eroare la exportul ${format}.`,
+                'danger'
+            );
+        }
+    }, function (msg, status) {
+        if (status === 401) {
+            showGeneratorMessage('Trebuie sa fii autentificat pentru a exporta. Te rugam sa te loghezi.', 'warning');
+        } else {
+            showGeneratorMessage(msg || `Eroare la exportul ${format}.`, 'danger');
+        }
     });
 }
-
 
 // --------------------------------------------------
 // Utilitare UI
@@ -632,11 +657,21 @@ if (result && result.download_url) {
 function showGeneratorMessage(text, type) {
     const msgBox = document.getElementById('generator-message');
     if (!msgBox) return;
-    msgBox.className = `admin-alert ${type}`;
-    msgBox.textContent = text;
-    msgBox.style.display = 'flex';
 
-    // Ascundem automat mesajele de succes dupa 4 secunde
+    const styles = {
+        success: { bg: '#d4edda', color: '#155724', border: '#c3e6cb' },
+        danger:  { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' },
+        warning: { bg: '#fff3cd', color: '#856404', border: '#ffeeba' },
+        info:    { bg: '#d1ecf1', color: '#0c5460', border: '#bee5eb' }
+    };
+
+    const s = styles[type] || styles.info;
+    msgBox.style.backgroundColor = s.bg;
+    msgBox.style.color = s.color;
+    msgBox.style.border = '1px solid ' + s.border;
+    msgBox.style.display = 'flex';
+    msgBox.textContent = text;
+
     if (type === 'success') {
         setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
     }

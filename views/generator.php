@@ -53,14 +53,16 @@ require_once __DIR__ . '/../config.php';
                             <button class="tab-btn active" data-tab="generator">
                                 Generator aleatoriu
                             </button>
+                            <?php if (!empty($_SESSION['user_id'])): ?>
                             <button class="tab-btn" data-tab="import">
                                 Import CSV
                             </button>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Tab: Generator aleatoriu --> 
                         <!-- Mesaj status --> 
-                        <div id="generator-message" class="admin-alert" style="display:none;"></div>
+                        <div id="generator-message" class="admin-alert" style="display:none; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 500; align-items: center; gap: 8px;"></div>
 
                         <!-- Numarul de randuri de generat --> 
                         <div class="form-group">
@@ -122,6 +124,7 @@ require_once __DIR__ . '/../config.php';
                             <button id="btn-save-schema" class="btn-generator-secondary">Salveaza Schema</button>
                         </div>
 
+                        <?php if (!empty($_SESSION['user_id'])): ?>
                         <!-- Tab: Import CSV --> 
                         <div id="tab-import" class="tab-content">
 
@@ -148,6 +151,7 @@ require_once __DIR__ . '/../config.php';
                             </button>
 
                         </div>
+                        <?php endif; ?>
 
                         <!-- Scheme salvate --> 
                         <div class="saved-schemas">
