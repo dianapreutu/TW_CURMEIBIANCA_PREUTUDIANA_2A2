@@ -846,3 +846,16 @@ body {
 main {
     padding-top: calc(var(--nav-height) + 20px);
 }
+
+.result-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.result-table-wrapper table {
+    min-width: 600px;
+}
+
+.result-table-wrapper td {
+    white-space: nowrap;
+}
