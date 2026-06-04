@@ -111,33 +111,87 @@ function handleGenerate(AuthService $authService, DocumentService $documentServi
         if ($dataSource === 'csv') {
             $data = $dataService->parseCsvRow($_FILES['csv_file'] ?? []);
         } else {
-            // Citim campurile din sablon pentru a genera date corespunzatoare
-            $template = $templateService->getTemplate($templateId);
-            $fields = [];
+             // Citim campurile din sablon pentru a genera date corespunzatoare
+$template = $templateService->getTemplate($templateId);
+$fields = [];
 
-            if ($template && !empty($template['fields_json'])) {
-                $decoded = json_decode($template['fields_json'], true);
-                if (is_array($decoded)) {
-                    // Sablon predefinit cu array de campuri — folosim campurile lui
-                    $fields = $decoded;
-                }
-            }
+if ($template && !empty($template['fields_json'])) {
+    $decoded = json_decode($template['fields_json'], true);
+    if (is_array($decoded)) {
+        $fields = $decoded;
+    } else {
+        // Sablon HTML custom - extragem variabilele si mapam la tipuri
+        preg_match_all('/\{\{(\w+)\}\}/', $template['fields_json'], $matches);
+       $typeMap = [
+    'nume' => 'full_name',
+    'email' => 'email',
+    'telefon' => 'phone',
+    'adresa' => 'address',
+    'data_nasterii' => 'date',
+    'cnp' => 'cnp',
+    'ocupatie' => 'job_title',
+    'studii' => 'education',
+    'firma' => 'company',
+    'nr_factura' => 'invoice_number',
+    'cui' => 'cui',
+    'iban' => 'iban',
+    'pret' => 'price',
+    'tva' => 'tva',
+    'data' => 'date',
+    'oras' => 'city',
+    'judet' => 'county',
+    'produs' => 'product',
+    'suma' => 'price',
+    'cantitate' => 'number',
+    'pret_unitar' => 'price',
+    'nume_solicitant' => 'full_name',
+    'detalii' => 'paragraph',
+    'subiect' => 'text',
+    'data_emitere' => 'date',
+    'furnizor' => 'company',
+    'cui_furnizor' => 'cui',
+    'client' => 'company',
+    'cui_client' => 'cui'
+];
+        foreach ($matches[1] as $var) {
+            if (strtoupper($var) === $var) continue;
+            $fields[] = ['field' => $var, 'type' => $typeMap[$var] ?? 'text', 'label' => $var];
+        }
+    }
+}
 
-            // Daca nu avem campuri din sablon (sablon HTML custom),
-            // folosim toate campurile generice disponibile in toolbar
-            if (empty($fields)) {
-                $fields = [
-                    ['field' => 'nume',        'type' => 'full_name',     'label' => 'Nume'],
-                    ['field' => 'email',       'type' => 'email',         'label' => 'Email'],
-                    ['field' => 'telefon',     'type' => 'phone',         'label' => 'Telefon'],
-                    ['field' => 'adresa',      'type' => 'address',       'label' => 'Adresa'],
-                    ['field' => 'cnp',         'type' => 'cnp',           'label' => 'CNP'],
-                    ['field' => 'firma',       'type' => 'company',       'label' => 'Firma'],
-                    ['field' => 'nr_factura',  'type' => 'invoice_number','label' => 'Numar factura'],
-                    ['field' => 'suma',        'type' => 'price',         'label' => 'Suma'],
-                    ['field' => 'data',        'type' => 'date',          'label' => 'Data'],
-                ];
-            }
+if (empty($fields)) {
+    $fields = [
+        ['field' => 'nume',           'type' => 'full_name',      'label' => 'Nume'],
+        ['field' => 'email',          'type' => 'email',           'label' => 'Email'],
+        ['field' => 'telefon',        'type' => 'phone',           'label' => 'Telefon'],
+        ['field' => 'adresa',         'type' => 'address',         'label' => 'Adresa'],
+        ['field' => 'data_nasterii',  'type' => 'date',            'label' => 'Data nasterii'],
+        ['field' => 'cnp',            'type' => 'cnp',             'label' => 'CNP'],
+        ['field' => 'ocupatie',       'type' => 'job_title',       'label' => 'Ocupatie'],
+        ['field' => 'studii',         'type' => 'education',       'label' => 'Nivel studii'],
+        ['field' => 'firma',          'type' => 'company',         'label' => 'Firma'],
+        ['field' => 'nr_factura',     'type' => 'invoice_number',  'label' => 'Numar factura'],
+        ['field' => 'cui',            'type' => 'cui',             'label' => 'CUI'],
+        ['field' => 'iban',           'type' => 'iban',            'label' => 'IBAN'],
+        ['field' => 'tva',            'type' => 'tva',             'label' => 'TVA'],
+        ['field' => 'produs',         'type' => 'product',         'label' => 'Produs'],
+        ['field' => 'cantitate',      'type' => 'number',          'label' => 'Cantitate'],
+        ['field' => 'pret_unitar',    'type' => 'price',           'label' => 'Pret unitar'],
+        ['field' => 'suma',           'type' => 'price',           'label' => 'Suma'],
+        ['field' => 'data',           'type' => 'date',            'label' => 'Data'],
+        ['field' => 'oras',           'type' => 'city',            'label' => 'Oras'],
+        ['field' => 'judet',          'type' => 'county',          'label' => 'Judet'],
+        ['field' => 'nume_solicitant','type' => 'full_name',       'label' => 'Nume solicitant'],
+        ['field' => 'detalii',        'type' => 'paragraph',       'label' => 'Detalii'],
+        ['field' => 'subiect',        'type' => 'text',            'label' => 'Subiect'],
+        ['field' => 'data_emitere',   'type' => 'date',            'label' => 'Data emiterii'],
+        ['field' => 'furnizor',       'type' => 'company',         'label' => 'Furnizor'],
+        ['field' => 'cui_furnizor',   'type' => 'cui',             'label' => 'CUI furnizor'],
+        ['field' => 'client',         'type' => 'company',         'label' => 'Client'],
+        ['field' => 'cui_client',     'type' => 'cui',             'label' => 'CUI client'],
+    ];
+}
 
             $data = $dataService->generateRecord($fields);
         }

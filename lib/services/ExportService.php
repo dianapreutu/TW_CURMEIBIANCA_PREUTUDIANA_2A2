@@ -229,25 +229,54 @@ class ExportService
             'message' => 'Date exportate ca JSON.'
         ];
     }
-
-    private function getDocumentFields(array $document): array
-    {
-        if (!empty($document['schema_id'])) {
-            $schema = $this->db->fetchOne('SELECT fields_json FROM schemas WHERE id = ?', [$document['schema_id']]);
-            if ($schema) {
-                return json_decode($schema['fields_json'], true) ?? [];
-            }
+private function getDocumentFields(array $document): array
+{
+    if (!empty($document['schema_id'])) {
+        $schema = $this->db->fetchOne('SELECT fields_json FROM schemas WHERE id = ?', [$document['schema_id']]);
+        if ($schema) {
+            $fields = json_decode($schema['fields_json'], true) ?? [];
+            if (!empty($fields)) return $fields;
         }
-
-        if (!empty($document['template_id'])) {
-            $template = $this->db->fetchOne('SELECT fields_json FROM templates WHERE id = ?', [$document['template_id']]);
-            if ($template) {
-                return json_decode($template['fields_json'], true) ?? [];
-            }
-        }
-
-        return [];
     }
+
+    if (!empty($document['template_id'])) {
+        $template = $this->db->fetchOne('SELECT fields_json FROM templates WHERE id = ?', [$document['template_id']]);
+        if ($template) {
+            $decoded = json_decode($template['fields_json'], true);
+            if (is_array($decoded)) return $decoded;
+            
+            // E HTML - extragem variabilele
+            $typeMap = [
+                'nume' => 'full_name', 'email' => 'email', 'telefon' => 'phone',
+                'adresa' => 'address', 'data_nasterii' => 'date', 'cnp' => 'cnp',
+                'ocupatie' => 'job_title', 'studii' => 'education',
+                'firma' => 'company', 'nr_factura' => 'invoice_number',
+                'cui' => 'cui', 'iban' => 'iban', 'pret' => 'price',
+                'tva' => 'tva', 'data' => 'date', 'oras' => 'city',
+                'judet' => 'county', 'produs' => 'product', 'suma' => 'price',
+                'cantitate' => 'number', 'pret_unitar' => 'price',
+                'nume_solicitant' => 'full_name', 'detalii' => 'paragraph',
+                'subiect' => 'text', 'data_emitere' => 'date',
+                'furnizor' => 'company', 'cui_furnizor' => 'cui',
+                'client' => 'company', 'cui_client' => 'cui'
+            ];
+            preg_match_all('/\{\{(\w+)\}\}/', $template['fields_json'], $matches);
+            $fields = [];
+            foreach ($matches[1] as $var) {
+                if (strtoupper($var) === $var) continue;
+                $fields[] = [
+                    'field' => $var,
+                    'type' => $typeMap[$var] ?? 'text',
+                    'label' => $var
+                ];
+            }
+            if (!empty($fields)) return $fields;
+        }
+    }
+
+    return [];
+}
+    
 
     private function extractDataFromHtml(string $html, array $fieldKeys): array
     {

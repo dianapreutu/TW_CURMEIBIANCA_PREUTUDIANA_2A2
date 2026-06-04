@@ -12,6 +12,8 @@ let currentTemplateId = null;
 // Continutul original al sablonului (pentru detectarea modificarilor)
 let originalContent = '';
 
+let currentTemplateFields = []; 
+
 // ==================================================
 // INITIALIZARE
 // ==================================================
@@ -167,6 +169,7 @@ function updatePreview() {
         tva: '19',
         nr_factura: 'FCT-2024-00123',
         data_emitere: '04.06.2026'
+
     };
 
     // Procesam template-ul local (inlocuim variabilele simple)
@@ -277,7 +280,7 @@ function attachTemplateEvents() {
         btn.addEventListener('click', function () {
             const id = parseInt(btn.getAttribute('data-id'));
             // Cerem confirmare inainte de stergere
-                showConfirmModal('Ești sigur că vrei să ștergi acest șablon? Acțiunea este ireversibilă.', function () {
+                showConfirmModal('Esti sigur ca vrei sa stergi acest sablon? Actiunea este ireversibila.', function () {
                 deleteTemplate(id);
             });
     });
@@ -292,9 +295,20 @@ function editTemplate(id) {
 
     // Apelam API-ul pentru a obtine datele sablonului
     ajaxGet('../api/templates.php?action=get&id=' + id, function (template) {
-
         // Setam ID-ul sablonului curent
         currentTemplateId = template.id;
+        console.log('fields_json tip:', typeof template.fields_json, template.fields_json.substring(0, 50));
+        // Salvam campurile sablonului pentru generare
+try {
+    const parsed = JSON.parse(template.fields_json);
+    if (Array.isArray(parsed)) {
+        currentTemplateFields = parsed;
+    } else {
+        currentTemplateFields = [];
+    }
+} catch(e) {
+    currentTemplateFields = [];
+}
 
         // Populam campurile formularului
         const nameInput = document.getElementById('template-name');
@@ -345,6 +359,7 @@ function newTemplate() {
     // Resetam ID-ul sablonului curent
     currentTemplateId = null;
     originalContent = '';
+    currentTemplateFields = [];
 
     // Golim campurile formularului
     const nameInput = document.getElementById('template-name');
@@ -388,14 +403,12 @@ function saveTemplate() {
         showError('Editorul nu poate fi gol!');
         return;
     }
-
-    // Pregatim datele pentru trimitere
-    const data = {
-        name: name,
-        type: type,
-        content: content,
-        format: 'html'
-    };
+const data = {
+    name: name,
+    type: type,
+    content: content,
+    format: 'html'
+};
 
     // Daca editam un sablon existent, adaugam ID-ul si actiunea update
     if (currentTemplateId) {
@@ -451,23 +464,31 @@ function deleteTemplate(id) {
  * generateDocument() - genereaza un document din sablonul curent
  */
 function generateDocument() {
-
+     
     // Verificam ca avem un sablon selectat
     if (!currentTemplateId) {
         showError('Selectati sau salvati un sablon inainte de generare!');
         return;
     }
+const docName = document.getElementById('doc-name') ?
+    document.getElementById('doc-name').value.trim() : 'Document generat';
 
-    // Citim numele documentului
-    const docName = document.getElementById('doc-name') ?
-        document.getElementById('doc-name').value.trim() : 'Document generat';
+let fields = [];
+try {
+    const parsed = JSON.parse(originalContent);
+    if (Array.isArray(parsed)) {
+        fields = parsed;
+    }
+} catch(e) {
+    fields = currentTemplateFields || [];
+}
 
-    // Pregatim datele pentru generare
-    const data = {
-        template_id: currentTemplateId,
-        name: docName || 'Document generat',
-        data_source: 'random'
-    };
+const data = {
+    template_id: currentTemplateId,
+    name: docName || 'Document generat',
+    data_source: 'random',
+    fields: currentTemplateFields.length > 0 ? currentTemplateFields : []
+};
 
     // Afisam indicatorul de incarcare
     showLoading('btn-generate', 'Se genereaza...');
