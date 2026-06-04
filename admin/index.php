@@ -178,7 +178,6 @@ $recentDocuments = $db->fetchAll(
             </ul>
             <div class="admin-sidebar-footer">
                 <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
-                <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
             </div>
         </aside>
 
@@ -187,7 +186,7 @@ $recentDocuments = $db->fetchAll(
                 <span class="admin-topbar-title">📊 Dashboard</span>
                 <div class="admin-topbar-actions">
                     <a href="<?php echo BASE_URL; ?>/" class="admin-btn secondary">Inapoi la aplicatie</a>
-                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn danger">Delogare</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn secondary" style="font-weight: bold; text-decoration: none;">Delogare</a>
                 </div>
             </div>
             <div class="admin-content">

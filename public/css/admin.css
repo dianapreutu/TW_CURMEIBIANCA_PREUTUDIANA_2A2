@@ -217,6 +217,25 @@
     margin-bottom: 4px;
 }
 
+.admin-sidebar-footer a {
+    color: #ffffff !important;
+    text-decoration: none;
+    display: inline-block;
+    padding: 4px 0;
+}
+
+.admin-sidebar-footer a:hover {
+    opacity: 0.8;
+}
+
+.admin-sidebar-footer a:visited {
+    color: #ffffff !important;
+}
+
+.admin-sidebar-footer a:active {
+    color: #ffffff !important;
+}
+
 /* --------------------------------------------------
    Zona principala de continut
    -------------------------------------------------- */
