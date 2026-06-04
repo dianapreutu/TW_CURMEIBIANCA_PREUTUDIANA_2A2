@@ -150,7 +150,23 @@ function updatePreview() {
         ocupatie: 'Programator',
         firma: 'Alpha Tech SRL',
         suma: '1500.00',
-        nr_factura: 'FCT-2024-00123'
+        nr_factura: 'FCT-2024-00123',
+        // Campuri suplimentare pentru sabloanele predefinite
+        data_nasterii: '15.05.1985',
+        studii: 'Licenta',
+        nume_solicitant: 'Ion Popescu',
+        subiect: 'Cerere de concediu',
+        detalii: 'Va rog sa aprobati cererea mea.',
+        furnizor: 'Alpha Tech SRL',
+        cui_furnizor: 'RO12345678',
+        client: 'Beta SRL',
+        cui_client: 'RO87654321',
+        produs: 'Servicii IT',
+        cantitate: '1',
+        pret_unitar: '1500.00',
+        tva: '19',
+        nr_factura: 'FCT-2024-00123',
+        data_emitere: '04.06.2026'
     };
 
     // Procesam template-ul local (inlocuim variabilele simple)
@@ -236,7 +252,7 @@ function buildTemplateCard(template) {
         '<div class="template-card-type">' + typeBadge + '</div>' +
         '<div class="template-card-actions">' +
         '<button class="btn-editor btn-edit-template" data-id="' + template.id + '">Editeaza</button>' +
-        '<button class="btn-delete btn-delete-template" data-id="' + template.id + '">Sterge</button>' +
+        (USER_IS_ADMIN ? '<button class="btn-delete btn-delete-template" data-id="' + template.id + '">Sterge</button>' : '') +
         '</div>' +
         '</div>';
 }
@@ -459,15 +475,43 @@ function generateDocument() {
     // Apelam API-ul pentru generare
     ajaxPost('../api/documents.php?action=generate', data, function (result) {
 
-        // Ascundem indicatorul de incarcare
         hideLoading('btn-generate');
-
         showSuccess('Documentul a fost generat cu succes!');
 
         // Afisam documentul generat in previzualizare
         const previewDoc = document.getElementById('preview-document');
         if (previewDoc && result.html) {
             previewDoc.innerHTML = result.html;
+        }
+
+        // Adaugam buton de descarcare intr-un container fix, sub previzualizare
+        // Stergem butonul anterior daca exista
+        const existingBtn = document.getElementById('download-btn-container');
+        if (existingBtn) existingBtn.remove();
+
+        const container = document.createElement('div');
+        container.id = 'download-btn-container';
+        container.style.cssText = 'text-align:center; padding: 1rem 0 0.5rem 0;';
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn-editor';
+        downloadBtn.textContent = 'Descarca document HTML';
+        downloadBtn.addEventListener('click', function () {
+            const blob = new Blob([result.html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (document.getElementById('doc-name').value.trim() || 'document') + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        container.appendChild(downloadBtn);
+
+        // Il adaugam dupa preview-container, nu inauntru
+        const previewPanel = document.querySelector('.preview-panel');
+        if (previewPanel) {
+            previewPanel.appendChild(container);
         }
 
     }, function (error) {

@@ -42,11 +42,9 @@ require_once __DIR__ . '/../config.php';
                 <div class="editor-header">
                 <h1>Editor Sabloane</h1>
                 <div class="editor-header-actions">
-                    <!-- Buton sablon nou --> 
                     <button id="btn-new" class="btn-editor-secondary">
-                        + Sablon nou 
+                        + Sablon nou
                     </button>
-                    <!-- Buton salvare --> 
                     <button id="btn-save" class="btn-editor">
                         Salveaza
                     </button>
@@ -125,9 +123,8 @@ Exemplu:
                                     placeholder="Ex: CV Ion Popescu">
                         </div>
 
-                        <!-- Buton generare document --> 
                         <button id="btn-generate" class="btn-editor">
-                            Genereaza Document 
+                            Genereaza Document
                         </button>
                     </div>
 
@@ -179,6 +176,11 @@ Exemplu:
         <!-- sfarsit editor-page --> 
         
         <!-- Scripturile JavaScript --> 
+        <script>
+            // Transmitem rolul utilizatorului din PHP catre JavaScript
+            var USER_IS_ADMIN = <?php echo (isset($_SESSION['admin']) && $_SESSION['admin'] === true) ? 'true' : 'false'; ?>;
+            var USER_IS_AUTH  = <?php echo (isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)) ? 'true' : 'false'; ?>;
+        </script>
         <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
         <script src="<?php echo BASE_URL; ?>/public/js/editor.js"></script>
 

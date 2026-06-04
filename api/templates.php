@@ -61,45 +61,59 @@ function handleGet()
 
 function handleCreate()
 {
-    if (empty($_POST)) {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $_POST = $input ?? [];
-    }
     global $authService, $templateService;
-    $authService->requireAuthentication();
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         jsonError('Metoda HTTP invalida!');
         return;
     }
 
-    $name = trim(htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $type = trim(htmlspecialchars($_POST['type'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $content = trim($_POST['content'] ?? '');
-    $format = trim(htmlspecialchars($_POST['format'] ?? 'html', ENT_QUOTES, 'UTF-8'));
+    // Citim input-ul O SINGURA DATA — json_decode din php://input
+    // deoarece ajaxPost trimite Content-Type: application/json
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
 
-    $templateId = $templateService->createTemplate($name, $type, $content, $format, $authService->getEffectiveUserId());
+    // Fallback la $_POST daca nu e JSON valid (ex: FormData)
+    if (!is_array($input)) {
+        $input = $_POST;
+    }
+
+    $name    = trim(htmlspecialchars($input['name']    ?? '', ENT_QUOTES, 'UTF-8'));
+    $type    = trim(htmlspecialchars($input['type']    ?? '', ENT_QUOTES, 'UTF-8'));
+    $content = trim($input['content'] ?? '');
+    $format  = trim(htmlspecialchars($input['format']  ?? 'html', ENT_QUOTES, 'UTF-8'));
+
+    $templateId = $templateService->createTemplate(
+        $name, $type, $content, $format,
+        $authService->getEffectiveUserId()
+    );
+
     jsonSuccess(['id' => $templateId, 'message' => 'Sablonul a fost creat cu succes!']);
 }
 
 function handleUpdate()
 {
     global $authService, $templateService;
-    $authService->requireAuthentication();
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         jsonError('Metoda HTTP invalida!');
         return;
     }
 
-  $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
-  $id = intval($input['id'] ?? 0);
+    // Citim input-ul O SINGURA DATA, inainte de requireAuthentication
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    if (!is_array($input)) {
+        $input = $_POST;
+    }
+
+    $id = intval($input['id'] ?? 0);
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;
     }
 
-    $name = trim(htmlspecialchars($input['name'] ?? '', ENT_QUOTES, 'UTF-8'));
+    $name    = trim(htmlspecialchars($input['name']    ?? '', ENT_QUOTES, 'UTF-8'));
     $content = trim($input['content'] ?? '');
 
     $templateService->updateTemplate($id, $name, $content);
@@ -109,15 +123,24 @@ function handleUpdate()
 function handleDelete()
 {
     global $authService, $templateService;
-    $authService->requireAuthentication();
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         jsonError('Metoda HTTP invalida!');
         return;
     }
 
-    $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
-    $id = intval($input['id'] ?? 0);   
+    // Citim input-ul O SINGURA DATA, inainte de requireAuthentication
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    if (!is_array($input)) {
+        $input = $_POST;
+    }
+
+    if (!$authService->isAdmin()) {
+        throw new Exception('Doar administratorul poate sterge sabloane!');
+    }
+
+    $id = intval($input['id'] ?? 0);
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;

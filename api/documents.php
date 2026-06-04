@@ -12,6 +12,7 @@ header('Content-Type: application/json; charset=utf-8');
 $authService = new AuthService();
 $documentService = new DocumentService();
 $dataService = new DataService();
+$templateService = new TemplateService();
 
 actionHandler($authService, $documentService, $dataService);
 
@@ -71,19 +72,25 @@ function handleGet(AuthService $authService, DocumentService $documentService)
 
 function handleGenerate(AuthService $authService, DocumentService $documentService, DataService $dataService)
 {
-    $authService->requireAuthentication();
-    $userId = $authService->getEffectiveUserId();
+    global $templateService; // adaugat pentru a accesa campurile sablonului
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         jsonError('Metoda HTTP invalida!');
         return;
     }
 
-  $input = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
-  $templateId = intval($input['template_id'] ?? 0);
-  $name = trim(htmlspecialchars($input['name'] ?? '', ENT_QUOTES, 'UTF-8'));
-  $dataSource = trim(htmlspecialchars($input['data_source'] ?? 'random', ENT_QUOTES, 'UTF-8'));
-  $count = intval($input['count'] ?? DEFAULT_ROWS);
+    // Citim input-ul O SINGURA DATA, inainte de orice altceva
+    $raw = file_get_contents('php://input');
+    $input = json_decode($raw, true);
+    if (!is_array($input)) {
+        $input = $_POST;
+    }
+
+    $userId = $authService->getEffectiveUserId() ?? 1;
+
+    $templateId = intval($input['template_id'] ?? 0);
+    $name = trim(htmlspecialchars($input['name'] ?? '', ENT_QUOTES, 'UTF-8'));
+    $dataSource = trim(htmlspecialchars($input['data_source'] ?? 'random', ENT_QUOTES, 'UTF-8'));
 
     if ($templateId <= 0) {
         jsonError('ID-ul sablonului este invalid!');
@@ -104,13 +111,31 @@ function handleGenerate(AuthService $authService, DocumentService $documentServi
         if ($dataSource === 'csv') {
             $data = $dataService->parseCsvRow($_FILES['csv_file'] ?? []);
         } else {
-            $fieldsJson = $_POST['fields'] ?? '[]';
-            $fields = json_decode($fieldsJson, true);
+            // Citim campurile din sablon pentru a genera date corespunzatoare
+            $template = $templateService->getTemplate($templateId);
+            $fields = [];
+
+            if ($template && !empty($template['fields_json'])) {
+                $decoded = json_decode($template['fields_json'], true);
+                if (is_array($decoded)) {
+                    // Sablon predefinit cu array de campuri — folosim campurile lui
+                    $fields = $decoded;
+                }
+            }
+
+            // Daca nu avem campuri din sablon (sablon HTML custom),
+            // folosim toate campurile generice disponibile in toolbar
             if (empty($fields)) {
                 $fields = [
-                    ['field' => 'nume', 'type' => 'full_name', 'label' => 'Nume'],
-                    ['field' => 'email', 'type' => 'email', 'label' => 'Email'],
-                    ['field' => 'data', 'type' => 'date', 'label' => 'Data']
+                    ['field' => 'nume',        'type' => 'full_name',     'label' => 'Nume'],
+                    ['field' => 'email',       'type' => 'email',         'label' => 'Email'],
+                    ['field' => 'telefon',     'type' => 'phone',         'label' => 'Telefon'],
+                    ['field' => 'adresa',      'type' => 'address',       'label' => 'Adresa'],
+                    ['field' => 'cnp',         'type' => 'cnp',           'label' => 'CNP'],
+                    ['field' => 'firma',       'type' => 'company',       'label' => 'Firma'],
+                    ['field' => 'nr_factura',  'type' => 'invoice_number','label' => 'Numar factura'],
+                    ['field' => 'suma',        'type' => 'price',         'label' => 'Suma'],
+                    ['field' => 'data',        'type' => 'date',          'label' => 'Data'],
                 ];
             }
 
@@ -119,10 +144,10 @@ function handleGenerate(AuthService $authService, DocumentService $documentServi
 
         $result = $documentService->generateDocument((int)$templateId, $data, $name, $userId);
         jsonSuccess([
-            'id' => $result['id'],
+            'id'       => $result['id'],
             'filename' => $result['filename'],
-            'html' => $result['html'],
-            'message' => 'Documentul a fost generat cu succes!'
+            'html'     => $result['html'],
+            'message'  => 'Documentul a fost generat cu succes!'
         ]);
     } catch (Exception $e) {
         jsonError('Eroare la generarea documentului: ' . $e->getMessage());

@@ -242,18 +242,34 @@ class TemplateEngine
         // Incarcam sablonul din baza de date
         $template = $this->loadTemplate($templateId);
 
-        // Daca sablonul nu exista, aruncam o exceptie 
         if (!$template) {
-            throw new Exception('Sablonul nu a fost gasit !');
+            throw new Exception('Sablonul nu a fost gasit!');
         }
 
-        // Procesam sablonul cu datele furnizate
-        $html = $this->render($template['fields_json'], $data);
+        $fieldsJson = $template['fields_json'];
+
+        // Detectam daca fields_json e un array JSON de campuri (sabloane predefinite)
+        // sau e deja HTML direct (sabloane create de utilizator in editor)
+        $decoded = json_decode($fieldsJson, true);
+
+        if (is_array($decoded)) {
+            // E un array de campuri — construim HTML din el
+            $htmlTemplate = '';
+            foreach ($decoded as $field) {
+                $label = htmlspecialchars($field['label'] ?? $field['field'], ENT_QUOTES, 'UTF-8');
+                $var   = '{{' . $field['field'] . '}}';
+                $htmlTemplate .= '<p><strong>' . $label . ':</strong> ' . $var . '</p>' . "\n";
+            }
+        } else {
+            // E deja HTML — il folosim direct
+            $htmlTemplate = $fieldsJson;
+        }
+
+        // Procesam template-ul cu datele furnizate
+        $html = $this->render($htmlTemplate, $data);
 
         // Generam un nume unic pentru fisierul HTML
         $filename = uniqid('doc_') . '_' . time() . '.html';
-
-        // Calea completa unde salvam fisierul
         $filePath = GENERATED_HTML_PATH . '/' . $filename;
 
         // Salvam fisierul HTML pe server
@@ -271,14 +287,12 @@ class TemplateEngine
             'updated_at'  => date('Y-m-d H:i:s')
         ]);
 
-        // Inregistram actiunea in logs
         $this->db->log('generate_document', "Document generat: {$name}", $userId);
 
-        // Returnam ID-ul documentului si calea fisierului
         return [
-            'id' => $docId,
+            'id'       => $docId,
             'filename' => $filename,
-            'html' => $html
+            'html'     => $html
         ];
     }
 }
