@@ -247,25 +247,19 @@ class TemplateEngine
         }
 
         $fieldsJson = $template['fields_json'];
-
-        // Detectam daca fields_json e un array JSON de campuri (sabloane predefinite)
-        // sau e deja HTML direct (sabloane create de utilizator in editor)
         $decoded = json_decode($fieldsJson, true);
 
         if (is_array($decoded)) {
-            // E un array de campuri — construim HTML din el
             $htmlTemplate = '';
             foreach ($decoded as $field) {
                 $label = htmlspecialchars($field['label'] ?? $field['field'], ENT_QUOTES, 'UTF-8');
-                $var   = '{{' . $field['field'] . '}}';
+                $var = '{{' . $field['field'] . '}}';
                 $htmlTemplate .= '<p><strong>' . $label . ':</strong> ' . $var . '</p>' . "\n";
             }
         } else {
-            // E deja HTML — il folosim direct
             $htmlTemplate = $fieldsJson;
         }
 
-        // Procesam template-ul cu datele furnizate
         $html = $this->render($htmlTemplate, $data);
 
         // Generam un nume unic pentru fisierul HTML

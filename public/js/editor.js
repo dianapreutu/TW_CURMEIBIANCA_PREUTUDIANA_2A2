@@ -168,7 +168,11 @@ function updatePreview() {
         pret_unitar: '1500.00',
         tva: '19',
         nr_factura: 'FCT-2024-00123',
-        data_emitere: '04.06.2026'
+        data_emitere: '04.06.2026',
+        iban: 'RO42RNCB0000123456789012',
+        cui: 'RO12345678',
+        oras: 'Bucuresti',
+        judet: 'Ilfov'
 
     };
 
