@@ -17,7 +17,7 @@ if ($isAuthenticated) {
     $db     = Database::getInstance();
  
     // Paginare
-    $page    = max(1, (int)($_GET['page'] ?? 1));
+    $page = max(1, (int)($_GET['p'] ?? 1));
     $perPage = 10;
     $offset  = ($page - 1) * $perPage;
  
@@ -117,7 +117,10 @@ if ($isAuthenticated) {
                         </option>
                     </select>
                     <?php if ($filterStatus): ?>
-                        <a href="?" class="btn btn-secondary btn-small">✕ Reseteaza</a>
+                      <a href="<?php echo BASE_URL; ?>/index.php?page=documents"
+   class="btn btn-secondary btn-small">
+   ✕ Reseteaza
+</a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -198,7 +201,7 @@ if ($isAuthenticated) {
             <?php if ($totalPages > 1): ?>
                 <div class="pagination">
                     <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>&status=<?php echo urlencode($filterStatus); ?>">
+                        <a href="<?php echo BASE_URL; ?>/index.php?page=documents&p=<?php echo $page - 1; ?>&status=<?php echo urlencode($filterStatus); ?>">
                             &laquo;
                         </a>
                     <?php endif; ?>
@@ -207,14 +210,14 @@ if ($isAuthenticated) {
                         <?php if ($i === $page): ?>
                             <span class="active"><?php echo $i; ?></span>
                         <?php else: ?>
-                            <a href="?page=<?php echo $i; ?>&status=<?php echo urlencode($filterStatus); ?>">
+                            <a href="<?php echo BASE_URL; ?>/index.php?page=documents&p=<?php echo $i; ?>&status=<?php echo urlencode($filterStatus); ?>">
                                 <?php echo $i; ?>
                             </a>
                         <?php endif; ?>
                     <?php endfor; ?>
  
                     <?php if ($page < $totalPages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>&status=<?php echo urlencode($filterStatus); ?>">
+                     <a href="<?php echo BASE_URL; ?>/index.php?page=documents&p=<?php echo $page + 1; ?>&status=<?php echo urlencode($filterStatus); ?>">
                             &raquo;
                         </a>
                     <?php endif; ?>
@@ -237,31 +240,62 @@ if ($isAuthenticated) {
     const BASE_URL = '<?php echo BASE_URL; ?>';
 </script>
 <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
+
+<div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:8px;padding:2rem;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.2);">
+        <h3 id="confirm-title" style="font-size:1.1rem;margin-bottom:.8rem;color:#1a1a2e;">Confirmare</h3>
+        <p id="confirm-message" style="color:#555;margin-bottom:1.5rem;font-size:.95rem;"></p>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anulează</button>
+            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Șterge</button>
+        </div>
+    </div>
+</div>
+
 <script>
-// Stergere document via AJAX
-document.querySelectorAll('.btn-delete').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        const id = this.dataset.id;
-        if (!confirm('Stergi acest document? Actiunea este ireversibila.')) return;
- 
-        // Folosim FormData ca handleDelete() citeste din $_POST
-        const formData = new FormData();
-        formData.append('action', 'delete');
-        formData.append('id', id);
- 
-        ajaxPost(BASE_URL + '/api/documents.php', formData, function(data) {
-            // app.js extrage response.data in callback - daca data exista = succes
-            if (data) {
-                // Stergem randul din tabel
-                btn.closest('tr').remove();
-            } else {
-                alert('Eroare la stergere.');
-            }
+function showConfirmModal(message, onConfirm) {
+    const modal = document.getElementById('confirm-modal');
+    const msg = document.getElementById('confirm-message');
+    const cancel = document.getElementById('confirm-cancel');
+    const ok = document.getElementById('confirm-ok');
+
+    msg.innerHTML = message;
+    modal.style.display = 'flex';
+
+    cancel.onclick = () => modal.style.display = 'none';
+
+    ok.onclick = () => {
+        modal.style.display = 'none';
+        onConfirm();
+    };
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-delete').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+
+            showConfirmModal(
+                'Ești sigur că vrei să ștergi acest document?<br>Acțiunea este ireversibilă.',
+                function () {
+                    const formData = new FormData();
+                    formData.append('action', 'delete');
+                    formData.append('id', id);
+
+                    ajaxPost(BASE_URL + '/api/documents.php', formData, function(data) {
+                        if (data) {
+                            btn.closest('tr').remove();
+                        } else {
+                            alert('Eroare la stergere.');
+                        }
+                    });
+                }
+            );
         });
     });
 });
 </script>
- 
+
 </body>
 </html>
  
