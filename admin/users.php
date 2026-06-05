@@ -124,6 +124,7 @@ $users = $db->fetchAll(
         <title>Utilizatori - <?php echo APP_NAME; ?></title>
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
+        <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
     </head>
     <body>
     <div class="admin-wrapper">
@@ -142,6 +143,11 @@ $users = $db->fetchAll(
                 <li class="admin-nav-item active">
                     <a href="<?php echo BASE_URL; ?>/admin/users.php">
                         <span class="nav-icon">👥</span> Utilizatori
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/documents.php">
+                        <span class="nav-icon">📄</span> Documente generate
                     </a>
                 </li>
                 <li class="admin-nav-item">
@@ -167,7 +173,7 @@ $users = $db->fetchAll(
                 <span class="admin-topbar-title">👥 Gestionare Utilizatori</span>
                 <div class="admin-topbar-actions">
                     <a href="<?php echo BASE_URL; ?>/" class="admin-btn secondary">Inapoi la aplicatie</a>
-                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn danger">Delogare</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn secondary">Delogare</a>
                 </div>
             </div>
             <div class="admin-content">
@@ -268,11 +274,20 @@ $users = $db->fetchAll(
                                     <td>
                                         <!-- Nu afisam butonul de stergere pentru adminul principal --> 
                                         <?php if ($user['username'] !== 'admin'): ?>
-                                            <form method="POST" action="users.php"
-                                                    onsubmit="return confirm('Esti sigur ca vrei sa stergi acest utilizator?')">
+                                            <form id="delete-form-<?php echo $user['id']; ?>" method="POST" action="users.php">
                                                 <input type="hidden" name="action" value="delete">
                                                 <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                                <button type="submit" class="btn-delete">Sterge</button>
+
+                                                <button type="button"
+                                                        class="btn-delete"
+                                                        onclick="showConfirmModal(
+                                                            'Esti sigur ca vrei sa stergi acest utilizator?',
+                                                            function() {
+                                                                document.getElementById('delete-form-<?php echo $user['id']; ?>').submit();
+                                                            }
+                                                        )">
+                                                    Sterge
+                                                </button>
                                             </form>
                                         <?php else: ?>
                                             <!-- Admin principal - nu poate fi sters --> 
@@ -290,6 +305,18 @@ $users = $db->fetchAll(
         </div>
     </main>
 
+</div>
+
+<!-- Modal confirmare -->
+<div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:8px;padding:2rem;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.2);">
+        <h3 id="confirm-title" style="font-size:1.1rem;margin-bottom:.8rem;color:#1a1a2e;">Confirmare</h3>
+        <p id="confirm-message" style="color:#555;margin-bottom:1.5rem;font-size:.95rem;"></p>
+        <div style="display:flex;gap:.75rem;justify-content:flex-end;">
+            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anulează</button>
+            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Șterge</button>
+        </div>
+    </div>
 </div>
 
     </body>

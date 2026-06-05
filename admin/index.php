@@ -165,6 +165,11 @@ $recentDocuments = $db->fetchAll(
                     </a>
                 </li>
                 <li class="admin-nav-item">
+                    <a href="<?php echo BASE_URL; ?>/admin/documents.php">
+                        <span class="nav-icon">📄</span> Documente generate
+                    </a>
+                </li>
+                <li class="admin-nav-item">
                     <a href="<?php echo BASE_URL; ?>/admin/logs.php">
                         <span class="nav-icon">📋</span> Istoric activitate
                     </a>
@@ -255,7 +260,7 @@ $recentDocuments = $db->fetchAll(
                 <?php endif; ?>
 
                     <!-- Link catre pagina completa de logs --> 
-                    <a href="logs.php" class="admin-link">Vezi toate activitatile</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/documents.php" class="admin-link">Vezi toate documentele generate</a>
                 </div>
             </section>
 
@@ -292,7 +297,7 @@ $recentDocuments = $db->fetchAll(
                 <?php endif; ?>
 
                     <!-- Link catre pagina completa de logs --> 
-                    <a href="logs.php" class="admin-link">Vezi toate actiunile</a>
+                    <a href="<?php echo BASE_URL; ?>/admin/logs.php" class="admin-link">Vezi toate actiunile</a>
                 </div>
             </section>
 

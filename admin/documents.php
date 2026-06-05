@@ -1,8 +1,8 @@
 <?php
 
-// admin/logs.php - Pagina de istoric activitate
-// Afiseaza logurile din tabela logs pentru admin
-// Suporta filtrare dupa actiune, utilizator si data
+// admin/documents.php - Pagina de documente generate
+// Afiseaza documentele din tabela documents pentru admin
+// Suporta filtrare dupa sablon, status si data
 
 require_once __DIR__ . '/../config.php';
 
@@ -17,102 +17,92 @@ $db = Database::getInstance();
 // --------------------------------------------------
 // Filtre din GET
 // --------------------------------------------------
-$filterAction = trim($_GET['action'] ?? '');
-$filterUser   = trim($_GET['user'] ?? '');
-$filterDate   = trim($_GET['date'] ?? '');
-$page         = max(1, (int)($_GET['page'] ?? 1));
-$perPage      = 20; // loguri per pagina
-$offset       = ($page - 1) * $perPage;
+$filterTemplate = trim($_GET['template'] ?? '');
+$filterStatus   = trim($_GET['status'] ?? '');
+$filterDate     = trim($_GET['date'] ?? '');
+$page           = max(1, (int)($_GET['page'] ?? 1));
+$perPage        = 20;
+$offset         = ($page - 1) * $perPage;
 
 // --------------------------------------------------
 // Construim query-ul cu filtrele aplicate
-// Folosim prepared statements - previne SQL Injection
 // --------------------------------------------------
 $where  = [];
 $params = [];
 
-if (!empty($filterAction)) {
-    $where[]  = 'l.action = ?';
-    $params[] = $filterAction;
+if (!empty($filterTemplate)) {
+    $where[]  = 't.name = ?';
+    $params[] = $filterTemplate;
 }
 
-if (!empty($filterUser)) {
-    $where[]  = 'u.username LIKE ?';
-    $params[] = '%' . $filterUser . '%';
+if (!empty($filterStatus)) {
+    $where[]  = 'd.status = ?';
+    $params[] = $filterStatus;
 }
 
 if (!empty($filterDate)) {
-    $where[]  = 'DATE(l.created_at) = ?';
+    $where[]  = 'DATE(d.created_at) = ?';
     $params[] = $filterDate;
 }
 
-$baseWhere = "l.action NOT IN ('admin', 'delete_log')";
-$whereClause = !empty($where) 
-    ? 'WHERE ' . $baseWhere . ' AND ' . implode(' AND ', $where) 
-    : 'WHERE ' . $baseWhere;
+$whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
 // --------------------------------------------------
-// Numaram totalul de loguri pentru paginare
+// Numaram totalul de documente pentru paginare
 // --------------------------------------------------
-$totalLogs = $db->fetchOne(
+$totalDocuments = $db->fetchOne(
     "SELECT COUNT(*) as total
-     FROM logs l
-     LEFT JOIN users u ON l.user_id = u.id
+     FROM documents d
+     LEFT JOIN templates t ON d.template_id = t.id
+     LEFT JOIN users u ON d.user_id = u.id
      {$whereClause}",
     $params
 )['total'] ?? 0;
 
-$totalPages = (int)ceil($totalLogs / $perPage);
+$totalPages = (int)ceil($totalDocuments / $perPage);
 
 // --------------------------------------------------
-// Obtinem logurile pentru pagina curenta
+// Obtinem documentele pentru pagina curenta
 // --------------------------------------------------
-$logs = $db->fetchAll(
-    "SELECT 
-        l.id,
-        l.action,
-        l.description,
-        l.entity,
-        l.entity_id,
-        l.ip_address,
-        l.created_at,
-        u.username,
-        u.email
-     FROM logs l
-     LEFT JOIN users u ON l.user_id = u.id
+$documents = $db->fetchAll(
+    "SELECT
+        d.id,
+        d.title,
+        d.status,
+        d.rows_count,
+        d.html_path,
+        d.pdf_path,
+        d.created_at,
+        d.updated_at,
+        t.name  AS template_name,
+        t.label AS template_label,
+        u.username
+     FROM documents d
+     LEFT JOIN templates t ON d.template_id = t.id
+     LEFT JOIN users u ON d.user_id = u.id
      {$whereClause}
-     ORDER BY l.created_at DESC
+     ORDER BY d.created_at DESC
      LIMIT {$perPage} OFFSET {$offset}",
     $params
 );
 
 // --------------------------------------------------
-// Obtinem lista de actiuni distincte pentru filtru
+// Liste pentru filtre
 // --------------------------------------------------
-$actions = $db->fetchAll(
-    "SELECT DISTINCT action FROM logs 
-     WHERE action NOT IN ('admin', 'delete_log')
-     ORDER BY action ASC"
+$templates = $db->fetchAll(
+    'SELECT DISTINCT name, label FROM templates ORDER BY label ASC'
 );
 
+$statuses = ['draft', 'generated', 'exported'];
+
 // --------------------------------------------------
-// Stergere log (doar admin, doar GET cu confirmare)
+// Stergere document
 // --------------------------------------------------
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
-    $db->delete('logs', 'id = ?', [$deleteId]);
-    $db->log('delete_log', 'Log sters: ID ' . $deleteId, $_SESSION['user_id']);
-    header('Location: ' . BASE_URL . '/admin/logs.php');
-    exit;
-}
-
-// --------------------------------------------------
-// Stergere toate logurile (reset complet)
-// --------------------------------------------------
-if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
-    $db->query('DELETE FROM logs');
-    $db->log('delete_log', 'Toate logurile au fost sterse', $_SESSION['user_id']);
-    header('Location: ' . BASE_URL . '/admin/logs.php');
+    $db->delete('documents', 'id = ?', [$deleteId]);
+    $db->log('admin', 'Document sters: ID ' . $deleteId, $_SESSION['user_id']);
+    header('Location: ' . BASE_URL . '/admin/documents.php');
     exit;
 }
 ?>
@@ -121,7 +111,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Istoric activitate — <?php echo APP_NAME; ?></title>
+    <title>Documente generate — <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/main.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/admin.css">
     <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
@@ -146,12 +136,12 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                     <span class="nav-icon">👥</span> Utilizatori
                 </a>
             </li>
-            <li class="admin-nav-item">
+            <li class="admin-nav-item active">
                 <a href="<?php echo BASE_URL; ?>/admin/documents.php">
                     <span class="nav-icon">📄</span> Documente generate
                 </a>
             </li>
-            <li class="admin-nav-item active">
+            <li class="admin-nav-item">
                 <a href="<?php echo BASE_URL; ?>/admin/logs.php">
                     <span class="nav-icon">📋</span> Istoric activitate
                 </a>
@@ -174,48 +164,49 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
 
         <!-- Topbar -->
         <div class="admin-topbar">
-            <span class="admin-topbar-title">📋 Istoric activitate</span>
+            <span class="admin-topbar-title">📄 Documente generate</span>
             <div class="admin-topbar-actions">
                 <span style="font-size:13px; color:#666;">
-                    Total: <strong><?php echo $totalLogs; ?></strong> loguri
+                    Total: <strong><?php echo $totalDocuments; ?></strong> documente
                 </span>
-                <a href="javascript:void(0)"
-                    class="admin-btn danger small"
-                    onclick="showConfirmModal('Stergi TOATE logurile? Actiunea este ireversibila!', function(){ window.location='?clear_all=1'; })">
-                    🗑 Sterge toate
-                </a>
             </div>
         </div>
 
-        <!-- Continut -->
         <div class="admin-content">
 
             <!-- Filtre -->
             <div class="admin-card" style="margin-bottom:20px;">
                 <div class="admin-card-header">
-                    <span class="admin-card-title">🔍 Filtrare loguri</span>
+                    <span class="admin-card-title">🔍 Filtrare documente</span>
                 </div>
                 <div class="admin-card-body">
                     <form method="GET" action="">
                         <div class="admin-filters">
 
-                            <!-- Filtru actiune -->
-                            <select name="action" class="admin-select">
-                                <option value="">Toate actiunile</option>
-                                <?php foreach ($actions as $act): ?>
-                                    <option value="<?php echo htmlspecialchars($act['action']); ?>"
-                                        <?php echo ($filterAction === $act['action']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($act['action']); ?>
+                            <!-- Filtru sablon -->
+                            <select name="template" class="admin-select">
+                                <option value="">Toate sabloanele</option>
+                                <?php foreach ($templates as $tpl): ?>
+                                    <option value="<?php echo htmlspecialchars($tpl['name']); ?>"
+                                        <?php echo ($filterTemplate === $tpl['name']) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($tpl['label']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                                <option value="__none__" <?php echo ($filterTemplate === '__none__') ? 'selected' : ''; ?>>
+                                    Fara sablon (N/A)
+                                </option>
+                            </select>
+
+                            <!-- Filtru status -->
+                            <select name="status" class="admin-select">
+                                <option value="">Toate statusurile</option>
+                                <?php foreach ($statuses as $s): ?>
+                                    <option value="<?php echo $s; ?>"
+                                        <?php echo ($filterStatus === $s) ? 'selected' : ''; ?>>
+                                        <?php echo ucfirst($s); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-
-                            <!-- Filtru utilizator -->
-                            <input type="text"
-                                   name="user"
-                                   class="admin-search-input"
-                                   placeholder="Cauta utilizator..."
-                                   value="<?php echo htmlspecialchars($filterUser); ?>">
 
                             <!-- Filtru data -->
                             <input type="date"
@@ -234,10 +225,10 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                 </div>
             </div>
 
-            <!-- Tabel loguri -->
+            <!-- Tabel documente -->
             <div class="admin-card">
                 <div class="admin-card-header">
-                    <span class="admin-card-title">Loguri</span>
+                    <span class="admin-card-title">Documente</span>
                     <span style="font-size:13px; color:#666;">
                         Pagina <?php echo $page; ?> din <?php echo max(1, $totalPages); ?>
                     </span>
@@ -247,53 +238,81 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                         <table class="admin-table">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Actiune</th>
-                                    <th>Descriere</th>
+                                    <th>ID</th>
+                                    <th>Titlu</th>
+                                    <th>Sablon</th>
                                     <th>Utilizator</th>
-                                    <th>IP</th>
-                                    <th>Data</th>
+                                    <th>Status</th>
+                                    <th>Randuri</th>
+                                    <th>Fisiere</th>
+                                    <th>Data generarii</th>
                                     <th>Actiuni</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (empty($logs)): ?>
+                                <?php if (empty($documents)): ?>
                                     <tr>
-                                        <td colspan="7"
+                                        <td colspan="9"
                                             style="text-align:center; padding:30px; color:#999;">
-                                            Nu exista loguri<?php echo !empty($whereClause) ? ' pentru filtrele selectate' : ''; ?>.
+                                            Nu exista documente<?php echo !empty($whereClause) ? ' pentru filtrele selectate' : ''; ?>.
                                         </td>
                                     </tr>
                                 <?php else: ?>
-                                    <?php foreach ($logs as $log): ?>
+                                    <?php foreach ($documents as $doc): ?>
                                         <tr>
-                                            <td><?php echo $log['id']; ?></td>
+                                            <td><?php echo $doc['id']; ?></td>
+                                            <td><?php echo htmlspecialchars($doc['title']); ?></td>
                                             <td>
-                                                <span class="admin-badge <?php echo getActionBadgeClass($log['action']); ?>">
-                                                    <?php echo htmlspecialchars($log['action']); ?>
-                                                </span>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($log['description'] ?? '-'); ?></td>
-                                            <td>
-                                                <?php if ($log['username']): ?>
-                                                    <span class="admin-badge <?php echo $log['username'] === 'admin' ? 'admin' : 'info'; ?>">
-                                                        <?php echo htmlspecialchars($log['username']); ?>
+                                                <?php if ($doc['template_label']): ?>
+                                                    <span class="admin-badge info">
+                                                        <?php echo htmlspecialchars($doc['template_label']); ?>
                                                     </span>
+                                                <?php else: ?>
+                                                    <span style="color:#999;">N/A</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($doc['username']): ?>
+                                                    <strong><?php echo htmlspecialchars($doc['username']); ?></strong>
                                                 <?php else: ?>
                                                     <span style="color:#999;">anonim</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td style="font-family:monospace; font-size:12px;">
-                                                <?php echo htmlspecialchars($log['ip_address'] ?? '-'); ?>
+                                            <td>
+                                                <span class="admin-badge <?php echo getStatusBadgeClass($doc['status']); ?>">
+                                                    <?php echo htmlspecialchars($doc['status']); ?>
+                                                </span>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <?php echo $doc['rows_count']; ?>
+                                            </td>
+                                            <td style="font-size:12px;">
+                                                <?php if ($doc['html_path']): ?>
+                                                    <a href="<?php echo BASE_URL . '/generated/html/' . htmlspecialchars($doc['html_path']); ?>"
+                                                    target="_blank">HTML</a>
+                                                <?php endif; ?>
+                                                <?php if ($doc['pdf_path']): ?>
+                                                    &nbsp;
+                                                    <a href="<?php echo BASE_URL . '/generated/pdf/' . htmlspecialchars($doc['pdf_path']); ?>"
+                                                    target="_blank">PDF</a>
+                                                <?php endif; ?>
+                                                <?php if (!$doc['html_path'] && !$doc['pdf_path']): ?>
+                                                    <span style="color:#999;">—</span>
+                                                <?php endif; ?>
                                             </td>
                                             <td style="white-space:nowrap; font-size:12px;">
-                                                <?php echo htmlspecialchars($log['created_at']); ?>
+                                                <?php echo htmlspecialchars($doc['created_at']); ?>
                                             </td>
                                             <td>
                                                 <a href="javascript:void(0)"
                                                     class="admin-btn danger small"
-                                                    onclick="showConfirmModal('Stergi acest log?', function(){ window.location='?delete_id=<?php echo $log['id']; ?>'; })">
-                                                    ✕
+                                                    onclick="showConfirmModal(
+                                                        'Stergi acest document?',
+                                                        function() {
+                                                            window.location='?delete_id=<?php echo $doc['id']; ?>';
+                                                        }
+                                                    )">
+                                                        ✕
                                                 </a>
                                             </td>
                                         </tr>
@@ -309,7 +328,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
             <?php if ($totalPages > 1): ?>
                 <div class="admin-pagination">
                     <?php if ($page > 1): ?>
-                        <a href="?page=<?php echo $page - 1; ?>&action=<?php echo urlencode($filterAction); ?>&user=<?php echo urlencode($filterUser); ?>&date=<?php echo urlencode($filterDate); ?>">
+                        <a href="?page=<?php echo $page - 1; ?>&template=<?php echo urlencode($filterTemplate); ?>&status=<?php echo urlencode($filterStatus); ?>&date=<?php echo urlencode($filterDate); ?>">
                             &laquo;
                         </a>
                     <?php endif; ?>
@@ -318,46 +337,32 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                         <?php if ($i === $page): ?>
                             <span class="active"><?php echo $i; ?></span>
                         <?php else: ?>
-                            <a href="?page=<?php echo $i; ?>&action=<?php echo urlencode($filterAction); ?>&user=<?php echo urlencode($filterUser); ?>&date=<?php echo urlencode($filterDate); ?>">
+                            <a href="?page=<?php echo $i; ?>&template=<?php echo urlencode($filterTemplate); ?>&status=<?php echo urlencode($filterStatus); ?>&date=<?php echo urlencode($filterDate); ?>">
                                 <?php echo $i; ?>
                             </a>
                         <?php endif; ?>
                     <?php endfor; ?>
 
                     <?php if ($page < $totalPages): ?>
-                        <a href="?page=<?php echo $page + 1; ?>&action=<?php echo urlencode($filterAction); ?>&user=<?php echo urlencode($filterUser); ?>&date=<?php echo urlencode($filterDate); ?>">
+                        <a href="?page=<?php echo $page + 1; ?>&template=<?php echo urlencode($filterTemplate); ?>&status=<?php echo urlencode($filterStatus); ?>&date=<?php echo urlencode($filterDate); ?>">
                             &raquo;
                         </a>
                     <?php endif; ?>
                 </div>
             <?php endif; ?>
 
-        </div><!-- /.admin-content -->
+        </div>
     </main>
 </div>
 
 <?php
-// --------------------------------------------------
-// Functie helper: returneaza clasa badge pentru actiune
-// --------------------------------------------------
-function getActionBadgeClass(string $action): string {
+function getStatusBadgeClass(string $status): string {
     $map = [
-        'login'         => 'success',
-        'logout'        => 'info',
-        'generate'      => 'info',
-        'export'        => 'success',
-        'import'        => 'warning',
-        'delete'        => 'danger',
-        'save_schema'   => 'info',
-        'update_schema' => 'warning',
-        'delete_schema' => 'danger',
-        'delete_log'    => 'danger',
-        'add_user'      => 'success',
-        'delete_user'   => 'danger',
-        'generate_document' => 'info',
-        'delete_template'   => 'danger',
+        'draft'     => 'warning',
+        'generated' => 'info',
+        'exported'  => 'success',
     ];
-    return $map[$action] ?? 'info';
+    return $map[$status] ?? 'info';
 }
 ?>
 
