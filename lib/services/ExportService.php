@@ -148,7 +148,7 @@ class ExportService
         $headers = array_column($fields, 'label');
         $fieldKeys = array_column($fields, 'field');
 
-        $rawRowData = $this->extractDataFromHtml(file_get_contents($htmlPath), $fieldKeys);
+        $rawRowData = $this->extractDataFromHtml(file_get_contents($htmlPath), $fields);
         $rowData = [];
         foreach ($fields as $field) {
             $rowData[$field['label']] = $rawRowData[$field['field']] ?? '';
@@ -278,19 +278,38 @@ private function getDocumentFields(array $document): array
 }
     
 
-    private function extractDataFromHtml(string $html, array $fieldKeys): array
-    {
-        $data = [];
-        foreach ($fieldKeys as $key) {
-            $pattern = '/data-field="' . preg_quote($key, '/') . '"[^>]*>([^<]*)</';
-            if (preg_match($pattern, $html, $matches)) {
-                $data[$key] = html_entity_decode(trim($matches[1]), ENT_QUOTES, 'UTF-8');
-            } else {
-                $data[$key] = '';
-            }
+    private function extractDataFromHtml(string $html, array $fields): array
+{
+    $data = [];
+
+    foreach ($fields as $field) {
+        $key = $field['field'] ?? '';
+        $label = $field['label'] ?? $key;
+
+        if (!$key) {
+            continue;
         }
-        return $data;
+
+        // Caz 1: HTML cu data-field="nume"
+        $patternDataField = '/data-field="' . preg_quote($key, '/') . '"[^>]*>([^<]*)</i';
+        if (preg_match($patternDataField, $html, $matches)) {
+            $data[$key] = html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            continue;
+        }
+
+        // Caz 2: HTML generat ca <p><strong>Label:</strong> valoare</p>
+        $patternLabel = '/<strong>\s*' . preg_quote($label, '/') . '\s*:?\s*<\/strong>\s*(.*?)\s*<\/p>/is';
+        if (preg_match($patternLabel, $html, $matches)) {
+            $value = strip_tags($matches[1]);
+            $data[$key] = html_entity_decode(trim($value), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            continue;
+        }
+
+        $data[$key] = '';
     }
+
+    return $data;
+}
 
     private function logExport(int $documentId, int $userId, string $format, string $filePath): void
     {

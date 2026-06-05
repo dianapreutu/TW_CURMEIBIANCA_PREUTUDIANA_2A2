@@ -240,16 +240,24 @@ class PdfExporter
   
     private function exportWithFallback(string $html, string $outputPath): string
     {
-        // Extragem textul din HTML (eliminam tag-urile)
-        $text = strip_tags($html);
+       // Pregatim HTML-ul ca sa pastram randurile/paragrafele in PDF
+$html = preg_replace('/<\s*br\s*\/?>/i', "\n", $html);
+$html = preg_replace('/<\/p\s*>/i', "\n\n", $html);
+$html = preg_replace('/<\/div\s*>/i', "\n", $html);
+$html = preg_replace('/<\/li\s*>/i', "\n", $html);
 
-        // decodam entitatile HTML
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+// Extragem textul din HTML
+$text = strip_tags($html);
 
-        // curatam spatiile multiple
-        $text = preg_replace('/\s+/', ' ', $text);
-        $text = wordwrap($text, 80, "\n", true);
+// Decodam entitatile HTML
+$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
+// Curatam spatiile, dar pastram newline-urile
+$text = preg_replace("/[ \t]+/", ' ', $text);
+$text = preg_replace("/\n{3,}/", "\n\n", $text);
+$text = trim($text);
+
+$text = wordwrap($text, 80, "\n", true);
         // construim un PDF minimal valid
         // structura PDF de baza conform specificatiei PDF 1.4
         $pdf = "%PDF-1.4\n";
