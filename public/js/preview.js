@@ -197,30 +197,21 @@ function handleExport(documentId, format) {
 // cere confirmare inainte de stergere
 // --------------------------------------------------
 function handleDelete(documentId) {
-    // Cerem confirmare utilizatorului
-    if (!confirm('Esti sigur ca vrei sa stergi acest document? Actiunea este ireversibila.')) {
-        return;
-    }
- 
-    // Folosim FormData ca handleDelete() citeste din $_POST
-    const formData = new FormData();
-    formData.append('action', 'delete');
-    formData.append('id', documentId);
- 
-    ajaxPost(BASE_URL + '/api/documents.php', formData, function (data) {
-        // app.js extrage response.data - daca data exista = succes
-        if (data) {
-            showPreviewMessage('Documentul a fost sters. Vei fi redirectionat...', 'success');
-            // Redirectam catre lista de documente dupa 2 secunde
-            setTimeout(() => {
-                window.location.href = BASE_URL + '/index.php?page=documents';
-            }, 2000);
-        } else {
-            showPreviewMessage(
-                'Eroare la stergerea documentului.',
-                'danger'
-            );
-        }
+    showConfirmModal('Ești sigur că vrei să ștergi acest document? Acțiunea este ireversibilă.', function() {
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('id', documentId);
+
+        ajaxPost(BASE_URL + '/api/documents.php', formData, function (data) {
+            if (data) {
+                showPreviewMessage('Documentul a fost sters. Vei fi redirectionat...', 'success');
+                setTimeout(() => {
+                    window.location.href = BASE_URL + '/index.php?page=documents';
+                }, 2000);
+            } else {
+                showPreviewMessage('Eroare la stergerea documentului.', 'danger');
+            }
+        });
     });
 }
  

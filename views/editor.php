@@ -77,6 +77,20 @@ require_once __DIR__ . '/../config.php';
                         <button class="toolbar-btn" data-insert="{{firma}}" title="Denumire firma">{{firma}}</button>
                         <button class="toolbar-btn" data-insert="{{nr_factura}}" title="Numar factura">{{nr_factura}}</button>
                         <button class="toolbar-btn" data-insert="{{suma}}" title="Suma">{{suma}}</button>
+                        <button class="toolbar-btn" data-insert="{{ocupatie}}" title="Ocupatie">{{ocupatie}}</button>
+<button class="toolbar-btn" data-insert="{{studii}}" title="Nivel studii">{{studii}}</button>
+<button class="toolbar-btn" data-insert="{{data_nasterii}}" title="Data nasterii">{{data_nasterii}}</button>
+<button class="toolbar-btn" data-insert="{{oras}}" title="Oras">{{oras}}</button>
+<button class="toolbar-btn" data-insert="{{judet}}" title="Judet">{{judet}}</button>
+<button class="toolbar-btn" data-insert="{{iban}}" title="IBAN">{{iban}}</button>
+<button class="toolbar-btn" data-insert="{{tva}}" title="TVA">{{tva}}</button>
+<button class="toolbar-btn" data-insert="{{produs}}" title="Produs">{{produs}}</button>
+<button class="toolbar-btn" data-insert="{{cantitate}}" title="Cantitate">{{cantitate}}</button>
+<button class="toolbar-btn" data-insert="{{pret_unitar}}" title="Pret unitar">{{pret_unitar}}</button>
+<button class="toolbar-btn" data-insert="{{cui}}" title="CUI">{{cui}}</button>
+<button class="toolbar-btn" data-insert="{{nume_solicitant}}" title="Nume solicitant">{{nume_solicitant}}</button>
+<button class="toolbar-btn" data-insert="{{subiect}}" title="Subiect">{{subiect}}</button>
+<button class="toolbar-btn" data-insert="{{detalii}}" title="Detalii">{{detalii}}</button>
                         <!-- Buton pentru bloc conditional -->
                         <button class="toolbar-btn" data-insert="{{IF camp}}continut{{ENDIF}}" title="Bloc conditional">{{IF...}}</button>
                     </div>
