@@ -122,14 +122,12 @@ function loadFieldTypes() {
     const select = document.getElementById('field-type-select');
     if (!select) return;
 
-    // Apel AJAX catre API
     ajaxGet('api/schemas.php?action=field_types', function (data) {
+        // app.js extrage automat response.data, deci data = { types: {...} }
         if (!data || !data.types) return;
 
-        // Golim optiunile existente
         select.innerHTML = '<option value="">-- Alege tipul --</option>';
 
-        // Adaugam fiecare tip ca optiune
         Object.entries(data.types).forEach(([value, label]) => {
             const option = document.createElement('option');
             option.value = value;
@@ -154,7 +152,9 @@ function loadSavedSchemas() {
             return;
         }
 
-        const schemas = data.schemas || [];
+        // app.js extrage automat response.data inainte de callback
+        // deci data = { schemas: [...] }, nu { success: true, data: { schemas: [...] } }
+        const schemas = (data && data.schemas) ? data.schemas : [];
         renderSavedSchemas(schemas);
     }, function (error) {
         const message = (typeof error === 'string' && error.indexOf('401') !== -1)
