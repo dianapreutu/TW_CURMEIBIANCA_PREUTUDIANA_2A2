@@ -20,22 +20,36 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
         $password = $_POST['password'] ?? '';
 
         // Verificam parola cu cea din config.php
-        if ($password === ADMIN_PASSWORD) {
+       $username = trim($_POST['username'] ?? '');
+$password = $_POST['password'] ?? '';
 
-            // Parola corecta - marcam sesiunea ca autentificata
-            $_SESSION['admin'] = true;
-            $_SESSION['user_id'] = 1;
-            $_SESSION['role'] = 'admin';
-            $_SESSION['username'] = 'admin';
+if ($username === 'admin' && $password === ADMIN_PASSWORD) {
+    $_SESSION['admin'] = true;
+    $_SESSION['user_id'] = 1;
+    $_SESSION['role'] = 'admin';
+    $_SESSION['username'] = 'admin';
 
-            // Redirectionam catre panoul admin
-            header('Location: index.php');
-            exit;
+    header('Location: index.php');
+    exit;
+}
 
-        } else {
-            // Parola gresita - setam mesajul de eroare
-            $loginError = 'Parola incorecta!';
-        }
+$db = Database::getInstance();
+$user = $db->fetchOne(
+    'SELECT * FROM users WHERE username = ? OR email = ?',
+    [$username, $username]
+);
+
+if ($user && password_verify($password, $user['password'])) {
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['admin'] = ($user['role'] === 'admin');
+
+    header('Location: ' . BASE_URL . '/index.php?page=home');
+    exit;
+}
+
+$loginError = 'Utilizator sau parola incorecta!';
     }
 
     // Afisam formularul de login daca nu e autentificat
@@ -77,16 +91,26 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
                     <!-- Formularul de autentificare --> 
                     <form method="POST" action="index.php">
-                        <div class="form-group">
-                            <label for="password">Parola administrator:</label>
-                            <input type="password"
-                                    id="password"
-                                    name="password"
-                                    placeholder="Introduceti parola"
-                                    required>
-                        </div>
-                        <button type="submit">Autentificare</button>
-                    </form>
+
+    <div class="form-group">
+        <label for="username">Utilizator sau email:</label>
+        <input type="text"
+               id="username"
+               name="username"
+               required>
+    </div>
+
+          <div class="form-group">
+              <label for="password">Introduceti parola:</label>
+        <input type="password"
+               id="password"
+               name="password"
+               required>
+    </div>
+
+                         <button type="submit">Autentificare</button>
+
+                      </form>
                 </div>
             </div>
         </body>
@@ -98,11 +122,12 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
 // Verificam daca s-a cerut delogarea
 if (isset($_GET['logout'])) {
+     $_SESSION = [];
     // Distrugem sesiunea
     session_destroy();
 
     // Redirectionam catre login
-    header('Location: index.php');
+    header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
 

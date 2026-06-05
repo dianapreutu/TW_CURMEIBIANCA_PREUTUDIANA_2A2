@@ -31,6 +31,13 @@ require_once __DIR__ . '/../config.php';
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
+                 <?php if (isset($_SESSION['user_id']) || isset($_SESSION['admin'])): ?>
+    <li>
+        <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">
+            Delogare
+        </a>
+    </li>
+<?php endif; ?>
             </ul>
         </nav>
 
