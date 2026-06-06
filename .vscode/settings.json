@@ -1,0 +1,8 @@
+﻿{
+  "files.exclude": {
+    "generated/html/*.html": true,
+    "generated/pdf/*.pdf": true,
+    "uploads/*.csv": true,
+    "uploads/*.json": true
+  }
+}
