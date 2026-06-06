@@ -97,32 +97,90 @@ class ExportService
         );
     }
 
-    private function exportAsHtml(array $document): array
-    {
-        $htmlPath = GENERATED_HTML_PATH . '/' . ($document['html_path'] ?? '');
-        if (empty($document['html_path']) || !file_exists($htmlPath)) {
-            throw new Exception('Fisierul HTML al documentului nu exista.');
+  private function exportAsHtml(array $document): array
+{
+    $htmlPath = GENERATED_HTML_PATH . '/' . ($document['html_path'] ?? '');
+    if (empty($document['html_path']) || !file_exists($htmlPath)) {
+        throw new Exception('Fisierul HTML al documentului nu exista.');
+    }
+
+    $html = file_get_contents($htmlPath);
+
+    // Aplicam stilizare daca fisierul nu e deja stilizat
+    if (strpos($html, '<!DOCTYPE html>') === false) {
+        $templateId = (int)($document['template_id'] ?? 0);
+        $cerereIds = [2];
+        $facturaIds = [3];
+        if (in_array($templateId, $cerereIds)) {
+            $docTitle = 'CERERE';
+            $color = '#1a3a5c';
+        } elseif (in_array($templateId, $facturaIds)) {
+            $docTitle = 'FACTURĂ';
+            $color = '#1a5c2a';
+        } else {
+            $docTitle = 'CURRICULUM VITAE';
+            $color = '#3a1a5c';
         }
 
-        return [
-            'format' => 'html',
-            'download_url' => BASE_URL . '/generated/html/' . basename($document['html_path']),
-            'filename' => pathinfo($document['html_path'], PATHINFO_FILENAME) . '.html',
-            'message' => 'Document HTML pregatit pentru descarcare.'
-        ];
+        $styledHtml = '<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>' . $docTitle . '</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Inter", Arial, sans-serif; font-size: 11pt; color: #333; background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 100%); min-height: 100vh; padding: 40px 20px; }
+    .doc-wrapper { max-width: 820px; margin: 0 auto; }
+    .doc-header { background: linear-gradient(135deg, ' . $color . ' 0%, ' . $color . 'cc 100%); color: white; border-radius: 12px 12px 0 0; padding: 32px 40px; position: relative; overflow: hidden; }
+    .doc-header::before { content: ""; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+    .doc-header::after { content: ""; position: absolute; bottom: -20px; left: 20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+    .doc-header h1 { font-size: 26pt; font-weight: 700; letter-spacing: 3px; margin-bottom: 6px; position: relative; }
+    .doc-header .subtitle { font-size: 9pt; opacity: 0.75; position: relative; }
+    .doc-body { background: white; padding: 36px 40px; box-shadow: 0 8px 32px rgba(0,0,0,0.10); }
+    p { margin: 12px 0; line-height: 1.8; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+    p:last-child { border-bottom: none; }
+    strong { color: ' . $color . '; min-width: 180px; display: inline-block; font-weight: 600; vertical-align: top; }
+p { margin: 12px 0; line-height: 1.8; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; display: flex; gap: 8px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th { background: ' . $color . '; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+    td { padding: 9px 12px; border-bottom: 1px solid #eee; }
+    tr:nth-child(even) td { background: #fafafa; }
+    h2 { color: ' . $color . '; font-size: 12pt; font-weight: 700; margin: 20px 0 10px; padding-left: 10px; border-left: 3px solid ' . $color . '; }
+    .doc-footer { background: #f8f8f8; border-radius: 0 0 12px 12px; padding: 14px 40px; font-size: 8.5pt; color: #aaa; display: flex; justify-content: space-between; border-top: 1px solid #eee; }
+    .print-btn { display: block; text-align: center; margin: 20px auto 0; padding: 10px 28px; background: ' . $color . '; color: white; border: none; border-radius: 6px; font-size: 10pt; cursor: pointer; font-family: inherit; letter-spacing: 1px; }
+    .print-btn:hover { opacity: 0.88; }
+    @media print { .print-btn { display: none; } body { background: white; padding: 0; } .doc-header { border-radius: 0; } .doc-footer { border-radius: 0; } }
+</style>
+</head>
+<body>
+<div class="doc-header">
+    <h1>' . $docTitle . '</h1>
+    <div class="subtitle">Generat la ' . date('d.m.Y H:i') . '</div>
+</div>
+<div class="doc-body">
+' . $html . '
+</div>
+<div class="doc-footer">Document generat automat &bull; ' . date('d.m.Y H:i') . '</div>
+</body>
+</html>';
+
+        $exportFilename = pathinfo($document['html_path'], PATHINFO_FILENAME) . '_export.html';
+$exportPath = GENERATED_HTML_PATH . '/' . $exportFilename;
+file_put_contents($exportPath, $styledHtml);
     }
+
+  return [
+    'format' => 'html',
+    'download_url' => BASE_URL . '/generated/html/' . $exportFilename,
+    'filename' => $exportFilename,
+    'message' => 'Document HTML pregatit pentru descarcare.'
+];
+}
 
     private function exportAsPdf(array $document): array
     {
-        $pdfPath = GENERATED_PDF_PATH . '/' . ($document['pdf_path'] ?? '');
-        if (!empty($document['pdf_path']) && file_exists($pdfPath)) {
-            return [
-                'format' => 'pdf',
-                'download_url' => BASE_URL . '/generated/pdf/' . basename($document['pdf_path']),
-                'filename' => basename($document['pdf_path']),
-                'message' => 'PDF existent returnat.'
-            ];
-        }
+       $pdfPath = GENERATED_PDF_PATH . '/' . ($document['pdf_path'] ?? '');
 
         $exportedPath = $this->pdfExporter->exportFromDocument($document['id'], (int)$document['user_id']);
         return [

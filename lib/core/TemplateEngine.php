@@ -260,14 +260,61 @@ class TemplateEngine
             $htmlTemplate = $fieldsJson;
         }
 
-        $html = $this->render($htmlTemplate, $data);
+       $html = $this->render($htmlTemplate, $data);
 
-        // Generam un nume unic pentru fisierul HTML
-        $filename = uniqid('doc_') . '_' . time() . '.html';
-        $filePath = GENERATED_HTML_PATH . '/' . $filename;
+// Detectam tipul documentului pentru stilizare
+$cerereIds = [2];
+$facturaIds = [3];
+if (in_array($templateId, $cerereIds)) {
+    $docTitle = 'CERERE';
+    $color = '#1a3a5c';
+} elseif (in_array($templateId, $facturaIds)) {
+    $docTitle = 'FACTURĂ';
+    $color = '#1a5c2a';
+} else {
+    $docTitle = 'CURRICULUM VITAE';
+    $color = '#3a1a5c';
+}
 
-        // Salvam fisierul HTML pe server
-        file_put_contents($filePath, $html);
+$styledHtml = '<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>' . $docTitle . '</title>
+<style>
+    body { font-family: Arial, sans-serif; font-size: 12pt; color: #222; max-width: 800px; margin: 40px auto; padding: 0 24px; background: #f9f9f9; }
+    .doc-header { text-align: center; border-bottom: 3px solid ' . $color . '; margin-bottom: 28px; padding-bottom: 14px; }
+    .doc-header h1 { font-size: 24pt; color: ' . $color . '; margin: 0 0 4px 0; letter-spacing: 2px; }
+    .doc-header .subtitle { font-size: 9pt; color: #888; }
+    .doc-body { background: white; padding: 28px 32px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    p { margin: 10px 0; line-height: 1.7; }
+    strong { color: ' . $color . '; min-width: 160px; display: inline-block; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th { background: ' . $color . '; color: white; padding: 8px; text-align: left; }
+    td { padding: 7px 8px; border-bottom: 1px solid #ddd; }
+    tr:nth-child(even) td { background: #f5f5f5; }
+    h2 { color: ' . $color . '; font-size: 13pt; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-top: 18px; }
+    .doc-footer { margin-top: 32px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 9pt; color: #aaa; text-align: center; }
+</style>
+</head>
+<body>
+<div class="doc-header">
+    <h1>' . $docTitle . '</h1>
+    <div class="subtitle">Generat la ' . date('d.m.Y H:i') . '</div>
+</div>
+<div class="doc-body">
+' . $html . '
+</div>
+<div class="doc-footer">Document generat automat &bull; ' . date('d.m.Y H:i') . '</div>
+</body>
+</html>';
+
+// Generam un nume unic pentru fisierul HTML
+$filename = uniqid('doc_') . '_' . time() . '.html';
+$filePath = GENERATED_HTML_PATH . '/' . $filename;
+// Salvam fisierul HTML stilizat pe server
+file_put_contents($filePath, $styledHtml);
 
         // Salvam inregistrarea documentului in baza de date
         $docId = $this->db->insert('documents', [

@@ -933,3 +933,29 @@ a:focus-visible {
 #btn-export-pdf  { background-color: #fdecea; border-color: #c0392b; color: #c0392b; }
 #btn-export-csv  { background-color: #e8f8f0; border-color: #1e8449; color: #1e8449; }
 #btn-export-json { background-color: #fef9e7; border-color: #b7950b; color: #b7950b; }
+
+
+.preview-meta-label { font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+
+.preview-meta-label { font-size: 0.85rem !important; }
+
+.preview-meta-value { font-weight: 600; color: #1a1a2e; font-size: 0.9rem; }
+
+.preview-meta-item:first-child .preview-meta-value { font-weight: 400; }
+
+.preview-meta-item:first-child .preview-meta-value { font-weight: 400; }
+
+.preview-header-left .btn { border-color: #999; }
+
+
+
+.preview-container { margin-top: 16px; }
+
+.preview-header { margin-bottom: 16px; } .preview-header-actions { margin-top: 10px; margin-bottom: 10px; }
+
+
+
+
+
+
+

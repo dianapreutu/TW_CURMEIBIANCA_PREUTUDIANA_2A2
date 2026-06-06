@@ -1,8 +1,1 @@
-﻿{
-  "files.exclude": {
-    "generated/html/*.html": true,
-    "generated/pdf/*.pdf": true,
-    "uploads/*.csv": true,
-    "uploads/*.json": true
-  }
-}
+﻿{"files.exclude":{"vendor/":true,"lib/mpdf/":true,"generated/":true,"composer.phar":true,"composer-setup.php":true,"mpdf_debug.txt":true,"test_*.php":true,"preview_dump.txt":true,"uploads/":true}}

@@ -39,7 +39,7 @@ class PdfExporter
     // $userId   - id-ul utilizatorului (pentru logare)
     // returneaza calea catre fisierul PDF generat
 
-    public function exportFromHtml(string $html, string $filename = 'document', int $userId = null): string
+    public function exportFromHtml(string $html, string $filename = 'document', int $userId = null, int $templateId = 0): string
     {
         // generam un nume unic pentru fisier
         $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $filename);
@@ -50,9 +50,10 @@ class PdfExporter
         // mPDF trebuie instalat manual in /lib/mpdf/
         $mpdfPath = ROOT_PATH . '/lib/mpdf/autoload.php';
 
-        if (file_exists($mpdfPath)) {
+        file_put_contents(ROOT_PATH . '/mpdf_debug.txt', $mpdfPath . ' exists=' . (file_exists($mpdfPath) ? 'YES' : 'NO'));
+if (file_exists($mpdfPath)) {
             // varianta cu mPDF (calitate mai buna) 
-            $pdfPath = $this->exportWithMpdf($html, $pdfPath);
+           $pdfPath = $this->exportWithMpdf($html, $pdfPath, $templateId);
         } else {
             // varianta fallback: HTML2PDF simplu (pentru siguranta, ca sa nu crape aplicatia daca nu e instalat mPDF)
             // generam un PDF minimal fara librarie externa
@@ -98,11 +99,12 @@ class PdfExporter
         $html = file_get_contents($htmlPath);
 
         // Exportam HTML-ul ca PDF
-        $pdfPath = $this->exportFromHtml(
-            $html,
-            pathinfo($document['html_path'], PATHINFO_FILENAME),
-            $userId
-        );
+       $pdfPath = $this->exportFromHtml(
+    $html,
+    pathinfo($document['html_path'], PATHINFO_FILENAME),
+    $userId,
+    (int)($document['template_id'] ?? 0)
+);
 
         // Actualizam documentul in DB cu calea PDF-ului
         $pdfFilename = basename($pdfPath);
@@ -204,36 +206,125 @@ class PdfExporter
     // mPDF produce PDF-uri de calitate profesionala
     // suporta diacritice, CSS, imagini
 
-    private function exportWithMpdf(string $html, string $outputPath): string
-    {
-        require_once ROOT_PATH . '/lib/mpdf/autoload.php';
+private function exportWithMpdf(string $html, string $outputPath, int $templateId = 0): string
+{
+    require_once ROOT_PATH . '/lib/mpdf/autoload.php';
 
-        // configuram mPDF
-        $mpdf = new \Mpdf\Mpdf([
-            'mode'        => 'utf-8',
-            'format'      => 'A4',
-            'orientation' => 'P', // Portret
-            'margin_top'  => 15,
-            'margin_bottom'=> 15,
-            'margin_left' => 15,
-            'margin_right'=> 15,
-            'tempDir'     => ROOT_PATH . '/generated/tmp'
-        ]);
+    $mpdf = new \Mpdf\Mpdf([
+        'mode'         => 'utf-8',
+        'format'       => 'A4',
+        'orientation'  => 'P',
+        'margin_top'   => 20,
+        'margin_bottom'=> 20,
+        'margin_left'  => 20,
+        'margin_right' => 20,
+        'tempDir'      => ROOT_PATH . '/generated/tmp'
+    ]);
 
-        // setam metadatele PDF-ului
-        $mpdf->SetTitle(APP_NAME . ' - Document generat');
-        $mpdf->SetAuthor(APP_NAME);
-        $mpdf->SetCreator(APP_NAME . ' v' . APP_VERSION);
+    $mpdf->SetAuthor(APP_NAME);
+    $mpdf->SetCreator(APP_NAME . ' v' . APP_VERSION);
 
-        // scriem HTML-ul in PDF
-        $mpdf->WriteHTML($html);
+    // Detectam tipul documentului
+    $cerereIds = [2];
+    $facturaIds = [3];
+    // CV = orice altceva
 
-        // salvam fisierul PDF pe disk
-        $mpdf->Output($outputPath, 'F');
-
-        return $outputPath;
+    if (in_array($templateId, $cerereIds)) {
+        $type = 'cerere';
+        $title = 'CERERE';
+        $color = '#1a3a5c';
+    } elseif (in_array($templateId, $facturaIds)) {
+        $type = 'factura';
+        $title = 'FACTURĂ';
+        $color = '#1a5c2a';
+    } else {
+        $type = 'cv';
+        $title = 'CURRICULUM VITAE';
+        $color = '#3a1a5c';
     }
 
+    $mpdf->SetTitle($title);
+
+    $css = '
+    body {
+        font-family: DejaVu Sans, Arial, sans-serif;
+        font-size: 11pt;
+        color: #222;
+        margin: 0;
+        padding: 0;
+    }
+    .doc-header {
+        text-align: center;
+        border-bottom: 3px solid ' . $color . ';
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+    }
+    .doc-header h1 {
+        font-size: 22pt;
+        color: ' . $color . ';
+        margin: 0 0 4px 0;
+        letter-spacing: 2px;
+    }
+    .doc-header .subtitle {
+        font-size: 9pt;
+        color: #888;
+    }
+    p {
+        margin: 10px 0;
+        line-height: 1.7;
+    }
+    strong {
+        color: ' . $color . ';
+        min-width: 160px;
+        display: inline-block;
+    }
+    .doc-footer {
+        margin-top: 40px;
+        border-top: 1px solid #ccc;
+        padding-top: 8px;
+        font-size: 9pt;
+        color: #aaa;
+        text-align: center;
+    }
+    ';
+
+    // Stil suplimentar per tip
+    if ($type === 'factura') {
+        $css .= '
+        table { width:100%; border-collapse:collapse; margin:16px 0; }
+        th { background:' . $color . '; color:white; padding:8px; text-align:left; }
+        td { padding:7px 8px; border-bottom:1px solid #ddd; }
+        tr:nth-child(even) td { background:#f0f7f0; }
+        ';
+    } elseif ($type === 'cv') {
+        $css .= '
+        h2 { color:' . $color . '; font-size:13pt; border-bottom:1px solid #ccc; padding-bottom:3px; margin-top:18px; }
+        ';
+    }
+
+    $styledHtml = '<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>' . $css . '</style>
+</head>
+<body>
+<div class="doc-header">
+    <h1>' . $title . '</h1>
+    <div class="subtitle">Generat de ' . APP_NAME . ' &bull; ' . date('d.m.Y') . '</div>
+</div>
+' . $html . '
+<div class="doc-footer">
+    Document generat automat &bull; ' . date('d.m.Y H:i') . '
+</div>
+</body>
+</html>';
+
+    $mpdf->WriteHTML($styledHtml);
+    $mpdf->Output($outputPath, 'F');
+
+    return $outputPath;
+}
     // exportWithFallback() - genereaza PDF fara librarie externa
     // varianta simpla folosind structura PDF minima scrisa manual
     // suporta doar text simplu (fara CSS avansat)
