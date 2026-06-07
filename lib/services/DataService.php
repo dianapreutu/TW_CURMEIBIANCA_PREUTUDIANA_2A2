@@ -1,8 +1,8 @@
 <?php
 
-// lib/services/DataService.php - Serviciu pentru generarea de date si import CSV
-// Centralizeaza logica de validare, generare si import date
-// ==================================================
+// lib/services/DataService.php
+// Serviciu pentru generarea datelor si importul CSV
+// Centralizeaza validarea, generarea si importul datelor
 
 class DataService
 {
@@ -11,10 +11,11 @@ class DataService
 
     public function __construct(DataGenerator $generator = null, CsvService $csvService = null)
     {
-        $this->generator = $generator ?? new DataGenerator();
+        $this->generator  = $generator  ?? new DataGenerator();
         $this->csvService = $csvService ?? new CsvService(Database::getInstance());
     }
 
+    // Genereaza un numar de randuri pe baza schemei de campuri primite
     public function generateRows(array $fields, int $count): array
     {
         $this->validateFields($fields);
@@ -23,17 +24,20 @@ class DataService
         return $this->generator->generate($fields, $count);
     }
 
+    // Genereaza un singur rand de date si il returneaza ca array asociativ
     public function generateRecord(array $fields): array
     {
         $rows = $this->generateRows($fields, 1);
         return $rows[0] ?? [];
     }
 
+    // Importa un fisier CSV incarcat de utilizator via CsvService
     public function importCsv(array $file, int $userId): array
     {
         return $this->csvService->handleUpload($file, $userId);
     }
 
+    // Valideaza si returneaza primul rand dintr-un fisier CSV incarcat
     public function parseCsvRow(array $file): array
     {
         if (empty($file) || !isset($file['tmp_name']) || $file['error'] !== UPLOAD_ERR_OK) {
@@ -53,6 +57,7 @@ class DataService
         return $result['rows'][0];
     }
 
+    // Verifica ca schema contine cel putin un camp si ca tipurile sunt valide
     private function validateFields(array $fields): void
     {
         if (empty($fields)) {

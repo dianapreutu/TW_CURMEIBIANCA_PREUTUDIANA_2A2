@@ -1,8 +1,8 @@
 <?php
 
-// lib/services/SchemaService.php - Serviciu pentru gestionarea schemelor de campuri
-// Centralizeaza operatiile CRUD pentru scheme si tipurile de campuri
-// ==================================================
+// lib/services/SchemaService.php
+// Serviciu pentru gestionarea schemelor de campuri salvate de utilizatori
+// Centralizeaza operatiile CRUD pentru scheme
 
 class SchemaService
 {
@@ -13,11 +13,13 @@ class SchemaService
         $this->db = Database::getInstance();
     }
 
+    // Returneaza toate tipurile de campuri disponibile
     public function getFieldTypes(): array
     {
         return FieldTypes::getAll();
     }
 
+    // Returneaza toate schemele unui utilizator, cu campurile decodate
     public function getSchemas(int $userId): array
     {
         $schemas = $this->db->fetchAll(
@@ -36,6 +38,7 @@ class SchemaService
         return $schemas;
     }
 
+    // Returneaza o schema specifica dupa ID si utilizator
     public function getSchema(int $id, int $userId): ?array
     {
         if ($id <= 0) {
@@ -59,19 +62,21 @@ class SchemaService
         return $schema;
     }
 
+    // Salveaza o schema noua si returneaza ID-ul generat
     public function saveSchema(string $name, array $fields, int $userId): int
     {
         $name = $this->sanitize($name);
         $this->validateSchema($name, $fields);
 
         return $this->db->insert('schemas', [
-            'user_id' => $userId,
-            'name' => $name,
+            'user_id'     => $userId,
+            'name'        => $name,
             'fields_json' => json_encode($fields, JSON_UNESCAPED_UNICODE),
-            'rows_count' => max(1, min(10, MAX_ROWS))
+            'rows_count'  => max(1, min(10, MAX_ROWS))
         ]);
     }
 
+    // Actualizeaza o schema existenta cu datele furnizate
     public function updateSchema(int $id, array $data, int $userId): void
     {
         if ($id <= 0) {
@@ -108,6 +113,7 @@ class SchemaService
         $this->db->update('schemas', $updateData, 'id = ? AND user_id = ?', [$id, $userId]);
     }
 
+    // Sterge o schema dupa ID, verificand ca apartine utilizatorului curent
     public function deleteSchema(int $id, int $userId): void
     {
         if ($id <= 0) {
@@ -126,6 +132,7 @@ class SchemaService
         $this->db->delete('schemas', 'id = ? AND user_id = ?', [$id, $userId]);
     }
 
+    // Valideaza numele schemei si tipurile campurilor
     private function validateSchema(string $name, array $fields): void
     {
         if (empty($name)) {
@@ -144,6 +151,7 @@ class SchemaService
         }
     }
 
+    // Curata un string de caractere periculoase pentru a preveni XSS
     private function sanitize(string $value): string
     {
         return htmlspecialchars(trim($value), ENT_QUOTES | ENT_HTML5, 'UTF-8');

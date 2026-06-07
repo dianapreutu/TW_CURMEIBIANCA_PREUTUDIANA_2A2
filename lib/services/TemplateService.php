@@ -1,8 +1,8 @@
 <?php
 
-// lib/services/TemplateService.php - Serviciu pentru sabloane si logica de templating
-// Extinde TemplateEngine pentru a expune operatiile de sablon ca servicii
-// ==================================================
+// lib/services/TemplateService.php
+// Serviciu pentru gestionarea sabloanelor de documente
+// Expune operatiile CRUD din TemplateEngine ca servicii cu validare
 
 class TemplateService
 {
@@ -13,11 +13,13 @@ class TemplateService
         $this->engine = new TemplateEngine();
     }
 
+    // Returneaza lista tuturor sabloanelor disponibile
     public function listTemplates(): array
     {
         return $this->engine->getAllTemplates();
     }
 
+    // Returneaza un sablon dupa ID sau null daca nu exista
     public function getTemplate(int $id): ?array
     {
         if ($id <= 0) {
@@ -27,6 +29,7 @@ class TemplateService
         return $this->engine->loadTemplate($id);
     }
 
+    // Valideaza si creeaza un sablon nou, returneaza ID-ul generat
     public function createTemplate(string $name, string $type, string $content, string $format = 'html', ?int $userId = null): int
     {
         if (empty($name) || empty($type) || empty($content)) {
@@ -45,6 +48,7 @@ class TemplateService
         return $this->engine->saveTemplate($name, $type, $content, $format, $userId);
     }
 
+    // Valideaza si actualizeaza numele si continutul unui sablon existent
     public function updateTemplate(int $id, string $name, string $content): void
     {
         if ($id <= 0) {
@@ -63,6 +67,7 @@ class TemplateService
         $this->engine->updateTemplate($id, $name, $content);
     }
 
+    // Sterge un sablon dupa ID, dupa verificarea existentei acestuia
     public function deleteTemplate(int $id): void
     {
         if ($id <= 0) {

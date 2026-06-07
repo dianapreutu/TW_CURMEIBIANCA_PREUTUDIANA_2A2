@@ -1,50 +1,31 @@
 <?php
-//lib/services/CsvService.php - Serviciu pentru import/export CSV (gestioneaza importul fisierelor CSV incarcate de utilizatori)
-//exportul datelor generate in format CSV, salvarea fisierelor CSV importate in BD
 
-class CsvService {
-    //instanta bazei de date primita prin constructor
+// lib/services/CsvService.php
+// Serviciu pentru import si export CSV
+// Gestioneaza incarcarea fisierelor CSV, parsarea, exportul si istoricul importurilor
 
+class CsvService
+{
     private $db;
-
-    //separator implicit pt CSV
-
     private $delimiter;
-
-    //encodingul implicit pt fisierele CSV 
     private $encoding;
 
-    // Constructor
-    // $db - instanta Database (Singleton)
-    // $delimiter - separatorul coloanelor (implicit virgula)
-    // $encoding - encodingul fisierului (implicit UTF-8)
-
-    public function __construct($db, $delimiter = ',', $encoding = 'UTF-8') {
-    $this->db = $db;
-    $this->delimiter = $delimiter;
-    $this->encoding = $encoding;
-}
-
-    // IMPORT CSV
-
-    //importFromFile() - importa un fisier CSV incarcat
-    //$filepath - calea catre fisierul CSV pe disk
-    // $userId    - id-ul utilizatorului care importa
-    //$originalName - numele original al fisierului incarcat
-
-     // Returneaza array cu headers, rows, row_count, import_id
-
-     public function importFromFile(string $filePath, int $userId, string $originalName): array
+    public function __construct($db, $delimiter = ',', $encoding = 'UTF-8')
     {
-        // Verificam daca fisierul exista
+        $this->db        = $db;
+        $this->delimiter = $delimiter;
+        $this->encoding  = $encoding;
+    }
+
+    // Importa un fisier CSV de pe disk si salveaza metadatele in baza de date
+    public function importFromFile(string $filePath, int $userId, string $originalName): array
+    {
         if (!file_exists($filePath)) {
             throw new Exception('Fisierul CSV nu a fost gasit: ' . $filePath);
         }
- 
-        // Parsam fisierul CSV
+
         $parsed = $this->parseFile($filePath);
- 
-// Salvam informatiile despre import in baza de date
+
         $importId = $this->db->insert('csv_imports', [
             'user_id'       => $userId,
             'original_name' => $originalName,
@@ -52,14 +33,13 @@ class CsvService {
             'row_count'     => $parsed['row_count'],
             'headers_json'  => json_encode($parsed['headers'], JSON_UNESCAPED_UNICODE)
         ]);
- 
-        // Logam actiunea
+
         $this->db->log(
             'import',
             'Import CSV: ' . $originalName . ' (' . $parsed['row_count'] . ' randuri)',
             $userId
         );
- 
+
         return [
             'import_id' => $importId,
             'headers'   => $parsed['headers'],
@@ -68,200 +48,143 @@ class CsvService {
         ];
     }
 
-    // parseFile() - citeste si parseaza un fisier CSV
-    // $filePath - calea catre fisierul CSV
-    // Returneaza array cu headers si rows
-
+    // Citeste si parseaza un fisier CSV, returneaza headers si rows
     public function parseFile(string $filePath): array
     {
         $headers = [];
         $rows    = [];
- 
-        // Deschidem fisierul pentru citire
+
         $handle = fopen($filePath, 'r');
         if ($handle === false) {
             throw new Exception('Nu s-a putut deschide fisierul CSV.');
         }
- 
-        // Prima linie = headerele coloanelor
+
+        // Prima linie contine headerele coloanelor
         $rawHeaders = fgetcsv($handle, 0, $this->delimiter);
         if ($rawHeaders === false) {
             fclose($handle);
             throw new Exception('Fisierul CSV este gol sau invalid.');
         }
- 
-        // Curatam headerele (trim + conversie encoding daca e necesar)
+
         $headers = array_map(function($h) {
             return $this->sanitizeString(trim($h));
         }, $rawHeaders);
- 
-        // Citim randurile de date
+
+        // Citim randurile si construim array-uri asociative header => valoare
         while (($row = fgetcsv($handle, 0, $this->delimiter)) !== false) {
-            // Sarim randurile goale
             if (empty(array_filter($row))) continue;
- 
-            // Construim un array asociativ header => valoare
+
             $rowData = [];
             foreach ($headers as $index => $header) {
-                $value = $row[$index] ?? '';
-                // curatam valoarea pentru a preveni XSS
-                $rowData[$header] = $this->sanitizeString($value);
+                $rowData[$header] = $this->sanitizeString($row[$index] ?? '');
             }
             $rows[] = $rowData;
         }
- 
+
         fclose($handle);
- 
+
         return [
             'headers'   => $headers,
             'rows'      => $rows,
             'row_count' => count($rows)
         ];
     }
- 
-    // parseString() - parseaza un string CSV direct
-    // Util pentru CSV primit ca string (nu fisier)
-    // $csvString - continutul CSV ca string
-    // Returneaza array cu headers si rows
 
+    // Parseaza un string CSV direct, folosind un fisier temporar
     public function parseString(string $csvString): array
     {
-        // Scriem string-ul intr-un fisier temporar si il parsam
         $tmpFile = tempnam(sys_get_temp_dir(), 'csv_');
         file_put_contents($tmpFile, $csvString);
         $result = $this->parseFile($tmpFile);
-        unlink($tmpFile); // stergem fisierul temporar
+        unlink($tmpFile);
         return $result;
     }
- 
 
-    // handleUpload() - gestioneaza upload-ul unui fisier CSV
-    // Muta fisierul din tmp in directorul de uploads
-    // $fileArray - $_FILES['csv_file'] de la formularul HTML
-    // $userId    - id-ul utilizatorului
-    // Returneaza rezultatul importului
-
+    // Gestioneaza upload-ul unui fisier CSV, valideaza si muta fisierul in uploads/
     public function handleUpload(array $fileArray, int $userId): array
     {
-        // Verificam daca a aparut o eroare la upload
         if ($fileArray['error'] !== UPLOAD_ERR_OK) {
             throw new Exception('Eroare la incarcarea fisierului: cod ' . $fileArray['error']);
         }
- 
-        // Verificam extensia fisierului (securitate)
+
         $originalName = basename($fileArray['name']);
         $extension    = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
         if ($extension !== 'csv') {
             throw new Exception('Doar fisierele CSV sunt acceptate.');
         }
- 
+
         // Verificam dimensiunea fisierului (max 5MB)
-        $maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        $maxSize = 5 * 1024 * 1024;
         if ($fileArray['size'] > $maxSize) {
             throw new Exception('Fisierul este prea mare. Dimensiunea maxima este 5MB.');
         }
- 
-        // Generam un nume unic pentru fisier (evitam suprascrierile)
+
         $uniqueName = time() . '_' . uniqid() . '.csv';
         $destPath   = UPLOADS_PATH . '/' . $uniqueName;
- 
-        // Mutam fisierul din directorul tmp in uploads/
+
         if (!move_uploaded_file($fileArray['tmp_name'], $destPath)) {
             throw new Exception('Nu s-a putut salva fisierul incarcat.');
         }
- 
-        // Importam si returnam rezultatul
+
         return $this->importFromFile($destPath, $userId, $originalName);
     }
- 
-    // EXPORT CSV
 
-    // exportToString() - exporta date ca string CSV
-    // $headers - array cu numele coloanelor
-    // $rows    - array de array-uri asociative cu datele
-    // Returneaza string-ul CSV generat
-
+    // Genereaza si returneaza un string CSV din headers si rows
+    // Include BOM pentru compatibilitate cu Excel
     public function exportToString(array $headers, array $rows): string
     {
-        // Deschidem un buffer de memorie in loc de fisier
         $output = fopen('php://temp', 'r+');
- 
-        // Adaugam BOM pentru compatibilitate cu Excel (UTF-8)
-        // Fara BOM, Excel poate afisa gresit diacriticele
+
+        // BOM necesar pentru afisarea corecta a diacriticelor in Excel
         fwrite($output, "\xEF\xBB\xBF");
- 
-        // Scriem linia de headere
         fputcsv($output, $headers, $this->delimiter);
- 
-        // Scriem fiecare rand de date
+
         foreach ($rows as $row) {
-            // Extragem valorile in ordinea headerelor
             $rowValues = array_map(function($header) use ($row) {
                 return $row[$header] ?? '';
             }, $headers);
             fputcsv($output, $rowValues, $this->delimiter);
         }
- 
-        // Citim continutul bufferului
+
         rewind($output);
         $csvString = stream_get_contents($output);
         fclose($output);
- 
+
         return $csvString;
     }
- 
-    // exportToFile() - exporta date intr-un fisier CSV
-    // $headers  - array cu numele coloanelor
-    // $rows     - array de array-uri asociative cu datele
-    // $filename - numele fisierului de output (fara extensie)
-    // Returneaza calea catre fisierul generat
 
+    // Exporta datele intr-un fisier CSV pe disk si returneaza calea generata
     public function exportToFile(array $headers, array $rows, string $filename = 'export'): string
     {
-        // Generam numele fisierului cu timestamp
-        $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $filename);
-        $filePath = UPLOADS_PATH . '/' . $safeName . '_' . date('Ymd_His') . '.csv';
- 
-        // Generam continutul CSV
+        $safeName  = preg_replace('/[^a-zA-Z0-9_-]/', '_', $filename);
+        $filePath  = UPLOADS_PATH . '/' . $safeName . '_' . date('Ymd_His') . '.csv';
         $csvString = $this->exportToString($headers, $rows);
- 
-        // Scriem in fisier
+
         if (file_put_contents($filePath, $csvString) === false) {
             throw new Exception('Nu s-a putut crea fisierul CSV de export.');
         }
- 
+
         return $filePath;
     }
 
-    // downloadCsv() - trimite fisierul CSV catre browser( declanseaza descarcarea directa in browser)
-    // $headers  - array cu numele coloanelor
-    // $rows     - array de array-uri cu datele
-    // $filename - numele fisierului descarcat
-
+    // Trimite fisierul CSV catre browser si declanseaza descarcarea directa
     public function downloadCsv(array $headers, array $rows, string $filename = 'export'): void
     {
-        // Generam continutul CSV
         $csvString = $this->exportToString($headers, $rows);
- 
-        // Setam headerele HTTP pentru descarcare
-        $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $filename);
+        $safeName  = preg_replace('/[^a-zA-Z0-9_-]/', '_', $filename);
+
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $safeName . '.csv"');
         header('Content-Length: ' . strlen($csvString));
         header('Pragma: no-cache');
         header('Expires: 0');
- 
-        // Trimitem continutul
+
         echo $csvString;
         exit;
     }
 
-    // UTILITARE
- 
-    // getImportHistory() - returneaza istoricul importurilor
-    // unui utilizator din baza de date
-    // $userId - id-ul utilizatorului
-
+    // Returneaza istoricul importurilor unui utilizator din baza de date
     public function getImportHistory(int $userId): array
     {
         return $this->db->fetchAll(
@@ -269,9 +192,8 @@ class CsvService {
             [$userId]
         );
     }
-    
-    // getImportById() - returneaza un import dupa id
 
+    // Returneaza un import specific dupa ID si utilizator
     public function getImportById(int $importId, int $userId): ?array
     {
         $result = $this->db->fetchOne(
@@ -281,41 +203,29 @@ class CsvService {
         return $result ?: null;
     }
 
-    // sanitizeString() - curata un string de caractere periculoase(previne XSS)
-
+    // Curata un string de caractere periculoase pentru a preveni XSS
     private function sanitizeString(string $value): string
     {
-        // Eliminam spatiile de la inceput si sfarsit
-        $value = trim($value);
- 
-        // Convertim caracterele speciale HTML in entitati
-        // Previne XSS daca valoarea e afisata direct in HTML
-        $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
- 
-        return $value;
+        return htmlspecialchars(trim($value), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
- 
-    // detectDelimiter() - detecteaza automat separatorul CSV
-    // Incearca sa determine daca e virgula, punct-virgula sau tab
-    // $filePath - calea catre fisierul CSV
+
+    // Detecteaza automat separatorul CSV din prima linie a fisierului
     public function detectDelimiter(string $filePath): string
     {
-        // Citim prima linie din fisier
         $handle = fopen($filePath, 'r');
         if ($handle === false) return ',';
- 
+
         $firstLine = fgets($handle);
         fclose($handle);
- 
-        // Numaram aparitiile fiecarui separator posibil
+
+        // Numaram aparitiile fiecarui separator posibil si il alegem pe cel mai frecvent
         $delimiters = [
             ','  => substr_count($firstLine, ','),
             ';'  => substr_count($firstLine, ';'),
             "\t" => substr_count($firstLine, "\t"),
             '|'  => substr_count($firstLine, '|'),
         ];
- 
-        // Returnam separatorul cu cele mai multe aparitii
+
         arsort($delimiters);
         return array_key_first($delimiters);
     }
