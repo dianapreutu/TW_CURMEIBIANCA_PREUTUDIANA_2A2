@@ -167,7 +167,7 @@ class FieldTypes {
         $prefix = $prefixes[array_rand($prefixes)];
         // Restul de 7 cifre
         $rest = str_pad(rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
-        return $prefix . ' ' . substr($rest, 0, 3) . ' ' . substr($rest, 3);
+        return $prefix . substr($rest, 0, 1) . ' ' . substr($rest, 1, 3) . ' ' . substr($rest, 4);
     }
  
     // Adresa
