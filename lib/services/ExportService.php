@@ -168,6 +168,11 @@ class ExportService
             file_put_contents($exportPath, $styledHtml);
         }
 
+        // Daca fisierul contine deja DOCTYPE, il servim direct
+        if (!isset($exportFilename)) {
+            $exportFilename = $document['html_path'];
+        }
+
         return [
             'format'       => 'html',
             'download_url' => BASE_URL . '/generated/html/' . $exportFilename,
