@@ -96,7 +96,7 @@ if ($isAuthenticated) {
     <!-- Header -->
     <div class="page-header">
         <h1>Documentele mele</h1>
-        <a href="<?php echo BASE_URL; ?>/index.php?page=generator"
+        <a href="<?php echo BASE_URL; ?>/index.php?page=editor"
            class="btn btn-primary">
             + Document nou
         </a>
