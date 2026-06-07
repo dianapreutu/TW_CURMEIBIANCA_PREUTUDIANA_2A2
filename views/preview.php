@@ -52,7 +52,7 @@ if (!$document) {
             <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
             <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
             <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
-            <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
+            <?php if (!isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)): ?>
                 <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             <?php endif; ?>
         </ul>
