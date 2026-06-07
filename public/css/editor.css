@@ -1,15 +1,14 @@
-/* ==================================================
-    public/css/editor.css - Stiluri pentru editorul de sabloane
-    Folosit de views/editor.php
-    Extinde main.css cu stiluri specifice editorului
-    ================================================== */
+/*
+   public/css/editor.css
+   Stiluri pentru editorul de sabloane
+   Folosit de views/editor.php
+   Depinde de: public/css/main.css (variabile globale)
+*/
 
-/* -- Layout principal al editorului -- */
-
-/* Containerul principal al paginii de editor */
+/* Layout principal al paginii de editor */
 .editor-page {
-    margin-top: var(--nav-height); /* spatiu pentru bara de navigare fixa */
-    min-height: calc(100vh - var(--nav-height)); /* ocupa toata inaltimea ecranului */
+    margin-top: var(--nav-height);
+    min-height: calc(100vh - var(--nav-height));
     display: flex;
     flex-direction: column;
     background-color: var(--color-light);
@@ -19,7 +18,7 @@
     padding-top: 0;
 }
 
-/* Header-ul paginii de editor */
+/* Header cu titlu si butoane de actiune */
 .editor-header {
     background-color: var(--color-white);
     border-bottom: 1px solid var(--color-border);
@@ -31,31 +30,27 @@
     gap: 12px;
 }
 
-/* Titlul din header-ul editorului */
 .editor-header h1 {
     font-size: 1.4rem;
     font-weight: 600;
     color: var(--color-dark);
 }
 
-/* Grupa de butoane din header */
 .editor-header-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
-/* -- Layout cu doua coloane (editor + previzualizare) -- */
-
+/* Layout cu doua coloane egale: editor + previzualizare */
 .editor-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* doua coloane egale */
+    grid-template-columns: 1fr 1fr;
     flex: 1;
     gap: 0;
 }
 
-/* -- Panoul din stanga: editorul de sablon -- */
-
+/* Panoul din stanga - editorul de sablon */
 .editor-panel {
     background-color: var(--color-white);
     border-right: 1px solid var(--color-border);
@@ -63,7 +58,6 @@
     flex-direction: column;
 }
 
-/* Header-ul panoului de editor */
 .panel-header {
     padding: 12px 16px;
     background-color: var(--color-light);
@@ -75,7 +69,7 @@
     letter-spacing: 0.05em;
 }
 
-/* Toolbar-ul editorului (butoane de formatare) */
+/* Toolbar cu butoane de inserare variabile */
 .editor-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -85,7 +79,6 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-/* Butonul individual din toolbar */
 .toolbar-btn {
     padding: 5px 10px;
     font-size: 0.8rem;
@@ -95,7 +88,7 @@
     cursor: pointer;
     color: var(--color-dark);
     transition: var(--transition);
-    font-family: 'Courier New', monospace; /* font monospace pentru variabile */
+    font-family: 'Courier New', monospace;
 }
 
 .toolbar-btn:hover {
@@ -104,28 +97,27 @@
     border-color: var(--color-primary);
 }
 
-/* Area de test a editorului */
+/* Area de editare a sablonului */
 .editor-textarea {
     flex: 1;
     width: 100%;
     min-height: 400px;
     padding: 16px;
-    font-family: 'Courier New', Courier, monospace; /* font monospace pentru cod */
+    font-family: 'Courier New', Courier, monospace;
     font-size: 0.9rem;
     line-height: 1.6;
     border: none;
     outline: none;
-    resize: none; /* dezactivam redimensionarea manuala */
+    resize: none;
     background-color: var(--color-white);
     color: var(--color-dark);
 }
 
 .editor-textarea:focus {
-    background-color: #fafffe; /* fundal usor colorat la focus */
+    background-color: #fafffe;
 }
 
-/* -- Panoul din dreapta: previzualizare -- */
-
+/* Panoul din dreapta - previzualizare document */
 .preview-panel {
     background-color: var(--color-light);
     display: flex;
@@ -133,14 +125,13 @@
     overflow: hidden;
 }
 
-/* Containerul previzualizarii documentului */
 .preview-container {
     flex: 1;
     padding: 20px;
-    overflow-y: auto; /* scroll daca continutul e prea lung */
+    overflow-y: auto;
 }
 
-/* Documentul previzualizat (simuleaza o foaie A4) */
+/* Simulare foaie A4 pentru previzualizare */
 .preview-document {
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
@@ -152,7 +143,6 @@
     line-height: 1.7;
 }
 
-/* Mesajul afisat cand nu exista previzualizare */
 .preview-empty {
     display: flex;
     align-items: center;
@@ -163,9 +153,7 @@
     font-size: 0.9rem;
 }
 
-/* -- Formularul de salvare sablon -- */
-
-
+/* Formular de salvare sablon */
 .save-form {
     padding: 16px;
     background-color: var(--color-light);
@@ -176,7 +164,6 @@
     align-items: flex-end;
 }
 
-/* Grupul de camp din formular */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -185,7 +172,6 @@
     min-width: 150px;
 }
 
-/* Label-ul campului */
 .form-group label {
     font-size: 0.8rem;
     font-weight: 600;
@@ -194,7 +180,6 @@
     letter-spacing: 0.04em;
 }
 
-/* Input-ul campului */
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -207,22 +192,19 @@
     transition: var(--transition);
 }
 
-/* Focus pe campurile de formular */
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 3px rgba(44, 123, 229, 0.15); 
+    box-shadow: 0 0 3px rgba(44, 123, 229, 0.15);
 }
 
-/* -- Lista de sabloane salvate -- */
-
+/* Lista si grid de sabloane salvate */
 .templates-list {
     padding: 20px;
 }
 
-/* Titlul listei de sabloane */
 .templates-list h2 {
     font-size: 1.2rem;
     font-weight: 600;
@@ -230,14 +212,13 @@
     color: var(--color-dark);
 }
 
-/* Grid-ul cu cardurile de sabloane */
 .templates-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 16px;
 }
 
-/* Cardul individual de sablon */
+/* Card individual pentru fiecare sablon */
 .template-card {
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
@@ -253,7 +234,6 @@
     transform: translateY(-2px);
 }
 
-/* Numele sablonului din card */
 .template-card-name {
     font-size: 1rem;
     font-weight: 600;
@@ -261,14 +241,13 @@
     margin-bottom: 6px;
 }
 
-/* Tipul sablonului */
 .template-card-type {
     font-size: 0.8rem;
     color: var(--color-secondary);
     margin-bottom: 12px;
 }
 
-/* Badge-ul tipului de sablon */
+/* Badge de tip cu culori diferite per categorie */
 .type-badge {
     display: inline-block;
     padding: 2px 8px;
@@ -278,23 +257,19 @@
     text-transform: uppercase;
 }
 
-/* Culori diferite pentru fiecare tip de sablon */
-.type-badge.cv          { background-color: #cfe2ff; color: #084298; }
-.type-badge.cerere      { background-color: #d1e7dd; color: #0a3622; }
-.type-badge.factura     { background-color: #fff3cd; color: #664d03; }
-.type-badge.catalog     { background-color: #f8d7da; color: #842029; }
-.type-badge.alt         { background-color: #e2e3e5; color: #383d41; }
+.type-badge.cv      { background-color: #cfe2ff; color: #084298; }
+.type-badge.cerere  { background-color: #d1e7dd; color: #0a3622; }
+.type-badge.factura { background-color: #fff3cd; color: #664d03; }
+.type-badge.catalog { background-color: #f8d7da; color: #842029; }
+.type-badge.alt     { background-color: #e2e3e5; color: #383d41; }
 
-/* Actiunile cardului (butoane editare/stergere) */
 .template-card-actions {
     display: flex;
     gap: 8px;
     margin-top: 12px;
 }
 
-/* -- Butoane specifice editorului -- */
-
-/* Buton de actiune principal */
+/* Butoane specifice editorului */
 .btn-editor {
     padding: 8px 16px;
     font-size: 0.9rem;
@@ -310,7 +285,6 @@
     background-color: #1a65cc;
 }
 
-/* Buton de actiune secundar */
 .btn-editor-secondary {
     padding: 8px 16px;
     font-size: 0.9rem;
@@ -327,7 +301,6 @@
     color: var(--color-dark);
 }
 
-/* Buton de stergere */
 .btn-delete {
     padding: 6px 12px;
     font-size: 0.8rem;
@@ -344,9 +317,7 @@
     color: var(--color-white);
 }
 
-/* -- Notificari toast -- */
-
-/* Containerul notificarilor */
+/* Notificari toast pozitionate in coltul din dreapta-jos */
 .toast-container {
     position: fixed;
     bottom: 20px;
@@ -357,7 +328,6 @@
     gap: 10px;
 }
 
-/* Notificarea individuala */
 .toast {
     padding: 12px 20px;
     border-radius: var(--border-radius);
@@ -368,56 +338,26 @@
     min-width: 250px;
 }
 
-/* Tipuri de notificari */
 .toast.success  { background-color: var(--color-success); }
-.toast.error    { background-color: var(--color-danger); }
+.toast.error    { background-color: var(--color-danger);  }
 .toast.info     { background-color: var(--color-primary); }
 
-/* Animatia de intrare a notificarii */
 @keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* -- Design Responsive -- */
-
-/* Tablete (max 768px) */
+/* Responsive - tableta */
 @media (max-width: 768px) {
-    .editor-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .preview-panel {
-        display: none;
-    }
-
-    .editor-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+    .editor-layout          { grid-template-columns: 1fr; }
+    .preview-panel          { display: none; }
+    .editor-header          { flex-direction: column; align-items: flex-start; }
 }
 
-/* Telefoane (max 480px) */
+/* Responsive - mobil */
 @media (max-width: 480px) {
-    .editor-header {
-        padding: 12px 16px;
-    }
-
-    .editor-toolbar {
-        padding: 8px 12px;
-    }
-
-    .save-form {
-        flex-direction: column;
-    }
-
-    .templates-grid {
-        grid-template-columns: 1fr;
-    }
+    .editor-header  { padding: 12px 16px; }
+    .editor-toolbar { padding: 8px 12px; }
+    .save-form      { flex-direction: column; }
+    .templates-grid { grid-template-columns: 1fr; }
 }

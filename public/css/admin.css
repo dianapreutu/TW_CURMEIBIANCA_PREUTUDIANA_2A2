@@ -1,12 +1,11 @@
 /*
-   admin.css - stiluri pentru panoul de administrare
-   Folosit exclusiv de views/admin.php si views/admin-*.php
-   In dependenta de: public/css/main.css (variabile globale)
-   */
+   admin.css
+   Stiluri pentru panoul de administrare
+   Folosit de paginile din admin/
+   Depinde de: public/css/main.css (variabile globale)
+*/
 
-/* 
-   Variabile locale admin (completeaza variabilele din main.css)
- */
+/* Variabile locale pentru panoul admin */
 :root {
     --admin-sidebar-width: 240px;
     --admin-topbar-height: 60px;
@@ -22,9 +21,7 @@
     --admin-info: #3498db;
 }
 
-/* --------------------------------------------------
-   Stiluri pentru pagina de login admin
-   -------------------------------------------------- */
+/* Pagina de login admin */
 .login-container {
     min-height: 100vh;
     display: flex;
@@ -90,9 +87,7 @@
     width: 100%;
 }
 
-/* --------------------------------------------------
-   Reset de baza pentru panoul admin
-   -------------------------------------------------- */
+/* Reset box-sizing pentru wrapper-ul admin */
 .admin-wrapper * {
     box-sizing: border-box;
 }
@@ -110,11 +105,7 @@
     padding: initial;
 }
 
-/* --------------------------------------------------
-   Layout principal: sidebar + continut
-   -------------------------------------------------- */
-
-/* Containerul principal care ocupa toata pagina */
+/* Layout principal: sidebar fix + zona de continut */
 .admin-wrapper {
     display: flex;
     min-height: 100vh;
@@ -124,9 +115,7 @@
     color: #333;
 }
 
-/* --------------------------------------------------
-   Sidebar - meniul lateral
-   -------------------------------------------------- */
+/* Sidebar - meniu lateral fix */
 .admin-sidebar {
     width: var(--admin-sidebar-width);
     background-color: var(--admin-sidebar-bg);
@@ -142,7 +131,6 @@
     transition: width 0.3s ease;
 }
 
-/* Logo / titlu aplicatie in sidebar */
 .admin-sidebar-logo {
     padding: 20px 24px;
     font-size: 20px;
@@ -156,7 +144,6 @@
     color: var(--admin-sidebar-active);
 }
 
-/* Sectiunile meniului */
 .admin-nav {
     list-style: none;
     padding: 16px 0;
@@ -171,7 +158,6 @@
     color: rgba(200, 214, 229, 0.5);
 }
 
-/* Un element din meniu */
 .admin-nav-item a {
     display: flex;
     align-items: center;
@@ -195,7 +181,6 @@
     border-left-color: var(--admin-sidebar-active);
 }
 
-/* Iconita din meniu */
 .admin-nav-item a .nav-icon {
     font-size: 16px;
     width: 20px;
@@ -203,7 +188,7 @@
     opacity: 0.8;
 }
 
-/* Informatii utilizator admin in josul sidebarului */
+/* Footer sidebar - afiseaza utilizatorul curent */
 .admin-sidebar-footer {
     padding: 16px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -224,21 +209,11 @@
     padding: 4px 0;
 }
 
-.admin-sidebar-footer a:hover {
-    opacity: 0.8;
-}
+.admin-sidebar-footer a:hover  { opacity: 0.8; }
+.admin-sidebar-footer a:visited { color: #ffffff !important; }
+.admin-sidebar-footer a:active  { color: #ffffff !important; }
 
-.admin-sidebar-footer a:visited {
-    color: #ffffff !important;
-}
-
-.admin-sidebar-footer a:active {
-    color: #ffffff !important;
-}
-
-/* --------------------------------------------------
-   Zona principala de continut
-   -------------------------------------------------- */
+/* Zona principala de continut */
 .admin-main {
     margin-left: var(--admin-sidebar-width);
     flex: 1;
@@ -248,7 +223,7 @@
     background-color: #edf1f7;
 }
 
-/* Bara de sus (topbar) */
+/* Topbar - bara superioara fixa */
 .admin-topbar {
     height: var(--admin-topbar-height);
     background-color: #ffffff;
@@ -274,15 +249,12 @@
     gap: 16px;
 }
 
-/* Zona de continut propriu-zisa */
 .admin-content {
     padding: 24px;
     flex: 1;
 }
 
-/* --------------------------------------------------
-   Carduri de statistici (dashboard)
-   -------------------------------------------------- */
+/* Carduri de statistici pentru dashboard */
 .admin-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -301,20 +273,13 @@
     border-left: 4px solid var(--admin-info);
 }
 
-/* Variantele de culoare pentru carduri */
 .admin-stat-card.success { border-left-color: var(--admin-success); }
 .admin-stat-card.warning { border-left-color: var(--admin-warning); }
 .admin-stat-card.danger  { border-left-color: var(--admin-danger);  }
 .admin-stat-card.info    { border-left-color: var(--admin-info);    }
 
-.admin-stat-icon {
-    font-size: 28px;
-    opacity: 0.85;
-}
-
-.admin-stat-info {
-    flex: 1;
-}
+.admin-stat-icon  { font-size: 28px; opacity: 0.85; }
+.admin-stat-info  { flex: 1; }
 
 .admin-stat-value {
     font-size: 28px;
@@ -329,9 +294,7 @@
     margin-top: 4px;
 }
 
-/* --------------------------------------------------
-   Carduri generale (sectiuni de continut)
-   -------------------------------------------------- */
+/* Carduri generale pentru sectiuni de continut */
 .admin-card {
     background-color: #ffffff;
     border-radius: var(--admin-border-radius);
@@ -358,9 +321,7 @@
     padding: 20px;
 }
 
-/* --------------------------------------------------
-   Tabele (lista utilizatori, loguri etc.)
-   -------------------------------------------------- */
+/* Tabele pentru listare utilizatori, loguri etc. */
 .admin-table-wrapper {
     overflow-x: auto;
 }
@@ -406,14 +367,11 @@
     background-color: #f8f9fa;
 }
 
-/* Ultima linie fara border */
 .admin-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* --------------------------------------------------
-   Badges / etichete de status
-   -------------------------------------------------- */
+/* Badges de status */
 .admin-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -424,80 +382,77 @@
     letter-spacing: 0.4px;
 }
 
-.admin-badge.success {
-    background-color: rgba(39, 174, 96, 0.12);
-    color: #27ae60;
-}
+.admin-badge.success { background-color: rgba(39, 174, 96, 0.12);  color: #27ae60; }
+.admin-badge.warning { background-color: rgba(243, 156, 18, 0.12); color: #e67e22; }
+.admin-badge.danger  { background-color: rgba(231, 76, 60, 0.12);  color: #e74c3c; }
+.admin-badge.info    { background-color: rgba(52, 152, 219, 0.12); color: #2980b9; }
+.admin-badge.admin   { background-color: rgba(142, 68, 173, 0.12); color: #8e44ad; }
 
-.admin-badge.warning {
-    background-color: rgba(243, 156, 18, 0.12);
-    color: #e67e22;
-}
-
-.admin-badge.danger {
-    background-color: rgba(231, 76, 60, 0.12);
-    color: #e74c3c;
-}
-
-.admin-badge.info {
-    background-color: rgba(52, 152, 219, 0.12);
-    color: #2980b9;
-}
-
-.admin-badge.admin {
-    background-color: rgba(142, 68, 173, 0.12);
-    color: #8e44ad;
-}
-
-/* --------------------------------------------------
-   Butoane
-   -------------------------------------------------- */
-.admin-btn {
+/* Butoane admin */
+.admin-btn,
+.btn-admin {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
     cursor: pointer;
     border: none;
     text-decoration: none;
-    transition: background-color 0.2s, opacity 0.2s;
+    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
 }
 
-.admin-btn:hover {
-    opacity: 0.88;
+.admin-btn:hover,
+.btn-admin:hover {
+    opacity: 0.95;
 }
 
-.admin-btn.primary {
+.admin-btn.primary,
+.btn-admin.primary {
     background-color: var(--admin-info);
     color: #ffffff;
 }
 
-.admin-btn.success {
-    background-color: var(--admin-success);
-    color: #ffffff;
-}
-
-.admin-btn.danger {
+.admin-btn.danger,
+.btn-admin.danger {
     background-color: var(--admin-danger);
     color: #ffffff;
 }
 
-.admin-btn.secondary {
+.admin-btn.secondary,
+.btn-admin.secondary {
     background-color: #ecf0f1;
     color: #2c3e50;
 }
 
-.admin-btn.small {
-    padding: 5px 10px;
-    font-size: 12px;
+.admin-btn.small,
+.btn-admin.small {
+    padding: 8px 14px;
+    font-size: 0.85rem;
 }
 
-/* --------------------------------------------------
-   Sectiuni si linkuri admin
-   -------------------------------------------------- */
+/* Buton de stergere cu border rosu */
+.btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #e74c3c;
+    background-color: #ffffff;
+    color: var(--admin-danger);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-delete:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+/* Sectiuni de continut cu card */
 .admin-content h1 {
     margin-bottom: 18px;
     font-size: 2rem;
@@ -588,71 +543,7 @@
     color: #495057;
 }
 
-.btn-admin,
-.admin-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-}
-
-.btn-admin:hover,
-.admin-btn:hover {
-    opacity: 0.95;
-}
-
-.btn-admin.primary,
-.admin-btn.primary {
-    background-color: var(--admin-info);
-    color: #ffffff;
-}
-
-.btn-admin.danger,
-.admin-btn.danger {
-    background-color: var(--admin-danger);
-    color: #ffffff;
-}
-
-.btn-admin.secondary,
-.admin-btn.secondary {
-    background-color: #ecf0f1;
-    color: #2c3e50;
-}
-
-.btn-admin.small,
-.admin-btn.small {
-    padding: 8px 14px;
-    font-size: 0.85rem;
-}
-
-.btn-delete {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e74c3c;
-    background-color: #ffffff;
-    color: var(--admin-danger);
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-delete:hover {
-    background-color: rgba(231, 76, 60, 0.1);
-}
-
-/* --------------------------------------------------
-   Filtre si cautare (deasupra tabelelor)
-   -------------------------------------------------- */
+/* Filtre si cautare deasupra tabelelor */
 .admin-filters {
     display: flex;
     align-items: center;
@@ -685,9 +576,7 @@
     outline: none;
 }
 
-/* --------------------------------------------------
-   Mesaje de alert (succes, eroare, avertisment)
-   -------------------------------------------------- */
+/* Mesaje de alert cu variante de culoare */
 .admin-alert {
     padding: 12px 16px;
     border-radius: 6px;
@@ -698,33 +587,12 @@
     gap: 10px;
 }
 
-.admin-alert.success {
-    background-color: rgba(39, 174, 96, 0.1);
-    border-left: 4px solid var(--admin-success);
-    color: #1e8449;
-}
+.admin-alert.success { background-color: rgba(39, 174, 96, 0.1);  border-left: 4px solid var(--admin-success); color: #1e8449; }
+.admin-alert.danger  { background-color: rgba(231, 76, 60, 0.1);  border-left: 4px solid var(--admin-danger);  color: #c0392b; }
+.admin-alert.warning { background-color: rgba(243, 156, 18, 0.1); border-left: 4px solid var(--admin-warning); color: #d35400; }
+.admin-alert.info    { background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--admin-info);    color: #2471a3; }
 
-.admin-alert.danger {
-    background-color: rgba(231, 76, 60, 0.1);
-    border-left: 4px solid var(--admin-danger);
-    color: #c0392b;
-}
-
-.admin-alert.warning {
-    background-color: rgba(243, 156, 18, 0.1);
-    border-left: 4px solid var(--admin-warning);
-    color: #d35400;
-}
-
-.admin-alert.info {
-    background-color: rgba(52, 152, 219, 0.1);
-    border-left: 4px solid var(--admin-info);
-    color: #2471a3;
-}
-
-/* --------------------------------------------------
-   Paginare
-   -------------------------------------------------- */
+/* Paginare */
 .admin-pagination {
     display: flex;
     align-items: center;
@@ -761,45 +629,18 @@
     font-weight: 600;
 }
 
-/* --------------------------------------------------
-   Responsive - ecrane mici (tablet/mobil)
-   -------------------------------------------------- */
+/* Responsive - tableta */
 @media (max-width: 768px) {
-    .admin-sidebar {
-        width: 0;
-        overflow: hidden;
-    }
-
-    /* Cand sidebar-ul e deschis pe mobil */
-    .admin-sidebar.open {
-        width: var(--admin-sidebar-width);
-    }
-
-    .admin-main {
-        margin-left: 0;
-    }
-
-    .admin-stats-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .admin-content {
-        padding: 16px;
-    }
+    .admin-sidebar        { width: 0; overflow: hidden; }
+    .admin-sidebar.open   { width: var(--admin-sidebar-width); }
+    .admin-main           { margin-left: 0; }
+    .admin-stats-grid     { grid-template-columns: 1fr 1fr; }
+    .admin-content        { padding: 16px; }
 }
 
+/* Responsive - mobil */
 @media (max-width: 480px) {
-    .admin-stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-filters {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .admin-search-input {
-        min-width: unset;
-        width: 100%;
-    }
+    .admin-stats-grid           { grid-template-columns: 1fr; }
+    .admin-filters              { flex-direction: column; align-items: stretch; }
+    .admin-search-input         { min-width: unset; width: 100%; }
 }

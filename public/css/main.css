@@ -1,19 +1,17 @@
-/* ==================================================
-    public/css/main.css - Stiluri globale ale aplicatiei
-    Folosit de toate paginile principale (home, editor, generator)
-    Respecta principiile designului Web responsive
-    ================================================== */
+/* public/css/main.css
+   Stiluri globale ale aplicatiei.
+   Folosit de toate paginile principale (home, editor, generator).
+   Respecta principiile designului Web responsive. */
 
-/* -- Reset si setari generale -- */
 
-/* Eliminam marginile si padding-ul implicite ale browserului */
+/* ===== Reset si setari generale ===== */
+
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* dimensiunile includ padding si border */
+    box-sizing: border-box;
 }
 
-/* Setam fontul si culorile de baza ale aplicatiei */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 16px;
@@ -22,39 +20,42 @@ body {
     background-color: #f5f5f5;
 }
 
-/* -- Variabile CSS (culori si dimensiuni reutilizabile) -- */
+
+/* ===== Variabile CSS ===== */
+
 :root {
     --color-primary: #2c7be5;
     --color-secondary: #6c757d;
     --color-success: #28a745;
     --color-danger: #dc3545;
     --color-warning: #ffc107;
-    --color-light: #f8f9fa; /* fundal deschis */
-    --color-dark: #343a40; /* text inchis */
+    --color-light: #f8f9fa;
+    --color-dark: #343a40;
     --color-white: #ffffff;
     --color-border: #dee2e6;
 
     --border-radius: 6px;
-    --shadow: 0 2px 8px rgba(0,0,0,0.1); /* umbra usoara */
-    --transition: all 0.3s ease; /* tranzitii animatii */
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
 
     --nav-height: 60px;
     --container-max-width: 1200px;
 }
 
-/* -- Container -- */
 
-/* Containerul limiteaza latimea continutului si il centreaza */
+/* ===== Container ===== */
+
 .container {
     max-width: var(--container-max-width);
-    margin: 0 auto; /* centram orizontal */
-    padding: 0 20px; /* spatiu lateral pe ecrane mici */
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-/* -- Baza de navigare -- */
+
+/* ===== Navigare principala ===== */
 
 .main-nav {
-    position: fixed; /* ramane sus la scroll */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -64,11 +65,10 @@ body {
     align-items: center;
     justify-content: flex-start;
     padding: 0 20px;
-    z-index: 1000; /* apare deasupra tuturor elementelor */
+    z-index: 1000;
     box-shadow: var(--shadow);
 }
 
-/* Logo-ul / numele aplicatiri */
 .nav-brand {
     font-size: 1.3rem;
     font-weight: 700;
@@ -79,21 +79,18 @@ body {
     text-decoration: none;
 }
 
-/* Brand icon */
 .brand-icon {
     font-size: 1.5rem;
 }
 
-/* Lista de link-uri din navigare */
 .nav-links {
-    list-style: none; /* eliminam punctele de lista */
+    list-style: none;
     display: flex;
     align-items: center;
     gap: 12px;
     margin-left: auto;
 }
 
-/* Linkurile individuale din navigare */
 .nav-links a {
     color: #cccccc;
     text-decoration: none;
@@ -103,21 +100,20 @@ body {
     transition: var(--transition);
 }
 
-/* Hover pe linkurile din navigare */
 .nav-links a:hover {
     color: var(--color-white);
     background-color: rgba(255,255,255,0.1);
 }
 
-/* Linkul activ (pagina curenta) */
 .nav-links a.active {
     color: var(--color-white);
     background-color: var(--color-primary);
 }
 
-/* -- Sectiunea Hero -- */
 
-/* Spatiu pentru bara de navigare fixa */
+/* ===== Sectiunea Hero ===== */
+
+/* Margin-top compenseaza bara de navigare fixa */
 .hero {
     margin-top: var(--nav-height);
     background: linear-gradient(135deg, #1a3a5c 0%, #2c7be5 100%);
@@ -130,7 +126,6 @@ body {
     margin: 0 auto;
 }
 
-/* Titlul principal din hero */
 .hero h1 {
     font-size: 2.5rem;
     font-weight: 700;
@@ -138,7 +133,6 @@ body {
     line-height: 1.2;
 }
 
-/* Subtitlul din hero */
 .hero-subtitle {
     font-size: 1.1rem;
     opacity: 0.9;
@@ -146,15 +140,15 @@ body {
     line-height: 1.7;
 }
 
-/* Containerul butoanelor din hero */
 .hero-buttons {
     display: flex;
     gap: 16px;
     justify-content: center;
-    flex-wrap: wrap; /* butoanele se aliniaza pe mai multe randuri pe ecrane mici */
+    flex-wrap: wrap;
 }
 
-/* -- Butoane -- */
+
+/* ===== Butoane ===== */
 
 .btn {
     display: inline-block;
@@ -168,7 +162,6 @@ body {
     transition: var(--transition);
 }
 
-/* Buton principal (albastru) */
 .btn-primary {
     background-color: var(--color-white);
     color: var(--color-primary);
@@ -176,10 +169,9 @@ body {
 
 .btn-primary:hover {
     background-color: #e8f0fe;
-    transform: translateY(-2px); /* efect de ridicare la hover */
+    transform: translateY(-2px);
 }
 
-/* Buton secundar (contur alb) */
 .btn-secondary {
     background-color: transparent;
     color: var(--color-white);
@@ -191,14 +183,62 @@ body {
     transform: translateY(-2px);
 }
 
-/* -- Sectiunea Features -- */
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    opacity: 0.92;
+}
+
+.btn-small {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+}
+
+.btn-generator,
+.btn-generator-secondary,
+.btn-export,
+.btn-small,
+.btn-primary,
+.btn-secondary {
+    cursor: pointer;
+}
+
+.btn-generator {
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    border: none;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.btn-generator-secondary {
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    color: #495057;
+}
+
+.btn-export {
+    padding: 10px 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid #dfe3e8;
+    background-color: #ffffff;
+    color: #495057;
+}
+
+
+/* ===== Sectiunea Features ===== */
 
 .features {
     padding: 64px 20px;
     background-color: var(--color-white);
 }
 
-/* Titlul sectiunii */
 .features h2 {
     text-align: center;
     font-size: 1.8rem;
@@ -206,15 +246,12 @@ body {
     color: var(--color-dark);
 }
 
-/* Grid-ul cu cardurile de functionalitati */
 .features-grid {
     display: grid;
-    /* 3 coloane pe desktop, se adapteaza automat */
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
 }
 
-/* Cardul individual de functionalitate */
 .feature-card {
     background-color: var(--color-light);
     border: 1px solid var(--color-border);
@@ -228,13 +265,11 @@ body {
     box-shadow: var(--shadow);
 }
 
-/* Icon din cardul de functionalitate */
 .feature-icon {
     font-size: 2rem;
     margin-bottom: 12px;
 }
 
-/* Titlul cardului */
 .feature-card h3 {
     font-size: 1.1rem;
     font-weight: 600;
@@ -242,7 +277,6 @@ body {
     color: var(--color-dark);
 }
 
-/* Descrierea cardului */
 .feature-card p {
     font-size: 0.9rem;
     color: var(--color-secondary);
@@ -250,7 +284,6 @@ body {
     line-height: 1.6;
 }
 
-/* Codul inline din descriere */
 .feature-card code {
     background-color: #e8f0fe;
     color: var(--color-primary);
@@ -260,7 +293,6 @@ body {
     font-family: 'Courier New', monospace;
 }
 
-/* Linkul din cardul de functionalitate */
 .feature-link {
     color: var(--color-primary);
     text-decoration: none;
@@ -272,7 +304,8 @@ body {
     text-decoration: underline;
 }
 
-/* -- Sectiunea Tipuri Documente -- */
+
+/* ===== Sectiunea Tipuri Documente ===== */
 
 .doc-types {
     padding: 48px 20px;
@@ -286,7 +319,6 @@ body {
     color: var(--color-dark);
 }
 
-/* Grid-ul cu tipurile de documente */
 .doc-types-grid {
     display: flex;
     justify-content: center;
@@ -294,7 +326,6 @@ body {
     gap: 20px;
 }
 
-/* Cardul individual de tip document */
 .doc-type {
     display: flex;
     flex-direction: column;
@@ -317,12 +348,12 @@ body {
     transform: translateY(-2px);
 }
 
-/* Icoana tipul de document */
 .doc-icon {
     font-size: 2rem;
 }
 
-/* -- Footer -- */
+
+/* ===== Footer ===== */
 
 .main-footer {
     background-color: var(--color-dark);
@@ -332,7 +363,8 @@ body {
     font-size: 0.85rem;
 }
 
-/* -- Mesaje de succes si eroare -- */
+
+/* ===== Mesaje de feedback ===== */
 
 .success-message {
     background-color: #d4edda;
@@ -352,6 +384,18 @@ body {
     margin-bottom: 16px;
 }
 
+.alert {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: var(--border-radius);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+}
+
+
+/* ===== Layout pagini interioare ===== */
+
 .page-header {
     display: flex;
     align-items: center;
@@ -368,13 +412,11 @@ body {
     margin: 0;
 }
 
-.alert {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-    border-radius: var(--border-radius);
-    padding: 14px 18px;
-    margin-bottom: 20px;
+.page-subtitle {
+    margin: 8px 0 0;
+    color: #616a74;
+    line-height: 1.6;
+    max-width: 760px;
 }
 
 .page-wrapper {
@@ -384,6 +426,18 @@ body {
     background-color: #ffffff;
     min-height: calc(100vh - 80px);
 }
+
+/* Compensare bara de navigare fixa pe paginile fara .hero */
+.page-wrapper,
+.editor-page,
+.generator-page,
+.preview-wrapper,
+main {
+    padding-top: calc(var(--nav-height) + 20px);
+}
+
+
+/* ===== Generator ===== */
 
 .generator-page {
     padding-top: calc(var(--nav-height) + 20px);
@@ -413,11 +467,10 @@ body {
     gap: 22px;
 }
 
-.page-subtitle {
-    margin: 8px 0 0;
-    color: #616a74;
-    line-height: 1.6;
-    max-width: 760px;
+.generator-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 .tab-header {
@@ -462,46 +515,6 @@ body {
     margin: 0;
     font-size: 1rem;
     color: #2c3e50;
-}
-
-.generator-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.btn-generator,
-.btn-generator-secondary,
-.btn-export,
-.btn-small,
-.btn-primary,
-.btn-secondary {
-    cursor: pointer;
-}
-
-.btn-generator {
-    padding: 12px 20px;
-    border-radius: var(--border-radius);
-    border: none;
-    background-color: var(--color-primary);
-    color: #ffffff;
-    font-weight: 700;
-}
-
-.btn-generator-secondary {
-    padding: 12px 20px;
-    border-radius: var(--border-radius);
-    border: 1px solid #ced4da;
-    background-color: #ffffff;
-    color: #495057;
-}
-
-.btn-export {
-    padding: 10px 16px;
-    border-radius: var(--border-radius);
-    border: 1px solid #dfe3e8;
-    background-color: #ffffff;
-    color: #495057;
 }
 
 .file-upload-area {
@@ -570,46 +583,13 @@ body {
     padding: 18px;
 }
 
-.result-table-wrapper {
-    min-height: 220px;
-}
-
 .results-count {
     color: #495057;
     font-size: 0.95rem;
 }
 
-@media (max-width: 1024px) {
-    .generator-layout {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media (max-width: 768px) {
-    .generator-page {
-        padding-top: calc(var(--nav-height) + 10px);
-    }
-
-    .filters-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
-
-.page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.page-header h1 {
-    font-size: 2rem;
-    margin: 0;
-    color: #212529;
-}
+/* ===== Filtre ===== */
 
 .filters-bar {
     display: flex;
@@ -652,11 +632,6 @@ body {
     border-color: var(--color-primary);
 }
 
-.results-count {
-    color: #6c757d;
-    font-size: 0.95rem;
-}
-
 .empty-state {
     background-color: #f8f9fa;
     padding: 28px;
@@ -670,6 +645,9 @@ body {
     font-size: 1rem;
     color: #495057;
 }
+
+
+/* ===== Tabele de date ===== */
 
 .table-wrapper {
     overflow-x: auto;
@@ -707,6 +685,30 @@ body {
     background-color: #f8f9fa;
 }
 
+.result-table-wrapper {
+    min-height: 220px;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.result-table-wrapper table {
+    min-width: 600px;
+}
+
+.result-table-wrapper td {
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+/* ===== Badge-uri ===== */
+
 .badge {
     display: inline-flex;
     align-items: center;
@@ -734,26 +736,8 @@ body {
     color: #155724;
 }
 
-.btn-danger {
-    background-color: var(--color-danger);
-    color: #ffffff;
-}
 
-.btn-danger:hover {
-    opacity: 0.92;
-}
-
-.btn-small {
-    padding: 8px 14px;
-    font-size: 0.85rem;
-}
-
-.action-buttons {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
+/* ===== Paginare ===== */
 
 .pagination {
     display: flex;
@@ -788,79 +772,16 @@ body {
     color: #ffffff;
 }
 
-/* -- Design Responsive -- */
 
-/* Tablete (max 768px) */
-@media (max-width: 768px) {
-    /* Micsoram titlul hero */
-    .hero h1 {
-        font-size: 1.8rem;
-    }
+/* ===== Preview document ===== */
 
-    /* Micsoram subtitlul hero */
-    .hero-subtitle {
-        font-size: 1rem;
-    }
+.preview-container { margin-top: 16px; }
 
-    /* Butoanele hero pe coloana */
-    .hero-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
+.preview-header { margin-bottom: 16px; }
 
-    /* Ascundem linkurile din nav pe mobil */
-    .nav-links {
-        display: none;
-    }
+.preview-header-actions { margin-top: 10px; margin-bottom: 10px; }
 
-    /* Grid-ul de features devine o coloana */
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Telefoane (max 480px) */
-@media (max-width: 480px) {
-    .hero {
-        padding: 48px 16px;
-    }
-
-    .hero h1 {
-        font-size: 1.5rem;
-    }
-
-    .features {
-        padding: 40px 16px;
-    }
-
-    .container {
-        padding: 0 12px;
-    }
-}
-
-/* -- Compensare pentru bara de navigare fixa pe paginile fara .hero -- */
-.page-wrapper,
-.editor-page,
-.generator-page,
-.preview-wrapper,
-main {
-    padding-top: calc(var(--nav-height) + 20px);
-}
-
-.result-table-wrapper {
-    overflow-x: auto;
-    width: 100%;
-}
-
-.result-table-wrapper table {
-    min-width: 600px;
-}
-
-.result-table-wrapper td {
-    white-space: nowrap;
-}
-
-/* Butoane preview document */
+/* Butoane din header-ul de preview */
 .preview-header-actions .btn {
     background-color: #f8f9fa;
     color: #333;
@@ -879,10 +800,18 @@ main {
     background-color: #2c7be5;
     color: #ffffff;
     border-color: #2c7be5;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .preview-header-actions .btn-primary:hover {
     background-color: #1a6fd4;
+}
+
+.preview-header-actions .btn-primary:focus,
+.preview-header-actions .btn-primary:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .preview-header-actions .btn-danger {
@@ -894,11 +823,12 @@ main {
 .preview-header-actions .btn-danger:hover {
     background-color: #c82333;
 }
-/* Buton inapoi la documente */
+
 .preview-header-left .btn {
     background-color: #f8f9fa;
     color: #333;
     border: 1px solid #dee2e6;
+    border-color: #999;
     padding: 8px 16px;
     border-radius: 6px;
     text-decoration: none;
@@ -910,6 +840,22 @@ main {
     background-color: #e9ecef;
     color: #333;
 }
+
+/* Butoane de export cu culori distincte pe tip */
+#btn-export-html { background-color: #e8f4fd; border-color: #1a6fd4; color: #1a6fd4; }
+#btn-export-pdf  { background-color: #fdecea; border-color: #c0392b; color: #c0392b; }
+#btn-export-csv  { background-color: #e8f8f0; border-color: #1e8449; color: #1e8449; }
+#btn-export-json { background-color: #fef9e7; border-color: #b7950b; color: #b7950b; }
+
+.preview-meta-label { font-weight: 700; text-transform: uppercase; font-size: 0.85rem !important; letter-spacing: 0.5px; }
+
+.preview-meta-value { font-weight: 600; color: #1a1a2e; font-size: 0.9rem; }
+
+.preview-meta-item:first-child .preview-meta-value { font-weight: 400; }
+
+
+/* ===== Eliminare outline la focus (global) ===== */
+
 button:focus,
 button:focus-visible,
 a:focus,
@@ -918,44 +864,61 @@ a:focus-visible {
     box-shadow: none !important;
 }
 
-.preview-header-actions .btn-primary:focus,
-.preview-header-actions .btn-primary:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
+
+/* ===== Design Responsive ===== */
+
+@media (max-width: 1024px) {
+    .generator-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
-.preview-header-actions .btn-primary {
-    outline: none !important;
-    box-shadow: none !important;
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .generator-page {
+        padding-top: calc(var(--nav-height) + 10px);
+    }
+
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
 
-#btn-export-html { background-color: #e8f4fd; border-color: #1a6fd4; color: #1a6fd4; }
-#btn-export-pdf  { background-color: #fdecea; border-color: #c0392b; color: #c0392b; }
-#btn-export-csv  { background-color: #e8f8f0; border-color: #1e8449; color: #1e8449; }
-#btn-export-json { background-color: #fef9e7; border-color: #b7950b; color: #b7950b; }
+@media (max-width: 480px) {
+    .hero {
+        padding: 48px 16px;
+    }
 
+    .hero h1 {
+        font-size: 1.5rem;
+    }
 
-.preview-meta-label { font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
+    .features {
+        padding: 40px 16px;
+    }
 
-.preview-meta-label { font-size: 0.85rem !important; }
-
-.preview-meta-value { font-weight: 600; color: #1a1a2e; font-size: 0.9rem; }
-
-.preview-meta-item:first-child .preview-meta-value { font-weight: 400; }
-
-.preview-meta-item:first-child .preview-meta-value { font-weight: 400; }
-
-.preview-header-left .btn { border-color: #999; }
-
-
-
-.preview-container { margin-top: 16px; }
-
-.preview-header { margin-bottom: 16px; } .preview-header-actions { margin-top: 10px; margin-bottom: 10px; }
-
-
-
-
-
-
-
+    .container {
+        padding: 0 12px;
+    }
+}
