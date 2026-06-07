@@ -1,12 +1,12 @@
 <?php
 
-// admin/logs.php - Pagina de istoric activitate
-// Afiseaza logurile din tabela logs pentru admin
-// Suporta filtrare dupa actiune, utilizator si data
+// admin/logs.php
+// Pagina de istoric activitate
+// Suporta filtrare dupa actiune, utilizator si data, cu paginare
 
 require_once __DIR__ . '/../config.php';
 
-// Verificam ca utilizatorul e autentificat si e admin
+// Verificam ca utilizatorul este autentificat si are rol de admin
 if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
     header('Location: index.php');
     exit;
@@ -14,20 +14,16 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
 $db = Database::getInstance();
 
-// --------------------------------------------------
-// Filtre din GET
-// --------------------------------------------------
+// Citim parametrii de filtrare din URL
 $filterAction = trim($_GET['action'] ?? '');
 $filterUser   = trim($_GET['user'] ?? '');
 $filterDate   = trim($_GET['date'] ?? '');
 $page         = max(1, (int)($_GET['page'] ?? 1));
-$perPage      = 20; // loguri per pagina
+$perPage      = 20;
 $offset       = ($page - 1) * $perPage;
 
-// --------------------------------------------------
-// Construim query-ul cu filtrele aplicate
-// Folosim prepared statements - previne SQL Injection
-// --------------------------------------------------
+// Construim dinamic clauza WHERE in functie de filtrele active.
+// Excludem din start actiunile interne (admin, delete_log).
 $where  = [];
 $params = [];
 
@@ -46,14 +42,12 @@ if (!empty($filterDate)) {
     $params[] = $filterDate;
 }
 
-$baseWhere = "l.action NOT IN ('admin', 'delete_log')";
-$whereClause = !empty($where) 
-    ? 'WHERE ' . $baseWhere . ' AND ' . implode(' AND ', $where) 
+$baseWhere   = "l.action NOT IN ('admin', 'delete_log')";
+$whereClause = !empty($where)
+    ? 'WHERE ' . $baseWhere . ' AND ' . implode(' AND ', $where)
     : 'WHERE ' . $baseWhere;
 
-// --------------------------------------------------
-// Numaram totalul de loguri pentru paginare
-// --------------------------------------------------
+// Numaram totalul de loguri pentru a calcula numarul de pagini
 $totalLogs = $db->fetchOne(
     "SELECT COUNT(*) as total
      FROM logs l
@@ -64,11 +58,9 @@ $totalLogs = $db->fetchOne(
 
 $totalPages = (int)ceil($totalLogs / $perPage);
 
-// --------------------------------------------------
-// Obtinem logurile pentru pagina curenta
-// --------------------------------------------------
+// Obtinem logurile pentru pagina curenta, ordonate descrescator dupa data
 $logs = $db->fetchAll(
-    "SELECT 
+    "SELECT
         l.id,
         l.action,
         l.description,
@@ -86,18 +78,14 @@ $logs = $db->fetchAll(
     $params
 );
 
-// --------------------------------------------------
-// Obtinem lista de actiuni distincte pentru filtru
-// --------------------------------------------------
+// Lista de actiuni distincte pentru dropdown-ul de filtrare
 $actions = $db->fetchAll(
-    "SELECT DISTINCT action FROM logs 
+    "SELECT DISTINCT action FROM logs
      WHERE action NOT IN ('admin', 'delete_log')
      ORDER BY action ASC"
 );
 
-// --------------------------------------------------
-// Stergere log (doar admin, doar GET cu confirmare)
-// --------------------------------------------------
+// Procesam stergerea unui log individual daca s-a primit un ID valid prin GET
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
     $db->delete('logs', 'id = ?', [$deleteId]);
@@ -106,9 +94,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     exit;
 }
 
-// --------------------------------------------------
-// Stergere toate logurile (reset complet)
-// --------------------------------------------------
+// Stergere completa a tuturor logurilor
 if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
     $db->query('DELETE FROM logs');
     $db->log('delete_log', 'Toate logurile au fost sterse', $_SESSION['user_id']);
@@ -129,7 +115,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
 <body>
 <div class="admin-wrapper">
 
-    <!-- Sidebar -->
+    <!-- ===== Sidebar ===== -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-logo">
             Do<span>Gen</span>
@@ -168,10 +154,9 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
         </div>
     </aside>
 
-    <!-- Continut principal -->
+    <!-- ===== Continut principal ===== -->
     <main class="admin-main">
 
-        <!-- Topbar -->
         <div class="admin-topbar">
             <span class="admin-topbar-title">📋 Istoric activitate</span>
             <div class="admin-topbar-actions">
@@ -186,10 +171,9 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
             </div>
         </div>
 
-        <!-- Continut -->
         <div class="admin-content">
 
-            <!-- Filtre -->
+            <!-- Filtre de cautare -->
             <div class="admin-card" style="margin-bottom:20px;">
                 <div class="admin-card-header">
                     <span class="admin-card-title">🔍 Filtrare loguri</span>
@@ -198,7 +182,6 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                     <form method="GET" action="">
                         <div class="admin-filters">
 
-                            <!-- Filtru actiune -->
                             <select name="action" class="admin-select">
                                 <option value="">Toate actiunile</option>
                                 <?php foreach ($actions as $act): ?>
@@ -209,14 +192,12 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                                 <?php endforeach; ?>
                             </select>
 
-                            <!-- Filtru utilizator -->
                             <input type="text"
                                    name="user"
                                    class="admin-search-input"
                                    placeholder="Cauta utilizator..."
                                    value="<?php echo htmlspecialchars($filterUser); ?>">
 
-                            <!-- Filtru data -->
                             <input type="date"
                                    name="date"
                                    class="admin-search-input"
@@ -260,7 +241,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                                     <tr>
                                         <td colspan="7"
                                             style="text-align:center; padding:30px; color:#999;">
-                                            Nu exista loguri<?php echo !empty($whereClause) ? ' pentru filtrele selectate' : ''; ?>.
+                                            Nu exista loguri<?php echo !empty($filterAction) || !empty($filterUser) || !empty($filterDate) ? ' pentru filtrele selectate' : ''; ?>.
                                         </td>
                                     </tr>
                                 <?php else: ?>
@@ -304,7 +285,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                 </div>
             </div>
 
-            <!-- Paginare -->
+            <!-- Paginare: afisata doar daca exista mai mult de o pagina -->
             <?php if ($totalPages > 1): ?>
                 <div class="admin-pagination">
                     <?php if ($page > 1): ?>
@@ -313,7 +294,10 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                         </a>
                     <?php endif; ?>
 
-                    <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
+                    <?php
+                    // Afisam maxim 5 pagini centrate in jurul paginii curente
+                    for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++):
+                    ?>
                         <?php if ($i === $page): ?>
                             <span class="active"><?php echo $i; ?></span>
                         <?php else: ?>
@@ -331,28 +315,27 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
                 </div>
             <?php endif; ?>
 
-        </div><!-- /.admin-content -->
+        </div>
     </main>
+
 </div>
 
 <?php
-// --------------------------------------------------
-// Functie helper: returneaza clasa badge pentru actiune
-// --------------------------------------------------
+// Returneaza clasa CSS corespunzatoare tipului de actiune dintr-un log
 function getActionBadgeClass(string $action): string {
     $map = [
-        'login'         => 'success',
-        'logout'        => 'info',
-        'generate'      => 'info',
-        'export'        => 'success',
-        'import'        => 'warning',
-        'delete'        => 'danger',
-        'save_schema'   => 'info',
-        'update_schema' => 'warning',
-        'delete_schema' => 'danger',
-        'delete_log'    => 'danger',
-        'add_user'      => 'success',
-        'delete_user'   => 'danger',
+        'login'             => 'success',
+        'logout'            => 'info',
+        'generate'          => 'info',
+        'export'            => 'success',
+        'import'            => 'warning',
+        'delete'            => 'danger',
+        'save_schema'       => 'info',
+        'update_schema'     => 'warning',
+        'delete_schema'     => 'danger',
+        'delete_log'        => 'danger',
+        'add_user'          => 'success',
+        'delete_user'       => 'danger',
         'generate_document' => 'info',
         'delete_template'   => 'danger',
     ];
@@ -360,14 +343,14 @@ function getActionBadgeClass(string $action): string {
 }
 ?>
 
-<!-- Modal confirmare -->
+<!-- Modal de confirmare stergere -->
 <div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:8px;padding:2rem;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.2);">
         <h3 id="confirm-title" style="font-size:1.1rem;margin-bottom:.8rem;color:#1a1a2e;">Confirmare</h3>
         <p id="confirm-message" style="color:#555;margin-bottom:1.5rem;font-size:.95rem;"></p>
         <div style="display:flex;gap:.75rem;justify-content:flex-end;">
-            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anulează</button>
-            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Șterge</button>
+            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anuleaza</button>
+            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Sterge</button>
         </div>
     </div>
 </div>

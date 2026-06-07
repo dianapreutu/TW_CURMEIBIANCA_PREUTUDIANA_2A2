@@ -1,12 +1,12 @@
 <?php
 
-// admin/documents.php - Pagina de documente generate
-// Afiseaza documentele din tabela documents pentru admin
-// Suporta filtrare dupa sablon, status si data
+// admin/documents.php
+// Pagina de administrare a documentelor generate
+// Suporta filtrare dupa sablon, status si data, cu paginare
 
 require_once __DIR__ . '/../config.php';
 
-// Verificam ca utilizatorul e autentificat si e admin
+// Verificam ca utilizatorul este autentificat si are rol de admin
 if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
     header('Location: index.php');
     exit;
@@ -14,9 +14,7 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
 $db = Database::getInstance();
 
-// --------------------------------------------------
-// Filtre din GET
-// --------------------------------------------------
+// Citim parametrii de filtrare din URL
 $filterTemplate = trim($_GET['template'] ?? '');
 $filterStatus   = trim($_GET['status'] ?? '');
 $filterDate     = trim($_GET['date'] ?? '');
@@ -24,9 +22,7 @@ $page           = max(1, (int)($_GET['page'] ?? 1));
 $perPage        = 20;
 $offset         = ($page - 1) * $perPage;
 
-// --------------------------------------------------
-// Construim query-ul cu filtrele aplicate
-// --------------------------------------------------
+// Construim dinamic clauza WHERE in functie de filtrele active
 $where  = [];
 $params = [];
 
@@ -47,9 +43,7 @@ if (!empty($filterDate)) {
 
 $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// --------------------------------------------------
-// Numaram totalul de documente pentru paginare
-// --------------------------------------------------
+// Numaram totalul de documente pentru a calcula numarul de pagini
 $totalDocuments = $db->fetchOne(
     "SELECT COUNT(*) as total
      FROM documents d
@@ -61,9 +55,7 @@ $totalDocuments = $db->fetchOne(
 
 $totalPages = (int)ceil($totalDocuments / $perPage);
 
-// --------------------------------------------------
-// Obtinem documentele pentru pagina curenta
-// --------------------------------------------------
+// Obtinem documentele pentru pagina curenta, ordonate descrescator dupa data
 $documents = $db->fetchAll(
     "SELECT
         d.id,
@@ -86,18 +78,14 @@ $documents = $db->fetchAll(
     $params
 );
 
-// --------------------------------------------------
-// Liste pentru filtre
-// --------------------------------------------------
+// Listele de valori pentru dropdown-urile de filtrare
 $templates = $db->fetchAll(
     'SELECT DISTINCT name, label FROM templates ORDER BY label ASC'
 );
 
 $statuses = ['draft', 'generated', 'exported'];
 
-// --------------------------------------------------
-// Stergere document
-// --------------------------------------------------
+// Procesam stergerea unui document daca s-a primit un ID valid prin GET
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
     $db->delete('documents', 'id = ?', [$deleteId]);
@@ -119,7 +107,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
 <body>
 <div class="admin-wrapper">
 
-    <!-- Sidebar -->
+    <!-- ===== Sidebar ===== -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-logo">
             Do<span>Gen</span>
@@ -158,10 +146,9 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
         </div>
     </aside>
 
-    <!-- Continut principal -->
+    <!-- ===== Continut principal ===== -->
     <main class="admin-main">
 
-        <!-- Topbar -->
         <div class="admin-topbar">
             <span class="admin-topbar-title">📄 Documente generate</span>
             <div class="admin-topbar-actions">
@@ -173,7 +160,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
 
         <div class="admin-content">
 
-            <!-- Filtre -->
+            <!-- Filtre de cautare -->
             <div class="admin-card" style="margin-bottom:20px;">
                 <div class="admin-card-header">
                     <span class="admin-card-title">🔍 Filtrare documente</span>
@@ -182,7 +169,6 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
                     <form method="GET" action="">
                         <div class="admin-filters">
 
-                            <!-- Filtru sablon -->
                             <select name="template" class="admin-select">
                                 <option value="">Toate sabloanele</option>
                                 <?php foreach ($templates as $tpl): ?>
@@ -196,7 +182,6 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
                                 </option>
                             </select>
 
-                            <!-- Filtru status -->
                             <select name="status" class="admin-select">
                                 <option value="">Toate statusurile</option>
                                 <?php foreach ($statuses as $s): ?>
@@ -207,7 +192,6 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
                                 <?php endforeach; ?>
                             </select>
 
-                            <!-- Filtru data -->
                             <input type="date"
                                    name="date"
                                    class="admin-search-input"
@@ -323,7 +307,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
                 </div>
             </div>
 
-            <!-- Paginare -->
+            <!-- Paginare: afisata doar daca exista mai mult de o pagina -->
             <?php if ($totalPages > 1): ?>
                 <div class="admin-pagination">
                     <?php if ($page > 1): ?>
@@ -332,7 +316,10 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
                         </a>
                     <?php endif; ?>
 
-                    <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
+                    <?php
+                    // Afisam maxim 5 pagini centrate in jurul paginii curente
+                    for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++):
+                    ?>
                         <?php if ($i === $page): ?>
                             <span class="active"><?php echo $i; ?></span>
                         <?php else: ?>
@@ -352,9 +339,11 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
 
         </div>
     </main>
+
 </div>
 
 <?php
+// Returneaza clasa CSS corespunzatoare statusului unui document
 function getStatusBadgeClass(string $status): string {
     $map = [
         'draft'     => 'warning',
@@ -365,14 +354,14 @@ function getStatusBadgeClass(string $status): string {
 }
 ?>
 
-<!-- Modal confirmare -->
+<!-- Modal de confirmare stergere -->
 <div id="confirm-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:8px;padding:2rem;max-width:400px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.2);">
         <h3 id="confirm-title" style="font-size:1.1rem;margin-bottom:.8rem;color:#1a1a2e;">Confirmare</h3>
         <p id="confirm-message" style="color:#555;margin-bottom:1.5rem;font-size:.95rem;"></p>
         <div style="display:flex;gap:.75rem;justify-content:flex-end;">
-            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anulează</button>
-            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Șterge</button>
+            <button id="confirm-cancel" style="padding:.5rem 1.2rem;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;">Anuleaza</button>
+            <button id="confirm-ok" style="padding:.5rem 1.2rem;background:#dc3545;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;">Sterge</button>
         </div>
     </div>
 </div>
