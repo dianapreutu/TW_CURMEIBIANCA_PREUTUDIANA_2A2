@@ -218,7 +218,7 @@ class TemplateEngine
         return [
             'id'       => $docId,
             'filename' => $filename,
-            'html'     => $html
+            'html'     => $styledHtml
         ];
     }
 }
