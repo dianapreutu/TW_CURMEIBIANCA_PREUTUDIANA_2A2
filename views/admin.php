@@ -1,10 +1,9 @@
 <?php
 
-// views/admin.php - Dashboard panou de administrare
-// Afiseaza statistici generale ale aplicatiei
-// Acces restrictionat doar pentru utilizatorii admin
-// Depinde de: lib/Database.php, config.php
-// Stilizat cu: public/css/main.css, public/css/admin.css
+// views/admin.php
+// Dashboard pentru panoul de administrare.
+// Afiseaza statistici generale si activitate recenta.
+// Acces restrictionat la utilizatorii cu rol de admin.
 
 require_once __DIR__ . '/../config.php';
 
@@ -16,41 +15,15 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
 $db = Database::getInstance();
 
-// Obtinem statisticile pentru cardurile de dashboard
+// Statistici generale pentru cardurile de dashboard
+$totalUsers      = $db->fetchOne('SELECT COUNT(*) as total FROM users')['total']       ?? 0;
+$totalDocuments  = $db->fetchOne('SELECT COUNT(*) as total FROM documents')['total']   ?? 0;
+$totalExports    = $db->fetchOne('SELECT COUNT(*) as total FROM exports')['total']     ?? 0;
+$totalSchemas    = $db->fetchOne('SELECT COUNT(*) as total FROM schemas')['total']     ?? 0;
+$totalCsvImports = $db->fetchOne('SELECT COUNT(*) as total FROM csv_imports')['total'] ?? 0;
+$totalLogs       = $db->fetchOne('SELECT COUNT(*) as total FROM logs')['total']        ?? 0;
 
-// Total utilizatori
-$totalUsers = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM users'
-)['total'] ?? 0;
-
-// Total documente generate
-$totalDocuments = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM documents'
-)['total'] ?? 0;
-
-// Total exporturi
-$totalExports = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM exports'
-)['total'] ?? 0;
-
-// Total scheme salvate
-$totalSchemas = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM schemas'
-)['total'] ?? 0;
-
-// Total importuri CSV
-$totalCsvImports = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM csv_imports'
-)['total'] ?? 0;
-
-// Total loguri
-$totalLogs = $db->fetchOne(
-    'SELECT COUNT(*) as total FROM logs'
-)['total'] ?? 0;
-
-// --------------------------------------------------
-// Ultimele 5 documente generate (activitate recenta)
-// --------------------------------------------------
+// Ultimele 5 documente generate
 $recentDocuments = $db->fetchAll(
     'SELECT d.title, d.status, d.created_at, u.username
      FROM documents d
@@ -59,8 +32,7 @@ $recentDocuments = $db->fetchAll(
      LIMIT 5'
 );
 
-
-// Ultimele 5 loguri (activitate recenta)
+// Ultimele 5 intrari din log
 $recentLogs = $db->fetchAll(
     'SELECT l.action, l.description, l.created_at, u.username
      FROM logs l
@@ -69,9 +41,7 @@ $recentLogs = $db->fetchAll(
      LIMIT 5'
 );
 
-// --------------------------------------------------
 // Distributia exporturilor pe formate
-// --------------------------------------------------
 $exportsByFormat = $db->fetchAll(
     'SELECT format, COUNT(*) as total
      FROM exports
@@ -92,7 +62,7 @@ $exportsByFormat = $db->fetchAll(
 
 <div class="admin-wrapper">
 
-    <!-- Sidebar -->
+    <!-- ===== Sidebar ===== -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-logo">
             Do<span>Gen</span>
@@ -127,10 +97,9 @@ $exportsByFormat = $db->fetchAll(
         </div>
     </aside>
 
-    <!-- Continut principal -->
+    <!-- ===== Continut principal ===== -->
     <main class="admin-main">
 
-        <!-- Topbar -->
         <div class="admin-topbar">
             <span class="admin-topbar-title">📊 Dashboard</span>
             <div class="admin-topbar-actions">
@@ -140,10 +109,9 @@ $exportsByFormat = $db->fetchAll(
             </div>
         </div>
 
-        <!-- Continut -->
         <div class="admin-content">
 
-            <!-- Carduri statistici -->
+            <!-- Carduri cu statistici generale -->
             <div class="admin-stats-grid">
 
                 <div class="admin-stat-card info">
@@ -194,9 +162,9 @@ $exportsByFormat = $db->fetchAll(
                     </div>
                 </div>
 
-            </div><!-- /.admin-stats-grid -->
+            </div>
 
-            <!-- Randuri cu tabele de activitate recenta -->
+            <!-- Tabele de activitate recenta -->
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
 
                 <!-- Documente recente -->
@@ -242,7 +210,7 @@ $exportsByFormat = $db->fetchAll(
                     </div>
                 </div>
 
-                <!-- Activitate recenta (loguri) -->
+                <!-- Activitate recenta din log -->
                 <div class="admin-card">
                     <div class="admin-card-header">
                         <span class="admin-card-title">📋 Activitate recenta</span>
@@ -289,7 +257,7 @@ $exportsByFormat = $db->fetchAll(
 
             </div>
 
-            <!-- Exporturi pe formate -->
+            <!-- Exporturi grupate pe format -->
             <?php if (!empty($exportsByFormat)): ?>
             <div class="admin-card" style="margin-top:24px;">
                 <div class="admin-card-header">
@@ -312,11 +280,12 @@ $exportsByFormat = $db->fetchAll(
             </div>
             <?php endif; ?>
 
-        </div><!-- /.admin-content -->
+        </div>
     </main>
-</div><!-- /.admin-wrapper -->
+</div>
 
 <?php
+// Returneaza clasa CSS corespunzatoare statusului unui document
 function getStatusClass(string $status): string {
     $classes = [
         'draft'     => 'warning',
@@ -326,15 +295,16 @@ function getStatusClass(string $status): string {
     return $classes[$status] ?? 'info';
 }
 
+// Returneaza clasa CSS corespunzatoare tipului de actiune din log
 function getActionClass(string $action): string {
     $classes = [
-        'login'         => 'success',
-        'logout'        => 'info',
-        'generate'      => 'info',
-        'export'        => 'success',
-        'import'        => 'warning',
-        'delete'        => 'danger',
-        'admin'         => 'admin',
+        'login'    => 'success',
+        'logout'   => 'info',
+        'generate' => 'info',
+        'export'   => 'success',
+        'import'   => 'warning',
+        'delete'   => 'danger',
+        'admin'    => 'admin',
     ];
     return $classes[$action] ?? 'info';
 }
