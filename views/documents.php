@@ -142,7 +142,7 @@ if ($isAuthenticated) {
         <?php if (empty($documents)): ?>
             <div class="empty-state">
                 <p>📭 Nu ai niciun document generat inca.</p>
-                <a href="<?php echo BASE_URL; ?>/index.php?page=generator"
+                <a href="<?php echo BASE_URL; ?>/index.php?page=editor"
                    class="btn btn-primary">
                     Genereaza primul document
                 </a>
