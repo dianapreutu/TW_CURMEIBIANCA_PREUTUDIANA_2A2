@@ -55,25 +55,34 @@ class DataGenerator
     // --------------------------------------------------
     private function generateRow(array $fields): array 
     {
-        // Array-ul pentru un singur rand
         $row = [];
 
-        // Parcurgem fiecare camp din schema 
         foreach ($fields as $field) {
-            // Numele campului (ex: 'nume', 'email')
             $name = $field['field'] ?? 'camp';
-
-            // Tipul campului (ex: 'full_name', 'email')
             $type = $field['type'] ?? 'text';
-
-            // Optiunile campului (ex: min, max pentru numere)
             $options = $field['options'] ?? [];
-
-            // Generam valoarea folosind FiledTypes
             $row[$name] = FieldTypes::generate($type, $options);
         }
 
-        // Returnam randul generat
+        // Coreleaza email-ul cu numele daca ambele exista
+        $nameValue = $row['nume'] ?? $row['full_name'] ?? null;
+        $emailKey  = isset($row['email']) ? 'email' : null;
+
+        if ($nameValue && $emailKey) {
+            // Normalizam numele: "Ion Popescu" -> "ion.popescu"
+            $normalized = strtolower($nameValue);
+            $normalized = iconv('UTF-8', 'ASCII//TRANSLIT', $normalized);
+            $normalized = preg_replace('/[^a-z\s]/', '', $normalized);
+            $parts      = explode(' ', trim($normalized));
+            
+            $domains = ['gmail.com', 'yahoo.com', 'yahoo.ro', 'hotmail.com'];
+            $domain  = $domains[array_rand($domains)];
+            $suffix  = rand(0, 99) > 50 ? rand(10, 99) : '';
+
+            // Format: ion.popescu42@gmail.com
+            $row[$emailKey] = implode('.', $parts) . $suffix . '@' . $domain;
+        }
+
         return $row;
     }
 
