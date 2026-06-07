@@ -1,7 +1,7 @@
 <?php
 
 // admin/users.php
-// Gestionarea utilizatorilor: vizualizare, adaugare si stergere.
+// Gestionarea utilizatorilor: vizualizare, adaugare si stergere
 
 require_once '../config.php';
 
