@@ -1,18 +1,19 @@
 <?php
 
-// api/export.php - API pentru exportul documentelor
-// Gestioneaza exportul documentelor in formatele: HTML, PDF, CSV, JSON
-// Metode HTTP suportate: POST
-// Depinde de: lib/Database.php, lib/services/ExportService.php
+// api/export.php
+// API pentru exportul documentelor in formatele: HTML, PDF, CSV, JSON
+// Metoda HTTP acceptata: POST
 
 require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
+// Determinam utilizatorul din sesiune; adminul primeste ID-ul 1
 $userId = $_SESSION['user_id'] ?? null;
 if (!$userId && isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
     $userId = 1;
 }
+
 if (!$userId) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Trebuie sa fii autentificat pentru a exporta documente']);
@@ -28,10 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$data = getRequestData();
-$action = $data['action'] ?? '';
+$data          = getRequestData();
+$action        = $data['action'] ?? '';
 $exportService = new ExportService();
 
+// Rutam actiunea catre metoda corespunzatoare din ExportService
 try {
     switch ($action) {
         case 'export_document':
@@ -69,6 +71,7 @@ try {
     ]);
 }
 
+// Citeste datele din cerere - suporta JSON body si form POST clasic
 function getRequestData(): array
 {
     $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -79,10 +82,11 @@ function getRequestData(): array
     return $_POST;
 }
 
+// Returneaza un raspuns JSON de succes si opreste executia
 function jsonSuccess(array $data): void
 {
     echo json_encode([
         'success' => true,
-        'data' => $data
+        'data'    => $data
     ], JSON_UNESCAPED_UNICODE);
 }

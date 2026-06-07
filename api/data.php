@@ -1,10 +1,9 @@
 <?php
 
-// ==================================================
-// api/data.php - API pentru generarea si importul datelor
-// Acest fisier primeste cereri AJAX si returneaza JSON
-// Operatii: generare aleatorie, import CSV
-// ==================================================
+// api/data.php
+// API pentru generarea si importul datelor
+// Primeste cereri AJAX si returneaza raspunsuri JSON
+// Operatii disponibile: generare aleatorie, import CSV
 
 require_once '../config.php';
 header('Content-Type: application/json; charset=utf-8');
@@ -12,20 +11,23 @@ header('Content-Type: application/json; charset=utf-8');
 $authService = new AuthService();
 $dataService = new DataService();
 
-$input = getRequestData();
+// Determinam actiunea din GET, POST sau body JSON
+$input  = getRequestData();
 $action = $_GET['action'] ?? $_POST['action'] ?? ($input['action'] ?? '');
 
+// Rutam actiunea catre handler-ul corespunzator
 try {
     switch ($action) {
-        case 'generate': handleGenerate(); break;
+        case 'generate':   handleGenerate();  break;
         case 'import_csv': handleImportCsv(); break;
-        default: jsonError('Actiune invalida!'); break;
+        default:           jsonError('Actiune invalida!'); break;
     }
 } catch (Exception $e) {
     http_response_code(400);
     jsonError($e->getMessage());
 }
 
+// Genereaza randuri aleatorii pe baza schemei de campuri primite
 function handleGenerate()
 {
     global $dataService;
@@ -35,11 +37,13 @@ function handleGenerate()
         return;
     }
 
-    $input = getRequestData();
+    $input  = getRequestData();
     $fields = $input['fields'] ?? [];
+
     if (is_string($fields)) {
         $fields = json_decode($fields, true);
     }
+
     $count = (int)($input['rows'] ?? $input['count'] ?? DEFAULT_ROWS);
 
     if (empty($fields) || !is_array($fields)) {
@@ -52,16 +56,17 @@ function handleGenerate()
         return;
     }
 
-    $rows = $dataService->generateRows($fields, $count);
+    $rows    = $dataService->generateRows($fields, $count);
     $headers = array_keys($rows[0] ?? []);
 
     jsonSuccess([
-        'headers' => $headers,
-        'rows' => $rows,
+        'headers'   => $headers,
+        'rows'      => $rows,
         'row_count' => count($rows)
     ]);
 }
 
+// Importa date dintr-un fisier CSV incarcat de utilizatorul autentificat
 function handleImportCsv()
 {
     global $dataService, $authService;
@@ -81,35 +86,41 @@ function handleImportCsv()
 
     try {
         $result = $dataService->importCsv($_FILES['csv_file'], $userId);
+
         jsonSuccess([
-            'headers' => $result['headers'],
-            'rows' => $result['rows'],
+            'headers'   => $result['headers'],
+            'rows'      => $result['rows'],
             'row_count' => $result['row_count'],
-            'message' => 'CSV importat cu succes! ' . $result['row_count'] . ' randuri gasite.'
+            'message'   => 'CSV importat cu succes! ' . $result['row_count'] . ' randuri gasite.'
         ]);
     } catch (Exception $e) {
         jsonError('Eroare la importul CSV: ' . $e->getMessage());
     }
 }
 
+// Returneaza un raspuns JSON de succes si opreste executia
 function jsonSuccess($data)
 {
     echo json_encode(['success' => true, 'data' => $data], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
+// Returneaza un raspuns JSON de eroare si opreste executia
 function jsonError($message)
 {
     echo json_encode(['success' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
+// Citeste datele din cerere - suporta JSON body si form POST clasic
 function getRequestData(): array
 {
     $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
     if (strpos($contentType, 'application/json') !== false) {
         $body = file_get_contents('php://input');
         return json_decode($body, true) ?? [];
     }
+
     return $_POST;
 }

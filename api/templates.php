@@ -1,19 +1,19 @@
 <?php
 
-// ==================================================
-// api/templates.php - API pentru gestionarea sabloanelor
-// Acest fisier primeste cereri AJAX si returneaza JSON
-// Operatii disponibile: listare, creare, editare, stergere
-// ==================================================
+// api/templates.php
+// API pentru gestionarea sabloanelor de documente
+// Primeste cereri AJAX si returneaza raspunsuri JSON
+// Operatii disponibile: listare, obtinere, creare, editare, stergere
 
 require_once '../config.php';
 header('Content-Type: application/json; charset=utf-8');
 
-$authService = new AuthService();
+$authService     = new AuthService();
 $templateService = new TemplateService();
 
 actionHandler();
 
+// Rutam actiunea catre handler-ul corespunzator
 function actionHandler()
 {
     global $authService, $templateService;
@@ -21,12 +21,12 @@ function actionHandler()
 
     try {
         switch ($action) {
-            case 'list': handleList(); break;
-            case 'get': handleGet(); break;
+            case 'list':   handleList();   break;
+            case 'get':    handleGet();    break;
             case 'create': handleCreate(); break;
             case 'update': handleUpdate(); break;
             case 'delete': handleDelete(); break;
-            default: jsonError('Actiune invalida!'); break;
+            default:       jsonError('Actiune invalida!'); break;
         }
     } catch (Exception $e) {
         http_response_code(400);
@@ -34,17 +34,19 @@ function actionHandler()
     }
 }
 
+// Returneaza lista tuturor sabloanelor disponibile
 function handleList()
 {
     global $templateService;
     jsonSuccess($templateService->listTemplates());
 }
 
+// Returneaza un sablon specific dupa ID
 function handleGet()
 {
     global $templateService;
-    $id = intval($_GET['id'] ?? 0);
 
+    $id = intval($_GET['id'] ?? 0);
     if ($id <= 0) {
         jsonError('ID invalid!');
         return;
@@ -59,6 +61,7 @@ function handleGet()
     jsonSuccess($template);
 }
 
+// Creeaza un sablon nou pe baza datelor trimise
 function handleCreate()
 {
     global $authService, $templateService;
@@ -68,9 +71,8 @@ function handleCreate()
         return;
     }
 
-    // Citim input-ul O SINGURA DATA — json_decode din php://input
-    // deoarece ajaxPost trimite Content-Type: application/json
-    $raw = file_get_contents('php://input');
+    // Citim input-ul o singura data - ajaxPost trimite Content-Type: application/json
+    $raw   = file_get_contents('php://input');
     $input = json_decode($raw, true);
 
     // Fallback la $_POST daca nu e JSON valid (ex: FormData)
@@ -91,6 +93,7 @@ function handleCreate()
     jsonSuccess(['id' => $templateId, 'message' => 'Sablonul a fost creat cu succes!']);
 }
 
+// Actualizeaza numele si continutul unui sablon existent
 function handleUpdate()
 {
     global $authService, $templateService;
@@ -100,8 +103,8 @@ function handleUpdate()
         return;
     }
 
-    // Citim input-ul O SINGURA DATA, inainte de requireAuthentication
-    $raw = file_get_contents('php://input');
+    // Citim input-ul o singura data, inainte de orice validare
+    $raw   = file_get_contents('php://input');
     $input = json_decode($raw, true);
     if (!is_array($input)) {
         $input = $_POST;
@@ -120,6 +123,7 @@ function handleUpdate()
     jsonSuccess(['message' => 'Sablonul a fost actualizat cu succes!']);
 }
 
+// Sterge un sablon dupa ID - operatie permisa doar administratorului
 function handleDelete()
 {
     global $authService, $templateService;
@@ -129,8 +133,8 @@ function handleDelete()
         return;
     }
 
-    // Citim input-ul O SINGURA DATA, inainte de requireAuthentication
-    $raw = file_get_contents('php://input');
+    // Citim input-ul o singura data, inainte de orice validare
+    $raw   = file_get_contents('php://input');
     $input = json_decode($raw, true);
     if (!is_array($input)) {
         $input = $_POST;
@@ -150,12 +154,14 @@ function handleDelete()
     jsonSuccess(['message' => 'Sablonul a fost sters cu succes!']);
 }
 
+// Returneaza un raspuns JSON de succes si opreste executia
 function jsonSuccess($data)
 {
     echo json_encode(['success' => true, 'data' => $data], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
+// Returneaza un raspuns JSON de eroare si opreste executia
 function jsonError($message)
 {
     echo json_encode(['success' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
