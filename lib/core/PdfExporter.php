@@ -31,9 +31,7 @@ class PdfExporter
         $pdfPath     = $this->outputPath . '/' . $pdfFilename;
 
         // Verificam daca mPDF e disponibil; altfel folosim fallback-ul minimal
-        $mpdfPath = ROOT_PATH . '/lib/mpdf/autoload.php';
-
-        file_put_contents(ROOT_PATH . '/mpdf_debug.txt', $mpdfPath . ' exists=' . (file_exists($mpdfPath) ? 'YES' : 'NO'));
+        $mpdfPath = ROOT_PATH . '/vendor/autoload.php';
 
         if (file_exists($mpdfPath)) {
             $pdfPath = $this->exportWithMpdf($html, $pdfPath, $templateId);
@@ -152,7 +150,7 @@ class PdfExporter
     // Suporta diacritice, CSS si imagini
     private function exportWithMpdf(string $html, string $outputPath, int $templateId = 0): string
     {
-        require_once ROOT_PATH . '/lib/mpdf/autoload.php';
+        require_once ROOT_PATH . '/vendor/autoload.php';
 
         $mpdf = new \Mpdf\Mpdf([
             'mode'          => 'utf-8',
@@ -244,6 +242,18 @@ class PdfExporter
             h2 { color:' . $color . '; font-size:13pt; border-bottom:1px solid #ccc; padding-bottom:3px; margin-top:18px; }
             ';
         }
+
+        // Eliminam header-ul duplicat din HTML-ul original
+        $html = preg_replace('/<div[^>]*class="doc-header"[^>]*>.*?<\/div>/s', '', $html);
+        $html = preg_replace('/<div[^>]*class="doc-footer"[^>]*>.*?<\/div>/s', '', $html);
+        $html = preg_replace('/<h1[^>]*>.*?<\/h1>/s', '', $html);
+
+        // Eliminam si tagurile de wrapper ramase
+        $html = preg_replace('/<\/?div[^>]*class="doc-(wrapper|body|header|footer|subtitle)"[^>]*>/s', '', $html);
+
+        $html = preg_replace('/CURRICULUM VITAE\s*/i', '', $html);
+        $html = preg_replace('/CERERE\s*/i', '', $html);
+        $html = preg_replace('/FACTURA\s*/i', '', $html);
 
         $styledHtml = '<!DOCTYPE html>
 <html>
