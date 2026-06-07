@@ -164,7 +164,6 @@ $users = $db->fetchAll(
             </ul>
             <div class="admin-sidebar-footer">
                 <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
-                <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
             </div>
         </aside>
 
@@ -173,7 +172,6 @@ $users = $db->fetchAll(
                 <span class="admin-topbar-title">👥 Gestionare Utilizatori</span>
                 <div class="admin-topbar-actions">
                     <a href="<?php echo BASE_URL; ?>/" class="admin-btn secondary">Inapoi la aplicatie</a>
-                    <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1" class="admin-btn secondary">Delogare</a>
                 </div>
             </div>
             <div class="admin-content">

@@ -165,7 +165,6 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
         </ul>
         <div class="admin-sidebar-footer">
             <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
-            <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
         </div>
     </aside>
 
