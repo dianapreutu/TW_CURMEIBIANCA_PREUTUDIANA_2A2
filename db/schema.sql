@@ -1,79 +1,87 @@
 PRAGMA foreign_keys = ON;
 
+-- Tabel utilizatori - stocheaza conturile si rolurile
 CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin', 'user')),
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    username   TEXT NOT NULL UNIQUE,
+    email      TEXT NOT NULL UNIQUE,
+    password   TEXT NOT NULL,
+    role       TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('admin', 'user')),
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     last_login TEXT
 );
 
+-- Tabel sabloane - defineste tipurile de documente disponibile in aplicatie
 CREATE TABLE IF NOT EXISTS templates (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    label TEXT NOT NULL,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL UNIQUE,
+    label       TEXT NOT NULL,
     description TEXT,
     fields_json TEXT NOT NULL DEFAULT '[]',
-    filename TEXT NOT NULL,
-    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    filename    TEXT NOT NULL,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Tabel scheme - configuratii de campuri salvate de utilizatori
 CREATE TABLE IF NOT EXISTS schemas (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name       TEXT NOT NULL,
     fields_json TEXT NOT NULL DEFAULT '[]',
     rows_count INTEGER NOT NULL DEFAULT 10 CHECK(rows_count > 0 AND rows_count <= 1000),
     created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Tabel documente - inregistreaza documentele generate de utilizatori
 CREATE TABLE IF NOT EXISTS documents (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     template_id INTEGER REFERENCES templates(id) ON DELETE SET NULL,
-    schema_id INTEGER REFERENCES schemas(id) ON DELETE SET NULL,
-    title TEXT NOT NULL,
-    html_path TEXT,
-    pdf_path TEXT,
-    status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'generated', 'exported')),
-    rows_count INTEGER NOT NULL DEFAULT 10,
-    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    schema_id   INTEGER REFERENCES schemas(id) ON DELETE SET NULL,
+    title       TEXT NOT NULL,
+    html_path   TEXT,
+    pdf_path    TEXT,
+    status      TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft', 'generated', 'exported')),
+    rows_count  INTEGER NOT NULL DEFAULT 10,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Tabel exporturi - istoricul exporturilor efectuate pentru fiecare document
 CREATE TABLE IF NOT EXISTS exports (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
     document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    format TEXT NOT NULL CHECK(format IN ('html', 'pdf', 'csv', 'json')),
-    file_path TEXT,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    format      TEXT NOT NULL CHECK(format IN ('html', 'pdf', 'csv', 'json')),
+    file_path   TEXT,
     exported_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Tabel loguri - inregistreaza actiunile utilizatorilor pentru audit
 CREATE TABLE IF NOT EXISTS logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    action TEXT NOT NULL,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    action      TEXT NOT NULL,
     description TEXT,
-    entity TEXT,
-    entity_id INTEGER,
-    ip_address TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    entity      TEXT,
+    entity_id   INTEGER,
+    ip_address  TEXT,
+    created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Tabel importuri CSV - pastreaza metadatele fisierelor incarcate de utilizatori
 CREATE TABLE IF NOT EXISTS csv_imports (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     original_name TEXT NOT NULL,
-    file_path TEXT NOT NULL,
-    row_count INTEGER,
-    headers_json TEXT,
-    uploaded_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+    file_path     TEXT NOT NULL,
+    row_count     INTEGER,
+    headers_json  TEXT,
+    uploaded_at   TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
+-- Indecsi pentru optimizarea interogarilor frecvente
 CREATE INDEX IF NOT EXISTS idx_schemas_user ON schemas(user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_user ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_tmpl ON documents(template_id);
@@ -82,6 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_logs_user ON logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_logs_action ON logs(action);
 CREATE INDEX IF NOT EXISTS idx_csv_user ON csv_imports(user_id);
 
+-- Date initiale: cont de administrator implicit
 INSERT OR IGNORE INTO users (username, email, password, role)
 VALUES (
     'admin',
@@ -90,6 +99,7 @@ VALUES (
     'admin'
 );
 
+-- Date initiale: sabloane predefinite pentru CV, cerere si factura
 INSERT OR IGNORE INTO templates (name, label, description, filename, fields_json)
 VALUES (
     'cv',
