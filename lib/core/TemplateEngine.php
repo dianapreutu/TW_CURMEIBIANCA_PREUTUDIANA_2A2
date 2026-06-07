@@ -1,245 +1,129 @@
 <?php
 
-// ==================================================
-// lib/core/TemplateEngine.php - Motorul de templating
-// Aceasta clasa se ocupa de procesarea sabloanelor:
-// -> inlocuieste variabilele cu valori reale
-// -> suporta conditii (if/else)
-// -> suporta functii dinamice (data, ora etc.)
-// Este componenta centrala a aplicatiei
-// ==================================================
+// lib/core/TemplateEngine.php
+// Motorul de templating al aplicatiei
+// Proceseaza sabloanele: inlocuieste variabile, evalueaza conditii,
+// aplica functii dinamice si genereaza documentele HTML finale
 
-class TemplateEngine 
+class TemplateEngine
 {
-    // -- Proprietati private --
-
-    // Instanta bazei de date (folosita pentru salvarea documentelor)
     private $db;
 
-    // --------------------------------------------------
-    // Constructorul - initializeaza conexiunea la baza de date 
-    // --------------------------------------------------
     public function __construct()
     {
-        // Obtinem instanta unica a bazei de date (Singleton)
+        // Obtinem instanta unica a bazei de date
         $this->db = Database::getInstance();
     }
 
-    // --------------------------------------------------
-    // render() - proceseaza un sablon si returneaza HTML-ul final 
-    // $template - continutul sablon (string HTML cu variabile)
-    // $data - array asociativ cu valorile variabilelor
-    // --------------------------------------------------
+    // Proceseaza un sablon si returneaza HTML-ul final
+    // Aplica in ordine: functii dinamice, conditii, variabile
     public function render($template, $data = [])
     {
-        // Pasul 1: procesam functiile dinamice (ex: {{DATE}}, {{TIME}})
         $output = $this->processFunctions($template);
-
-        // Pasul 2: procesam blocurile conditionale (ex: {{IF campul}} ... {{ENDIF}})
         $output = $this->processConditions($output, $data);
-
-        // Pasul 3: inlocuim variabilele simple (ex: {{nume}}, {{email}})
         $output = $this->processVariables($output, $data);
 
-        // Returnam HTML-ul final procesat
         return $output;
     }
 
-    // --------------------------------------------------
-    // processFunctions() - inlocuieste functiile dinamice din sablon
-    // Functii disponibile:
-    // {{DATE}} -> data curenta
-    // {{TIME}} -> ora curenta
-    // {{DATETIME}} -> data si ora curenta
-    // {{YEAR}} -> anul curent
-    // {{TIMESTAMP}} -> timestamp Unix curent
-    // --------------------------------------------------
+    // Inlocuieste functiile dinamice din sablon cu valorile curente
+    // Functii disponibile: {{DATE}}, {{TIME}}, {{DATETIME}}, {{YEAR}}, {{TIMESTAMP}}
     private function processFunctions($template)
     {
-        // Inlocuim {{DATE}} cu data curenta formatata
-        $template = str_replace('{{DATE}}', date('d.m.Y'), $template);
+        $template = str_replace('{{DATE}}',      date('d.m.Y'),    $template);
+        $template = str_replace('{{TIME}}',      date('H:i'),      $template);
+        $template = str_replace('{{DATETIME}}',  date('d.m.Y H:i'),$template);
+        $template = str_replace('{{YEAR}}',      date('Y'),        $template);
+        $template = str_replace('{{TIMESTAMP}}', time(),           $template);
 
-        // Inlocuim {{TIME}} cu ora curenta
-        $template = str_replace('{{TIME}}', date('H:i'), $template);
-
-        // Inlocuim {{DATETIME}} cu data si ora curenta
-        $template = str_replace('{{DATETIME}}', date('d.m.Y H:i'), $template);
-
-        // Inlocuim {{YEAR}} cu anul curent
-        $template = str_replace('{{YEAR}}', date('Y'), $template);
-
-        // Inlocuim {{TIMESTAMP}} cu timestamp-ul Unix curent
-        $template = str_replace('{{TIMESTAMP}}', time(), $template);
-
-        // Returnam template-ul cu functiile inlocuite
         return $template;
     }
 
-    // --------------------------------------------------
-    // processConditions() - proceseaza blocurile conditionale
-    // Sintaxa: {{IF variabila}}continut{{ENDIF}}
-    // Sintaxa: {{IF variabila}}continut{{ELSE}}alt continut{{ENDIF}}
-    // Daca variabila exista si nu e goala, afiseaza continutul
-    // --------------------------------------------------
+    // Proceseaza blocurile conditionale din sablon
+    // Sintaxa suportata: {{IF var}}...{{ENDIF}} si {{IF var}}...{{ELSE}}...{{ENDIF}}
     private function processConditions($template, $data)
     {
-        // Expresie regulata pentru a gasi blocurile {{IF}}...{{ENDIF}}
-        // cu sau fara {{ELSE}}
-        $pattern = '/\{\{IF\s+(\w+)\}\}(.*?)\{\{ELSE\}\}(.*?)\{\{ENDIF\}\}/s';
-
         // Procesam blocurile IF/ELSE/ENDIF
+        $pattern  = '/\{\{IF\s+(\w+)\}\}(.*?)\{\{ELSE\}\}(.*?)\{\{ENDIF\}\}/s';
         $template = preg_replace_callback($pattern, function($matches) use ($data) {
-            $variable = $matches[1]; // numele variabilei din conditie
-            $ifContent = $matches[2]; // continutul din IF
-            $elseContent = $matches[3]; // continutul din ELSE
-
-            // Daca variabila exista in date si nu e goala, afisam IF
-            if (!empty($data[$variable])) {
-                return $ifContent;
-            }
-
-            // Altfel afisam continutul din ELSE
-            return $elseContent;
+            return !empty($data[$matches[1]]) ? $matches[2] : $matches[3];
         }, $template);
 
-        // Expresie regulata pentru blocuri simple {{IF}}...{{ENDIF}} (fara ELSE)
-        $pattern = '/\{\{IF\s+(\w+)\}\}(.*?)\{\{ENDIF\}\}/s';
-        
-        // Procesam blocurile IF/ENDIF simple
+        // Procesam blocurile IF/ENDIF simple (fara ELSE)
+        $pattern  = '/\{\{IF\s+(\w+)\}\}(.*?)\{\{ENDIF\}\}/s';
         $template = preg_replace_callback($pattern, function($matches) use ($data) {
-            $variable = $matches[1]; // numele variabilei 
-            $content = $matches[2]; // continutul blocului
-
-            // Daca variabila exista si nu e goala, afisam continutul
-            if (!empty($data[$variable])) {
-                return $content;
-            }
-
-            // Altfel nu afisam nimic
-            return '';
+            return !empty($data[$matches[1]]) ? $matches[2] : '';
         }, $template);
 
         return $template;
     }
 
-    // --------------------------------------------------
-    // processVariables() - inlocuieste variabilele simple
-    // Sintaxa: {{nume_variabila}}
-    // Inlocuieste cu valoarea corespunzatoare din array-ul $data
-    // Protejeaza impotriva XSS folosind htmlspecialchars()
-    // --------------------------------------------------
+    // Inlocuieste variabilele simple {{cheie}} cu valorile din $data
+    // Valorile sunt escapate pentru a preveni XSS
     private function processVariables($template, $data)
     {
-        // Parcurgem toate perechile cheie-valoare din date
         foreach ($data as $key => $value) {
-            // Curatam valoarea pentru a preveni atacurile XSS
-            // htmlspecialchars() transforma caracterele speciale in entitati HTML
-            // ex: <script> devine &lt;script&gt;
             $safeValue = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-
-            // Inlocuim {{cheie}} cu valoarea curatata
-            $template = str_replace('{{' . $key . '}}', $safeValue, $template);
+            $template  = str_replace('{{' . $key . '}}', $safeValue, $template);
         }
 
-        // Returnam template-ul cu toate variabilele inlocuite
         return $template;
     }
 
-    // --------------------------------------------------
-    // loadTemplate() - incarca un sablon din baza de date
-    // $id - ID-ul sablonului din tabela templates
-    // Returneaza array-ul cu datele sablonului sau null
-    // --------------------------------------------------
+    // Incarca un sablon din baza de date dupa ID
     public function loadTemplate($id)
     {
-        // Cautam sablonul in baza de date dupa ID
-        $template = $this->db->fetchOne(
+        return $this->db->fetchOne(
             'SELECT * FROM templates WHERE id = ?',
             [$id]
         );
-
-        // Returnam sablonul gasit (sau false daca nu exista)
-        return $template;
     }
 
-    // --------------------------------------------------
-    // saveTemplate() - salveaza un sablon nou in baza de date
-    // $name - numele sablonului 
-    // $type - tipul documentului (cv, cerere, factura)
-    // $content - continutul HTML al sablonului
-    // $format - formatul: 'html' sau 'json'
-    // $userId - ID-ul utilizatorului care salveaza 
-    // --------------------------------------------------
+    // Salveaza un sablon nou in baza de date
     public function saveTemplate($name, $type, $content, $format = 'html', $userId = null)
     {
-        // Inseram sablonul in baza de date
         $id = $this->db->insert('templates', [
-            'name' => $name,
-            'label' => $type,
+            'name'        => $name,
+            'label'       => $type,
             'fields_json' => $content,
-            'filename' => $name . '.json'
+            'filename'    => $name . '.json'
         ]);
 
-        // Inregistram actiunea in logs
         $this->db->log('save_template', "Sablon salvat: {$name}", $userId);
 
-        // Returnam ID-ul sablonului nou creat
         return $id;
     }
 
-    // --------------------------------------------------
-    // updateTemplate() - actualizeaza un sablon existent
-    // $id - ID-ul sablonului de actualizat
-    // $name - noul nume
-    // $content - noul continut
-    // --------------------------------------------------
-    public function updateTemplate($id, $name, $content) 
+    // Actualizeaza numele si continutul unui sablon existent
+    public function updateTemplate($id, $name, $content)
     {
-        // Actualizam sablonul in baza de date
         $this->db->update('templates', [
-            'name' => $name,
+            'name'        => $name,
             'fields_json' => $content
         ], 'id = ?', [$id]);
 
-        // Inregistram actiunea in logs
         $this->db->log('update_template', "Sablon actualizat ID: {$id}");
     }
 
-    // --------------------------------------------------
-    // deleteTemplate() - sterge un sablon din baza de date 
-    // $id - ID-ul sablonului de sters
-    // --------------------------------------------------
+    // Sterge un sablon din baza de date dupa ID
     public function deleteTemplate($id)
     {
-        // Stergem sablonul din baza de date
         $this->db->delete('templates', 'id = ?', [$id]);
-
-        // Inregistram actiunea in logs
         $this->db->log('delete_template', "Sablon sters ID: {$id}");
     }
 
-    // --------------------------------------------------
-    // getAllTemplates() - returneaza toate sabloanele din baza de date
-    // --------------------------------------------------
+    // Returneaza toate sabloanele din baza de date, ordonate dupa data crearii
     public function getAllTemplates()
     {
-        // Selectam toate sabloanele ordonate dupa data crearii
         return $this->db->fetchAll(
             'SELECT * FROM templates ORDER BY created_at DESC'
         );
     }
 
-    // --------------------------------------------------
-    // generateDocument() - genereaza un document final
-    // Aplica datele pe sablon si salveaza fisierul HTML
-    // $templateId - ID-ul sablonului folosit
-    // $data - datele cu care se populeaza sablonul
-    // $name - numele documentului generat
-    // $userId - ID-ul utilizatorului
-    // --------------------------------------------------
+    // Genereaza un document HTML pe baza unui sablon si a datelor primite
+    // Salveaza fisierul pe server si inregistreaza documentul in baza de date
     public function generateDocument($templateId, $data, $name, $userId = null)
     {
-        // Incarcam sablonul din baza de date
         $template = $this->loadTemplate($templateId);
 
         if (!$template) {
@@ -247,36 +131,38 @@ class TemplateEngine
         }
 
         $fieldsJson = $template['fields_json'];
-        $decoded = json_decode($fieldsJson, true);
+        $decoded    = json_decode($fieldsJson, true);
 
+        // Construim HTML-ul din campurile JSON sau folosim continutul direct
         if (is_array($decoded)) {
             $htmlTemplate = '';
             foreach ($decoded as $field) {
-                $label = htmlspecialchars($field['label'] ?? $field['field'], ENT_QUOTES, 'UTF-8');
-                $var = '{{' . $field['field'] . '}}';
+                $label        = htmlspecialchars($field['label'] ?? $field['field'], ENT_QUOTES, 'UTF-8');
+                $var          = '{{' . $field['field'] . '}}';
                 $htmlTemplate .= '<p><strong>' . $label . ':</strong> ' . $var . '</p>' . "\n";
             }
         } else {
             $htmlTemplate = $fieldsJson;
         }
 
-       $html = $this->render($htmlTemplate, $data);
+        $html = $this->render($htmlTemplate, $data);
 
-// Detectam tipul documentului pentru stilizare
-$cerereIds = [2];
-$facturaIds = [3];
-if (in_array($templateId, $cerereIds)) {
-    $docTitle = 'CERERE';
-    $color = '#1a3a5c';
-} elseif (in_array($templateId, $facturaIds)) {
-    $docTitle = 'FACTURĂ';
-    $color = '#1a5c2a';
-} else {
-    $docTitle = 'CURRICULUM VITAE';
-    $color = '#3a1a5c';
-}
+        // Determinam tipul documentului pentru stilizare
+        $cerereIds  = [2];
+        $facturaIds = [3];
 
-$styledHtml = '<!DOCTYPE html>
+        if (in_array($templateId, $cerereIds)) {
+            $docTitle = 'CERERE';
+            $color    = '#1a3a5c';
+        } elseif (in_array($templateId, $facturaIds)) {
+            $docTitle = 'FACTURA';
+            $color    = '#1a5c2a';
+        } else {
+            $docTitle = 'CURRICULUM VITAE';
+            $color    = '#3a1a5c';
+        }
+
+        $styledHtml = '<!DOCTYPE html>
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
@@ -310,13 +196,12 @@ $styledHtml = '<!DOCTYPE html>
 </body>
 </html>';
 
-// Generam un nume unic pentru fisierul HTML
-$filename = uniqid('doc_') . '_' . time() . '.html';
-$filePath = GENERATED_HTML_PATH . '/' . $filename;
-// Salvam fisierul HTML stilizat pe server
-file_put_contents($filePath, $styledHtml);
+        // Salvam fisierul HTML pe server cu un nume unic
+        $filename = uniqid('doc_') . '_' . time() . '.html';
+        $filePath = GENERATED_HTML_PATH . '/' . $filename;
+        file_put_contents($filePath, $styledHtml);
 
-        // Salvam inregistrarea documentului in baza de date
+        // Inregistram documentul in baza de date
         $docId = $this->db->insert('documents', [
             'title'       => $name,
             'template_id' => $templateId,
