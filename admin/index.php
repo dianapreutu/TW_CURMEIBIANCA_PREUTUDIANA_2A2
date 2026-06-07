@@ -9,6 +9,22 @@
 // Includem configurarile globale
 require_once '../config.php';
 
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+
+    header('Location: ' . BASE_URL . '/index.php?page=home');
+    exit;
+}
+
 // Verificam daca utilizatorul este autentificat ca admin
 // Daca nu, il redirectionam catre pagina de login
 if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
@@ -117,17 +133,6 @@ $loginError = 'Utilizator sau parola incorecta!';
     </html>
     <?php
     // Oprim executia - nu afisam panoul admin
-    exit;
-}
-
-// Verificam daca s-a cerut delogarea
-if (isset($_GET['logout'])) {
-     $_SESSION = [];
-    // Distrugem sesiunea
-    session_destroy();
-
-    // Redirectionam catre login
-    header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
 
