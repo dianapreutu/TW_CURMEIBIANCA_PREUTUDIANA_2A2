@@ -1,8 +1,8 @@
 <?php
 
 // views/editor.php
-// Pagina editorului de sabloane HTML.
-// Permite crearea, editarea si previzualizarea sabloanelor de documente.
+// Pagina editorului de sabloane HTML
+// Permite crearea, editarea si previzualizarea sabloanelor de documente
 
 require_once __DIR__ . '/../config.php';
 ?>

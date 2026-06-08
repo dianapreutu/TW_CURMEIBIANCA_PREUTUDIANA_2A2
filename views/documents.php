@@ -1,8 +1,8 @@
 <?php
 
 // views/documents.php
-// Lista documentelor generate de utilizatorul logat.
-// Permite filtrare dupa status, paginare, previzualizare si stergere.
+// Lista documentelor generate de utilizatorul logat
+// Permite filtrare dupa status, paginare, previzualizare si stergere
 
 require_once __DIR__ . '/../config.php';
 
