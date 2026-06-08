@@ -61,6 +61,11 @@ if (!$document) {
             <?php if (!isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)): ?>
                 <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
             <?php endif; ?>
+            <?php if (isset($_SESSION['user_id']) || isset($_SESSION['admin'])): ?>
+            <li>
+                <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Delogare</a>
+            </li>
+            <?php endif; ?>
         </ul>
     </nav>
 
