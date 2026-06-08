@@ -1,6 +1,6 @@
 # .htaccess
-# Redirectioneaza toate cererile catre index.php (front controller).
-# Protejeaza fisierele sensibile si seteaza headere de securitate.
+# Redirectioneaza toate cererile catre index.php (front controller)
+# Protejeaza fisierele sensibile si seteaza headere de securitate
 
 
 # ===== Rescriere URL =====
