@@ -121,7 +121,6 @@ Exemplu:
                                     <option value="cv">CV</option>
                                     <option value="cerere">Cerere</option>
                                     <option value="factura">Factura</option>
-                                    <option value="catalog">Catalog</option>
                                     <option value="alt">Alt tip</option>
                                 </select>
                             </div>
