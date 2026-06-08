@@ -1,7 +1,7 @@
 // public/js/preview.js
-// Logica UI pentru pagina de previzualizare.
+// Logica UI pentru pagina de previzualizare
 // Gestioneaza incarcarea documentului via AJAX, afisarea in iframe,
-// exportul (PDF, HTML, CSV, JSON) si stergerea documentului.
+// exportul (PDF, HTML, CSV, JSON) si stergerea documentului
 // Depinde de: public/js/app.js
 
 

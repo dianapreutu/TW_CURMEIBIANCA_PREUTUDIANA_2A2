@@ -1,7 +1,7 @@
 // public/js/generator.js
-// Logica UI pentru pagina de generator.
+// Logica UI pentru pagina de generator
 // Gestioneaza campurile din schema, previzualizarea tabelara,
-// salvarea schemei via AJAX si importul/exportul CSV/JSON.
+// salvarea schemei via AJAX si importul/exportul CSV/JSON
 // Depinde de: public/js/app.js
 
 
