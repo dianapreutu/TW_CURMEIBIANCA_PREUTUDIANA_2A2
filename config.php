@@ -1,8 +1,8 @@
 <?php
 
 // config.php
-// Configurari globale ale aplicatiei DoGen.
-// Inclus in toate fisierele PHP — defineste constante, sesiunea si autoload-ul.
+// Configurari globale ale aplicatiei DoGen
+// Inclus in toate fisierele PHP — defineste constante, sesiunea si autoload-ul
 
 
 // ===== Setari generale =====
