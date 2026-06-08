@@ -64,7 +64,19 @@ class PdfExporter
             throw new Exception('Fisierul HTML al documentului nu a fost gasit.');
         }
 
-        $html    = file_get_contents($htmlPath);
+        $html = file_get_contents($htmlPath);
+
+        // Daca fisierul contine un document HTML complet, extragem doar body-ul
+        // pentru a evita dublarea stilurilor in mPDF
+        if (strpos($html, '<!DOCTYPE html>') !== false || strpos($html, '<html') !== false) {
+            preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $matches);
+            if (!empty($matches[1])) {
+                $html = $matches[1];
+            }
+            // Eliminam tagurile de stil inline care ar aparea ca text
+            $html = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $html);
+        }
+
         $pdfPath = $this->exportFromHtml(
             $html,
             pathinfo($document['html_path'], PATHINFO_FILENAME),
@@ -72,7 +84,6 @@ class PdfExporter
             (int)($document['template_id'] ?? 0)
         );
 
-        // Actualizam documentul in DB cu calea PDF-ului generat
         $pdfFilename = basename($pdfPath);
         $this->db->update(
             'documents',
@@ -268,7 +279,7 @@ class PdfExporter
 </div>
 ' . $html . '
 <div class="doc-footer">
-    Document generat automat &bull; ' . date('d.m.Y H:i') . '
+    Document generat automat ' . date('d.m.Y H:i') . '
 </div>
 </body>
 </html>';
