@@ -1,8 +1,8 @@
 <?php
 
 // views/preview.php
-// Pagina de previzualizare a unui document generat.
-// Afiseaza documentul intr-un iframe si ofera butoane de export (PDF, HTML, CSV, JSON).
+// Pagina de previzualizare a unui document generat
+// Afiseaza documentul intr-un iframe si ofera butoane de export (PDF, HTML, CSV, JSON)
 // Depinde de: api/documents.php, api/export.php, public/js/preview.js
 
 require_once __DIR__ . '/../config.php';
