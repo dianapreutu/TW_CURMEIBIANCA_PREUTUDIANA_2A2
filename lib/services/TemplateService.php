@@ -36,7 +36,7 @@ class TemplateService
             throw new Exception('Campurile nume, tip si continut sunt obligatorii!');
         }
 
-        $allowedTypes = ['cv', 'cerere', 'factura', 'catalog', 'alt'];
+        $allowedTypes = ['cv', 'cerere', 'factura', 'alt'];
         if (!in_array($type, $allowedTypes, true)) {
             throw new Exception('Tipul de sablon este invalid!');
         }
