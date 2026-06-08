@@ -1,66 +1,62 @@
+# .htaccess
+# Redirectioneaza toate cererile catre index.php (front controller).
+# Protejeaza fisierele sensibile si seteaza headere de securitate.
 
-# Toate cererile sunt redirectionate catre index.php
 
-# Activez modulul de rescriere URL
+# ===== Rescriere URL =====
+
 RewriteEngine On
-
-# Setez directorul de baza al aplicatiei
 RewriteBase /docgen/
 
-# Las sa treaca fisierele si folderele care exista fizic pe disk (CSS, JS, imagini etc.)
-# Daca fisierul exista fizic - nu rescriu
-
+# Fisierele si folderele care exista fizic pe disk trec direct (CSS, JS, imagini etc.)
 RewriteCond %{REQUEST_FILENAME} !-f
-
-# Daca folderul exista fizic -> nu rescriu
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Orice alta cerere merge la index.php (QSA - pastreaza parametrii GET din URL)
-
+# Orice alta cerere e redirectionata catre index.php (QSA pastreaza parametrii GET)
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# Blochez accesul direct la fisiere sensibile care nu trebuie accesate din browser
 
-# Blochez accesul la baza de date SQLite
+# ===== Protectie fisiere sensibile =====
+
+# Baza de date SQLite
 <Files "database.sqlite">
     Order Allow,Deny
     Deny from all
 </Files>
 
-# Blochez accesul la fisierele de configurare
+# Fisier de configurare
 <Files "config.php">
     Order Allow,Deny
     Deny from all
 </Files>
 
-# Blochez accesul la fisierele SQL
+# Fisiere SQL
 <Files "*.sql">
     Order Allow,Deny
     Deny from all
 </Files>
 
-# Blochez accesul la fisierele JSON din templates/
-
-# Blochez accesul direct la fisierele JSON din templates/
+# Fisiere JSON din templates/ (acces doar prin API, nu direct)
 RewriteRule ^templates/.*\.json$ - [F,L]
 
-# Securitate suplimentara - headere HTTP
 
-# Previn clickjacking
+# ===== Headere de securitate =====
+
+# Previne clickjacking
 Header always set X-Frame-Options "SAMEORIGIN"
 
-# Previn MIME sniffing
+# Previne MIME sniffing
 Header always set X-Content-Type-Options "nosniff"
 
-# Activez XSS protection in browser
+# Activeaza protectia XSS in browser
 Header always set X-XSS-Protection "1; mode=block"
 
-
-# Setez charset-ul implicit pentru fisierele PHP
-AddDefaultCharset UTF-8
-
-# Ascund versiunea de PHP din headere
-
+# Ascunde versiunea de PHP
 <IfModule mod_headers.c>
     Header unset X-Powered-By
 </IfModule>
+
+
+# ===== Altele =====
+
+AddDefaultCharset UTF-8
