@@ -1,9 +1,9 @@
 <?php
 
 // views/admin.php
-// Dashboard pentru panoul de administrare.
-// Afiseaza statistici generale si activitate recenta.
-// Acces restrictionat la utilizatorii cu rol de admin.
+// Dashboard pentru panoul de administrare
+// Afiseaza statistici generale si activitate recenta
+// Acces restrictionat la utilizatorii cu rol de admin
 
 require_once __DIR__ . '/../config.php';
 
