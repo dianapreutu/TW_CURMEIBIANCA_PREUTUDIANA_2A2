@@ -226,7 +226,7 @@ $recentDocuments = $db->fetchAll(
                 <!-- Ultimele documente generate -->
                 <section class="admin-section admin-card">
                     <div class="admin-card-header">
-                        <span class="admin-card-title">Ultimele documente generate</span>
+                        <h2 class="admin-card-title">Ultimele documente generate</h2>
                     </div>
                     <div class="admin-card-body">
                         <?php if (empty($recentDocuments)): ?>
@@ -262,7 +262,7 @@ $recentDocuments = $db->fetchAll(
                 <!-- Activitate recenta din log -->
                 <section class="admin-section admin-card">
                     <div class="admin-card-header">
-                        <span class="admin-card-title">Activitate recenta</span>
+                        <h2 class="admin-card-title">Activitate recenta</h2>
                     </div>
                     <div class="admin-card-body">
                         <?php if (empty($recentLogs)): ?>
