@@ -1,36 +1,58 @@
 <?php
 
 // lib/services/AuthService.php
-// Serviciu pentru autentificare si gestionarea sesiunii curente
-// Expune starea utilizatorului autentificat, inclusiv modul admin
+// Autentificare bazata exclusiv pe JWT — fara $_SESSION
 
 class AuthService
 {
-    // Verifica daca utilizatorul curent are rol de administrator
+    private ?object $payload = null;
+    private JwtService $jwt;
+
+    public function __construct()
+    {
+        $this->jwt = new JwtService();
+        $token = $this->jwt->getFromRequest();
+        if ($token) {
+            $this->payload = $this->jwt->validate($token);
+        }
+    }
+
     public function isAdmin(): bool
     {
-        return isset($_SESSION['admin']) && $_SESSION['admin'] === true;
+        return $this->payload && $this->payload->role === 'admin';
     }
 
-    // Returneaza ID-ul utilizatorului din sesiune sau null daca nu e autentificat
     public function getUserId(): ?int
     {
-        return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+        return $this->payload ? (int)$this->payload->user_id : null;
     }
 
-    // Returneaza ID-ul efectiv al utilizatorului
-    // Adminul fara cont explicit primeste ID-ul 1
+    public function getUsername(): string
+    {
+        return $this->payload->username ?? 'Admin';
+    }
+
     public function getEffectiveUserId(): ?int
     {
-        $userId = $this->getUserId();
-        return $userId ?: ($this->isAdmin() ? 1 : null);
+        $id = $this->getUserId();
+        return $id ?: ($this->isAdmin() ? 1 : null);
     }
 
-    // Arunca exceptie daca utilizatorul nu este autentificat
     public function requireAuthentication(): void
     {
         if ($this->getEffectiveUserId() === null) {
+            http_response_code(401);
             throw new Exception('Trebuie sa fii autentificat pentru a accesa aceasta resursa.');
         }
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return $this->getEffectiveUserId() !== null;
+    }
+
+    public function getJwt(): JwtService
+    {
+        return $this->jwt;
     }
 }

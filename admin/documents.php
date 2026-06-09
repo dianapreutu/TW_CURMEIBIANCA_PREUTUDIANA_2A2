@@ -7,10 +7,12 @@
 require_once __DIR__ . '/../config.php';
 
 // Verificam ca utilizatorul este autentificat si are rol de admin
-if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+$auth = new AuthService();
+if (!$auth->isAdmin()) {
     header('Location: index.php');
     exit;
 }
+$currentUsername = $auth->getUsername();
 
 $db = Database::getInstance();
 
@@ -89,7 +91,7 @@ $statuses = ['draft', 'generated', 'exported'];
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
     $db->delete('documents', 'id = ?', [$deleteId]);
-    $db->log('admin', 'Document sters: ID ' . $deleteId, $_SESSION['user_id']);
+    $db->log('admin', 'Document sters: ID ' . $deleteId, $auth->getUserId());
     header('Location: ' . BASE_URL . '/admin/documents.php');
     exit;
 }
@@ -142,7 +144,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
             </li>
         </ul>
         <div class="admin-sidebar-footer">
-            <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
+            <strong><?php echo htmlspecialchars($currentUsername); ?></strong>
             <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
         </div>
     </aside>

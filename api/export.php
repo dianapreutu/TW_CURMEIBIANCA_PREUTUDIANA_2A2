@@ -9,11 +9,8 @@ require_once __DIR__ . '/../config.php';
 header('Content-Type: application/json; charset=UTF-8');
 
 // Determinam utilizatorul din sesiune; adminul primeste ID-ul 1
-$userId = $_SESSION['user_id'] ?? null;
-if (!$userId && isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
-    $userId = 1;
-}
-
+$auth = new AuthService();
+$userId = $auth->getEffectiveUserId();
 if (!$userId) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Trebuie sa fii autentificat pentru a exporta documente']);

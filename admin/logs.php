@@ -7,10 +7,12 @@
 require_once __DIR__ . '/../config.php';
 
 // Verificam ca utilizatorul este autentificat si are rol de admin
-if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+$auth = new AuthService();
+if (!$auth->isAdmin()) {
     header('Location: index.php');
     exit;
 }
+$currentUsername = $auth->getUsername();
 
 $db = Database::getInstance();
 
@@ -89,7 +91,7 @@ $actions = $db->fetchAll(
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
     $db->delete('logs', 'id = ?', [$deleteId]);
-    $db->log('delete_log', 'Log sters: ID ' . $deleteId, $_SESSION['user_id']);
+    $db->log('delete_log', 'Log sters: ID ' . $deleteId, $auth->getUserId());
     header('Location: ' . BASE_URL . '/admin/logs.php');
     exit;
 }
@@ -97,7 +99,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
 // Stergere completa a tuturor logurilor
 if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
     $db->query('DELETE FROM logs');
-    $db->log('delete_log', 'Toate logurile au fost sterse', $_SESSION['user_id']);
+    $db->log('delete_log', 'Toate logurile au fost sterse', $auth->getUserId());
     header('Location: ' . BASE_URL . '/admin/logs.php');
     exit;
 }
@@ -150,7 +152,7 @@ if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
             </li>
         </ul>
         <div class="admin-sidebar-footer">
-            <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
+            <strong><?php echo htmlspecialchars($currentUsername); ?></strong>
             <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
         </div>
     </aside>

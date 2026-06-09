@@ -28,10 +28,10 @@ require_once __DIR__ . '/../config.php';
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor" class="active">Editor Sabloane</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator">Generator Date</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
-                <?php if (!isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)): ?>
+                <?php $auth = new AuthService(); if (!$auth->isAuthenticated() || $auth->isAdmin()): ?>
                     <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
                 <?php endif; ?>
-                <?php if (isset($_SESSION['user_id']) || isset($_SESSION['admin'])): ?>
+                <?php if ($auth->isAuthenticated()): ?>
                     <li>
                         <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Delogare</a>
                     </li>
@@ -174,8 +174,8 @@ Exemplu:
 
         <script>
             // Transmitem rolul utilizatorului din PHP catre JavaScript
-            var USER_IS_ADMIN = <?php echo (isset($_SESSION['admin']) && $_SESSION['admin'] === true) ? 'true' : 'false'; ?>;
-            var USER_IS_AUTH  = <?php echo (isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)) ? 'true' : 'false'; ?>;
+            var USER_IS_ADMIN = <?php echo $auth->isAdmin() ? 'true' : 'false'; ?>;
+            var USER_IS_AUTH  = <?php echo $auth->isAuthenticated() ? 'true' : 'false'; ?>;
         </script>
         <script src="<?php echo BASE_URL; ?>/public/js/app.js"></script>
         <script src="<?php echo BASE_URL; ?>/public/js/editor.js"></script>
