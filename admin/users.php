@@ -155,7 +155,7 @@ $users = $db->fetchAll('SELECT * FROM users ORDER BY created_at DESC');
                 <!-- Formular adaugare utilizator nou -->
                 <section class="admin-section admin-card">
                     <div class="admin-card-header">
-                        <span class="admin-card-title">Adauga utilizator nou</span>
+                        <h2 class="admin-card-title">Adauga utilizator nou</h2>
                     </div>
                     <div class="admin-card-body">
                         <form method="POST" action="users.php">
@@ -195,7 +195,7 @@ $users = $db->fetchAll('SELECT * FROM users ORDER BY created_at DESC');
                 <!-- Tabel cu toti utilizatorii inregistrati -->
                 <section class="admin-section admin-card">
                     <div class="admin-card-header">
-                        <span class="admin-card-title">Lista utilizatori (<?php echo count($users); ?>)</span>
+                        <h2 class="admin-card-title">Lista utilizatori (<?php echo count($users); ?>)</h2>
                     </div>
                     <div class="admin-card-body">
                         <?php if (empty($users)): ?>
