@@ -257,7 +257,8 @@ lib/services/TemplateService.php
 
 ### AuthService
 
-Gestionează autentificarea, sesiunea curentă și verificarea rolului utilizatorului.
+Gestionează autentificarea bazată pe JWT, validarea token-urilor
+și verificarea rolului utilizatorului.
 
 ### CsvService
 
@@ -364,9 +365,12 @@ Interogările SQL sunt executate prin PDO și prepared statements.
 Datele afișate în interfață sunt escapate folosind `htmlspecialchars`.
 
 ### Control acces
+Autentificarea este implementată prin JWT (JSON Web Token).
+La autentificare, serverul generează un token JWT semnat cu HMAC-SHA256,
+stocat în cookie HttpOnly. La fiecare cerere, token-ul este validat
+de server fără a menține stare de sesiune (stateless).
 
-Operațiile sensibile sunt verificate prin sesiune și rol:
-
+Roluri:
 * utilizator;
 * administrator.
 
