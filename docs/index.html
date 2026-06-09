@@ -176,7 +176,7 @@
       <tr><td>CF5</td><td>Export HTML, PDF, CSV, JSON</td><td><code>ExportService</code></td><td>Implementat</td></tr>
       <tr><td>CF6</td><td>Gestionare documente generate</td><td><code>DocumentService</code>, pagina Documente</td><td>Implementat</td></tr>
       <tr><td>CF7</td><td>Modul administrare cu dashboard</td><td>Statistici, CRUD utilizatori, logs</td><td>Implementat</td></tr>
-      <tr><td>CF8</td><td>Autentificare utilizatori și administratori</td><td>Aplicația oferă autentificare pe bază de utilizator și rol administrativ, cu gestionarea sesiunilor prin intermediul serviciului <code>AuthService</code></td><td>Implementat</td></tr>
+      <tr><td>CF8</td><td>Autentificare utilizatori și administratori</td><td>Aplicația oferă autentificare pe bază de utilizator și rol administrativ, cu autentificare bazată pe JWT (JSON Web Token) prin intermediul serviciului <code>AuthService</code></td><td>Implementat</td></tr>
       <tr><td>CF9</td><td>Salvare scheme de câmpuri</td><td><code>SchemaService</code>, tabela <code>schemas</code></td><td>Implementat</td></tr>
       <tr><td>CF10</td><td>Previzualizare document în browser</td><td>iframe cu conținut HTML izolat</td><td>Implementat</td></tr>
     </tbody>
@@ -502,7 +502,7 @@
 <text x="309" y="209" text-anchor="middle" font-family="Arial" font-size="10" fill="#777">generare, preview, export</text>
 
 <line x1="720" y1="190" x2="622" y2="190" stroke="#555" stroke-width="1.6" marker-end="url(#arrow1)"/>
-<text x="671" y="174" text-anchor="middle" font-family="Arial" font-size="11" fill="#555">HTTP / sesiuni</text>
+<text x="671" y="174" text-anchor="middle" font-family="Arial" font-size="11" fill="#555">HTTP / JWT</text>
 <text x="671" y="209" text-anchor="middle" font-family="Arial" font-size="10" fill="#777">șabloane, utilizatori, logs</text>
 
 <line x1="490" y1="275" x2="490" y2="318" stroke="#555" stroke-width="1.6" marker-end="url(#arrow1)"/>
@@ -547,7 +547,7 @@
 <g font-family="Arial" filter="url(#shadow2)">
 <rect x="355" y="340" width="115" height="55" rx="6" fill="#fff" stroke="#cdd0da"/>
 <text x="412" y="364" text-anchor="middle" font-size="11" font-weight="700" fill="#111">AuthService</text>
-<text x="412" y="381" text-anchor="middle" font-size="9" fill="#555">sesiuni, roluri</text>
+<text x="412" y="381" text-anchor="middle" font-size="9" fill="#555">JWT, roluri</text>
 <rect x="485" y="340" width="115" height="55" rx="6" fill="#fff" stroke="#cdd0da"/>
 <text x="542" y="364" text-anchor="middle" font-size="11" font-weight="700" fill="#111">DataService</text>
 <text x="542" y="381" text-anchor="middle" font-size="9" fill="#555">date, CSV</text>
@@ -683,7 +683,7 @@ SQLite</code></pre>
 │   │   ├── PdfExporter.php     # Export PDF din HTML
 │   │   └── TemplateEngine.php  # Motor templating cu condiții și funcții dinamice
 │   └── services/
-│       ├── AuthService.php     # Autentificare și sesiuni
+│       ├── AuthService.php     # Autentificare și JWT
 │       ├── CsvService.php      # Import/export CSV
 │       ├── DataService.php     # Validare + generare date
 │       ├── DocumentService.php # CRUD documente cu permisiuni
@@ -898,7 +898,7 @@ SQLite</code></pre>
   <h3>8.5 ExportService</h3>
   <p>Serviciu central pentru toate exporturile. <code>exportDocument()</code> exportă un document existent, <code>exportData()</code> exportă date generate. Înregistrează fiecare export în tabela <code>exports</code> și <code>logs</code>. Metoda <code>getDocumentFields()</code> detectează automat dacă <code>fields_json</code> este array JSON (șabloane predefinite) sau HTML (șabloane custom) și extrage câmpurile corespunzător cu <code>$typeMap</code>.</p>
   <h3>8.6 Modul administrare</h3>
-  <p>Modulul admin (<code>/admin/</code>) este protejat prin verificarea sesiunii la fiecare pagină. Conține patru pagini:</p>
+  <p>Modulul admin (<code>/admin/</code>) este protejat prin verificarea token-ului JWT la fiecare pagină. Conține patru pagini:</p>
   <ul>
     <li><code>index.php</code> — Dashboard cu statistici globale (șabloane, documente, scheme, utilizatori) și ultimele 5 înregistrări din documente și logs</li>
     <li><code>users.php</code> — Gestionare utilizatori: adăugare cu câmpuri username, email (obligatoriu), parolă (bcrypt cu <code>PASSWORD_BCRYPT</code>), rol (<code>user</code>/<code>admin</code>); validare unicitate username; ștergere cu modal confirmare; utilizatorul cu <code>username = 'admin'</code> este protejat și nu poate fi șters</li>
@@ -1105,14 +1105,15 @@ SQLite</code></pre>
 }</code></pre>
   <h3>12.2 Prevenire XSS</h3>
   <p>Datele afișate în HTML sunt escapate cu <code>htmlspecialchars(ENT_QUOTES | ENT_HTML5, 'UTF-8')</code> în toate view-urile PHP. În JavaScript, funcția <code>escapeHtml()</code> din <code>app.js</code> escapează valorile înainte de injecție în DOM.</p>
-  <h3>12.3 Autentificare și sesiuni</h3>
-  <p>Aplicația folosește două mecanisme de autentificare distincte:</p>
+  <h3>12.3 Autentificare și JWT</h3>
+  <p>Aplicația folosește JWT (JSON Web Token) pentru autentificare:</p>
   <ul>
     <li><strong>Utilizatori din tabela <code>users</code></strong> — parolă stocată cu <code>password_hash()</code> (bcrypt), verificată cu <code>password_verify()</code></li>
     <li><strong>Administrator principal</strong> — parola comparată direct cu constanta <code>ADMIN_PASSWORD</code> din <code>config.php</code>, configurabilă prin variabila de mediu <code>ADMIN_PASSWORD</code> (implicit <code>admin1234</code> în dezvoltare)</li>
-    <li>Sesiune PHP cu nume personalizat: <code>docgen_session</code></li>
-    <li>Verificarea sesiunii la fiecare request protejat prin <code>AuthService::requireAuthentication()</code></li>
-    <li>Logout complet cu <code>session_destroy()</code></li>
+    <li>La login, serverul generează un token JWT semnat cu HMAC-SHA256</li>
+    <li>Token-ul este stocat în cookie HttpOnly și trimis automat la fiecare cerere</li>
+    <li>Verificarea token-ului la fiecare request protejat prin <code>AuthService::requireAuthentication()</code></li>
+    <li>Logout prin ștergerea cookie-ului JWT cu <code>JwtService::clearCookie()</code></li>
   </ul>
   <h3>12.4 Validare input</h3>
   <ul>
@@ -1655,7 +1656,7 @@ APP_BASE_URL=https://domeniu.ro/docgen</code></pre>
 
   <ul>
     <li>Exportul PDF fallback nu reproduce complet stilizarea HTML și CSS.</li>
-    <li>Sistemul utilizează autentificare bazată pe sesiuni locale și nu integrează servicii externe de autentificare.</li>
+    <li>Sistemul utilizează autentificare bazată pe JWT și nu integrează servicii externe de autentificare.</li>
     <li>Aplicația este optimizată pentru generarea documentelor text și nu pentru documente complexe cu imagini sau tabele avansate.</li>
     <li>Exportul este disponibil în formatele HTML, PDF, CSV și JSON, fără suport pentru DOCX.</li>
   </ul>
