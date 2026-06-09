@@ -153,11 +153,6 @@ require_once __DIR__ . '/../config.php';
                     </div>
 
                     <div class="doc-type">
-                        <span class="doc-icon">📦</span>
-                        <span>Catalog</span>
-                    </div>
-
-                    <div class="doc-type">
                         <span class="doc-icon">📑</span>
                         <span>Alte documente</span>
                     </div>
