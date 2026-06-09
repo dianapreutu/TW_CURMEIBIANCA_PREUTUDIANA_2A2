@@ -85,7 +85,7 @@ require_once __DIR__ . '/../config.php';
                         <!-- Definire campuri schema -->
                         <div class="fields-section">
                             <div class="fields-header">
-                                <h3>Campuri schema</h3>
+                                <h2>Campuri schema</h2>
                                 <button id="btn-add-field" class="btn-small">+ Adauga camp</button>
                             </div>
 
@@ -139,7 +139,7 @@ require_once __DIR__ . '/../config.php';
 
                         <!-- Scheme salvate, populate dinamic via JS -->
                         <div class="saved-schemas">
-                            <h3>Scheme salvate</h3>
+                            <h2>Scheme salvate</h2>
                             <div id="schemas-list" class="schemas-list">
                                 <p class="empty-message">Se incarca schemele...</p>
                             </div>
