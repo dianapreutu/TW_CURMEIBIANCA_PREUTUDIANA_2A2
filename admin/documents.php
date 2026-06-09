@@ -161,13 +161,15 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
 
         <div class="admin-content">
 
+            <h1>Documente generate</h1>
+
             <!-- Filtre de cautare -->
             <div class="admin-card" style="margin-bottom:20px;">
                 <div class="admin-card-header">
                     <span class="admin-card-title">🔍 Filtrare documente</span>
                 </div>
                 <div class="admin-card-body">
-                    <form method="GET" action="">
+                    <form method="GET">
                         <div class="admin-filters">
 
                             <select name="template" class="admin-select">
