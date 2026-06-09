@@ -58,6 +58,9 @@ define('SESSION_NAME', 'docgen_session');
 // Parola adminului — se seteaza prin variabila de mediu in productie
 define('ADMIN_PASSWORD', getenv('ADMIN_PASSWORD') ?: 'admin1234');
 
+// Cheia secreta JWT
+define('JWT_SECRET', getenv('JWT_SECRET') ?: 'doGen_jwt_secret_key_for_hmac_sha256_2024_secure!!');
+
 
 // ===== Generare date =====
 
@@ -87,20 +90,11 @@ error_reporting(E_ALL);
 date_default_timezone_set('Europe/Bucharest');
 
 
-// ===== Sesiune =====
-
+// ===== Sesiune (minimala - doar pentru compatibilitate) =====
+// Autentificarea principala se face prin JWT
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
     session_start();
-}
-
-// Bridge de compatibilitate: sincronizam $_SESSION['admin'] cu campurile user_id/role
-if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
-    if (!isset($_SESSION['user_id'])) {
-        $_SESSION['user_id']  = 1;
-        $_SESSION['role']     = 'admin';
-        $_SESSION['username'] = 'admin';
-    }
 }
 
 
@@ -121,6 +115,11 @@ foreach ($requiredPaths as $path) {
 
 
 // ===== Autoload =====
+
+// Autoload Composer (firebase/php-jwt)
+if (file_exists(ROOT_PATH . '/vendor/autoload.php')) {
+    require_once ROOT_PATH . '/vendor/autoload.php';
+}
 
 // Incarca automat clasele din /lib, /lib/core si /lib/services
 spl_autoload_register(function ($className) {

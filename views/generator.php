@@ -27,10 +27,10 @@ require_once __DIR__ . '/../config.php';
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=editor">Editor Sabloane</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=generator" class="active">Generator Date</a></li>
                 <li><a href="<?php echo BASE_URL; ?>/index.php?page=documents">Documentele Mele</a></li>
-                <?php if (!isset($_SESSION['user_id']) || (isset($_SESSION['admin']) && $_SESSION['admin'] === true)): ?>
+                <?php $auth = new AuthService(); if (!$auth->isAuthenticated() || $auth->isAdmin()): ?>
                     <li><a href="<?php echo BASE_URL; ?>/admin/index.php">Admin</a></li>
                 <?php endif; ?>
-                <?php if (isset($_SESSION['user_id']) || isset($_SESSION['admin'])): ?>
+                <?php if ($auth->isAuthenticated()): ?>
                     <li>
                         <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Delogare</a>
                     </li>
@@ -57,7 +57,7 @@ require_once __DIR__ . '/../config.php';
                             <button class="tab-btn active" data-tab="generator">
                                 Generator aleatoriu
                             </button>
-                            <?php if (!empty($_SESSION['user_id'])): ?>
+                            <?php if ($auth->isAuthenticated()): ?>
                                 <button class="tab-btn" data-tab="import">
                                     Import CSV
                                 </button>
@@ -121,7 +121,7 @@ require_once __DIR__ . '/../config.php';
                         </div>
 
                         <!-- Tab: Import CSV (vizibil doar pentru utilizatorii autentificati) -->
-                        <?php if (!empty($_SESSION['user_id'])): ?>
+                        <?php if ($auth->isAuthenticated()): ?>
                         <div id="tab-import" class="tab-content">
                             <div class="form-group">
                                 <label>Incarca fisier CSV:</label>

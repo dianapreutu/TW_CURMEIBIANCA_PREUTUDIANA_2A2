@@ -8,7 +8,8 @@
 require_once __DIR__ . '/../config.php';
 
 // Verificam autentificarea si rolul de admin
-if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
+$auth = new AuthService();
+if (!$auth->isAdmin()) {
     header('Location: ' . BASE_URL . '/admin/index.php');
     exit;
 }
@@ -92,7 +93,7 @@ $exportsByFormat = $db->fetchAll(
             </li>
         </ul>
         <div class="admin-sidebar-footer">
-            <strong><?php echo htmlspecialchars($_SESSION['username'] ?? 'Admin'); ?></strong>
+            <strong><?php echo htmlspecialchars($auth->getUsername()); ?></strong>
             <a href="<?php echo BASE_URL; ?>/admin/index.php?logout=1">Logout</a>
         </div>
     </aside>
