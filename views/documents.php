@@ -101,7 +101,9 @@ if ($isAuthenticated) {
 
         <!-- Filtre dupa status -->
         <div class="filters-bar">
-            <form method="GET" action="">
+            <form method="GET">
+                <input type="hidden" name="page" value="documents">
+                
                 <div class="filters-inner">
                     <select name="status" class="select-input" onchange="this.form.submit()">
                         <option value="">Toate statusurile</option>
