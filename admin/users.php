@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Stergere utilizator
+    // Stergere utilizator (cu protectie pentru admin principal)
     if ($action === 'delete') {
         $userId = intval($_POST['user_id'] ?? 0);
 

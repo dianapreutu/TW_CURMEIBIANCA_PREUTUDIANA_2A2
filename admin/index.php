@@ -4,22 +4,22 @@ require_once '../config.php';
 $jwt = new JwtService();
 $auth = new AuthService();
 
-// ===== LOGOUT =====
+// ===== LOGOUT (stergere token JWT) =====
 if (isset($_GET['logout'])) {
     $jwt->clearCookie();
     header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
 
-// ===== DEJA LOGAT =====
+// ===== UTILIZATOR DEJA AUTENTIFICAT =====
 if ($auth->isAdmin()) {
-    // continua spre dashboard
+    // utilizatorul este admin -> se afiseaza dashboard-ul
 } elseif ($auth->isAuthenticated()) {
-    // logat dar nu admin
+    // utilizator autentificat, dar fara rol de admin
     header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 } else {
-    // ===== FORMULAR LOGIN =====
+    // ===== AUTENTIFICARE ADMIN/UTILIZATOR =====
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -33,7 +33,7 @@ if ($auth->isAdmin()) {
             exit;
         }
 
-        // Verificam utilizatorii din baza de date
+        // Verificam utilizatorul si generam token JWT la autentificare
         $db   = Database::getInstance();
         $user = $db->fetchOne(
             'SELECT * FROM users WHERE username = ? OR email = ?',

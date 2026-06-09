@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config.php';
 
 header('Content-Type: application/json; charset=UTF-8');
 
-// Determinam utilizatorul din sesiune; adminul primeste ID-ul 1
+// Determinam utilizatorul autentificat (JWT / AuthService)
 $auth = new AuthService();
 $userId = $auth->getEffectiveUserId();
 if (!$userId) {

@@ -87,7 +87,7 @@ $actions = $db->fetchAll(
      ORDER BY action ASC"
 );
 
-// Procesam stergerea unui log individual daca s-a primit un ID valid prin GET
+// Stergere log individual si inregistrare actiune in audit log
 if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     $deleteId = (int)$_GET['delete_id'];
     $db->delete('logs', 'id = ?', [$deleteId]);
@@ -96,7 +96,7 @@ if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
     exit;
 }
 
-// Stergere completa a tuturor logurilor
+// Stergere completa a logurilor si inregistrare actiune in audit log
 if (isset($_GET['clear_all']) && $_GET['clear_all'] === '1') {
     $db->query('DELETE FROM logs');
     $db->log('delete_log', 'Toate logurile au fost sterse', $auth->getUserId());
