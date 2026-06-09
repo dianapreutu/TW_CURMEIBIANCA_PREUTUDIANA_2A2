@@ -113,7 +113,7 @@ if ($isAuthenticated) {
                     </select>
                     <?php if ($filterStatus): ?>
                         <a href="<?php echo BASE_URL; ?>/index.php?page=documents"
-                           class="btn btn-secondary btn-small">
+                           class="btn btn-warning">
                             ✕ Reseteaza
                         </a>
                     <?php endif; ?>
